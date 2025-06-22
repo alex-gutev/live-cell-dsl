@@ -36,7 +36,7 @@ class TokenEventSink implements EventSink<String> {
   ];
 
   /// Regex matching characters which do not form part of identifiers
-  static const _nonIdChars = r'\s;(){}#';
+  static const _nonIdChars = r'\s;(){}#"';
 
   /// Identifies the token currently being parsed
   _LexState? _state;
