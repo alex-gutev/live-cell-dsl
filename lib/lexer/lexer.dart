@@ -34,6 +34,9 @@ class TokenEventSink implements EventSink<String> {
     _consumeWhiteSpace
   ];
 
+  /// Regex matching characters which do not form part of identifiers
+  static const _nonIdChars = r'\s;(){}';
+
   /// Identifies the token currently being parsed
   _LexState? _state;
 
@@ -104,7 +107,7 @@ class TokenEventSink implements EventSink<String> {
 
   /// Consume and emit an identifier.
   int _consumeId(String data, int start) {
-    final regex = RegExp('[a-zA-z_\$][a-zA-Z0-9_\$]*');
+    final regex = RegExp('[^0-9$_nonIdChars][^$_nonIdChars]*');
     final match = regex.matchAsPrefix(data, start);
 
     if (match != null) {
