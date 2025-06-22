@@ -188,6 +188,7 @@ class TokenEventSink implements EventSink<String> {
     }
     else if (data[start] == ')') {
       _emitToken(const ParenClose());
+      return start + 1;
     }
 
     return start;
@@ -201,6 +202,7 @@ class TokenEventSink implements EventSink<String> {
     }
     else if (data[start] == ')') {
       _emitToken(const BraceClose());
+      return start + 1;
     }
 
     return start;
