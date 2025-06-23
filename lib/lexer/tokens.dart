@@ -35,6 +35,11 @@ class Terminator extends Token {
   });
 }
 
+/// Argument separator ','
+class Separator extends Token {
+  const Separator();
+}
+
 /// Opening parenthesis '('
 class ParenOpen extends Token {
   const ParenOpen();

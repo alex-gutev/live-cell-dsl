@@ -27,6 +27,7 @@ class TokenEventSink implements EventSink<String> {
   late final _consumeFns = [
     _consumeId,
     _consumeTerminator,
+    _consumeSeparator,
     _consumeNum,
     _startString,
     _consumeParen,
@@ -36,7 +37,7 @@ class TokenEventSink implements EventSink<String> {
   ];
 
   /// Regex matching characters which do not form part of identifiers
-  static const _nonIdChars = r'\s;(){}#"';
+  static const _nonIdChars = r'\s;,(){}#"';
 
   /// Identifies the token currently being parsed
   _LexState? _state;
@@ -228,6 +229,16 @@ class TokenEventSink implements EventSink<String> {
   int _consumeLineComment(String data, int start) {
     if (data[start] == '#') {
       return data.length;
+    }
+
+    return start;
+  }
+
+  /// Consume and emit a separator token
+  int _consumeSeparator(String data, int start) {
+    if (data[start] == ',') {
+      _emitToken(const Separator());
+      return start + 1;
     }
 
     return start;
