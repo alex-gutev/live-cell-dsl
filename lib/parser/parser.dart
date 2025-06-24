@@ -21,6 +21,12 @@ class _Parser {
   /// Input [Token] stream
   final StreamIterator<Token> tokens;
 
+  /// The current token consumed from the token stream
+  late Token _current;
+
+  /// Should soft terminators be skipped when advancing the stream position
+  var _skipSoftTerminators = false;
+
   _Parser(this.tokens);
 
   /// Parse a stream of [Expression]s from the token stream
@@ -41,17 +47,12 @@ class _Parser {
     // TODO: Close token stream
   }
 
-  // Private
-
-  /// The current token consumed from the token stream
-  late Token _current;
-
   /// Advance the token stream to the next position
   ///
   /// If the end of the stream is reached, [_current] is set to an [EndOfInput]
   /// token.
   Future<Token> _advance() async {
-    if (await tokens.moveNext()) {
+    if (await _moveNext()) {
       _current = tokens.current;
     }
     else {
@@ -59,6 +60,44 @@ class _Parser {
     }
 
     return _current;
+  }
+
+  /// Move to the next position in the stream.
+  ///
+  /// If [_skipSoftTerminators] is true, the stream is advanced past
+  /// soft terminator tokens.
+  Future<bool> _moveNext() async {
+    if (!_skipSoftTerminators) {
+      return await tokens.moveNext();
+    }
+
+    while (await tokens.moveNext()) {
+      switch (tokens.current) {
+        case Terminator(soft: true):
+          break;
+
+        default:
+          return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Run a function [f] with [_skipSoftTerminators] set to true.
+  ///
+  /// When [f] returns, The value of [_skipSoftTerminators] is restored to
+  /// what it was before calling this method.
+  Future<T> _withSkipSoft<T>(Future<T> Function() f) async {
+    final prev = _skipSoftTerminators;
+
+    try {
+      _skipSoftTerminators = true;
+      return await f();
+    }
+    finally {
+      _skipSoftTerminators = prev;
+    }
   }
 
   /// Parse a declaration from the token stream.
@@ -161,14 +200,17 @@ class _Parser {
 
   /// Parse a parenthesized expression
   Future<Expression> _parseParenExpression() async {
-    await _advance();
+    final expr = await _withSkipSoft(() async {
+      await _advance();
+      final expr = await _parseExpression();
 
-    final expr = await _parseExpression();
+      if (_current is! ParenClose) {
+        // TODO: Proper exception type
+        throw Exception('Parse Error');
+      }
 
-    if (_current is! ParenClose) {
-      // TODO: Proper exception type
-      throw Exception('Parse Error');
-    }
+      return expr;
+    });
 
     await _advance();
     return expr;
@@ -178,21 +220,23 @@ class _Parser {
   Future<List<Expression>> _parseArgList() async {
     final args = <Expression>[];
 
-    await _advance();
+    await _withSkipSoft(() async {
+      await _advance();
 
-    if (_current is! ParenClose) {
-      args.add(await _parseExpression());
-
-      while (_current is! ParenClose) {
-        if (_current is! Separator) {
-          // TODO: Proper exception type
-          throw Exception('Parse Error');
-        }
-
-        await _advance();
+      if (_current is! ParenClose) {
         args.add(await _parseExpression());
+
+        while (_current is! ParenClose) {
+          if (_current is! Separator) {
+            // TODO: Proper exception type
+            throw Exception('Parse Error');
+          }
+
+          await _advance();
+          args.add(await _parseExpression());
+        }
       }
-    }
+    });
 
     await _advance();
     return args;
