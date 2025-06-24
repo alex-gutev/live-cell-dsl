@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:live_cell/lexer/tokens.dart';
 
-/// A stream transfer that converts Strings to [Token]s.
+/// A stream transformer that converts Strings to [Token]s.
 ///
 /// This transformer reads a strings from a source stream and emits
 /// the [Token]s that were parsed from the strings.
