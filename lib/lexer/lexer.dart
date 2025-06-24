@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:live_cell/lexer/tokens.dart';
+import 'tokens.dart';
 
 /// A stream transformer that converts Strings to [Token]s.
 ///
