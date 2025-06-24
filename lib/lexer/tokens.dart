@@ -40,6 +40,11 @@ class Separator extends Token {
   const Separator();
 }
 
+/// Represents the end of the input
+class EndOfInput extends Token {
+  const EndOfInput();
+}
+
 /// Opening parenthesis '('
 class ParenOpen extends Token {
   const ParenOpen();
