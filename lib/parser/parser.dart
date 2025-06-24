@@ -172,10 +172,8 @@ class _Parser {
   /// is not necessarily followed by a [Terminator] token.
   Future<Expression> _parseExpression() async {
     final builder = ExpressionBuilder();
-    final arg1 = await _parseOperand();
+    builder.addOperand(await _parseOperand());
 
-    builder.addOperand(arg1);
-    
     while (true) {
       final operator = await _parseInfixOperator();
 
