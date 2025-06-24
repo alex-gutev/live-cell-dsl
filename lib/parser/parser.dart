@@ -1,7 +1,9 @@
 import 'dart:async';
 
-import 'package:live_cell/lexer/index.dart';
-import 'package:live_cell/parser/declarations.dart';
+import '../lexer/index.dart';
+import 'declarations.dart';
+import 'expression_builder.dart';
+import 'operators.dart';
 
 /// A stream transformer that parses [Expression]s from a [Token] stream.
 ///
@@ -9,15 +11,29 @@ import 'package:live_cell/parser/declarations.dart';
 /// parses [Expression]s from them, until the [EndOfInput] token or the end
 /// of the stream is reached.
 class Parser extends StreamTransformerBase<Token, Expression> {
+  /// Operator table
+  /// 
+  /// This stores information about prefix, infix and postfix operators, and
+  /// is used to parse infix expressions.
+  final OperatorTable operatorTable;
+
+  Parser(this.operatorTable);
+
   @override
   Stream<Expression> bind(Stream<Token> stream) {
-    final parser = _Parser(StreamIterator(stream));
+    final parser = _Parser(
+        tokens: StreamIterator(stream),
+        operatorTable: operatorTable
+    );
     return parser.parse();
   }
 }
 
 /// Maintains the state of the parser
 class _Parser {
+  /// The operator table
+  final OperatorTable operatorTable;
+
   /// Input [Token] stream
   final StreamIterator<Token> tokens;
 
@@ -27,7 +43,10 @@ class _Parser {
   /// Should soft terminators be skipped when advancing the stream position
   var _skipSoftTerminators = false;
 
-  _Parser(this.tokens);
+  _Parser({
+    required this.operatorTable,
+    required this.tokens
+  });
 
   /// Parse a stream of [Expression]s from the token stream
   Stream<Expression> parse() async* {
@@ -152,6 +171,54 @@ class _Parser {
   /// The difference between a declaration and expression is that an expression
   /// is not necessarily followed by a [Terminator] token.
   Future<Expression> _parseExpression() async {
+    final builder = ExpressionBuilder();
+    final arg1 = await _parseOperand();
+
+    builder.addOperand(arg1);
+    
+    while (true) {
+      final operator = await _parseInfixOperator();
+
+      if (operator == null) {
+        break;
+      }
+
+      builder.addOperator(operator);
+      builder.addOperand(await _parseOperand());
+    }
+
+    return builder.build();
+  }
+
+  /// Parse an infix operator at the current position in the stream.
+  ///
+  /// If the current token in the stream is an infix operator in [_operatorTable],
+  /// it is consumed and returned. Otherwise null is returned.
+  Future<Operator?> _parseInfixOperator() async {
+    switch (_current) {
+      case IdToken(:final name):
+        final operator = operatorTable.find(
+            name: name,
+            type: OperatorType.infix,
+            minPrecedence: 0
+        );
+
+        if (operator != null) {
+          await _advance();
+        }
+
+        return operator;
+
+      default:
+        return null;
+    }
+  }
+
+  /// Parse an operand of an infix expression.
+  ///
+  /// An operand may be a function application or a parenthesized expression
+  /// but not an expression of an infix operator.
+  Future<Expression> _parseOperand() async {
     final op = await _parseSubExpression();
 
     switch (_current) {
