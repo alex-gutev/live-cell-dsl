@@ -5,63 +5,65 @@ import '../parser/index.dart';
 
 /// Builds cell specifications from parsed cell [Expression]s
 class CellBuilder {
-  /// The table holding all cells defined in the global scope
-  final CellTable globalTable;
+  /// The scope in which the cells are built
+  final CellTable scope;
 
+  /// Create a [CellBuilder] that builds cells in a given [scope].
+  /// 
+  /// If [scope] is null, a new scope is created.
   CellBuilder({
     CellTable? scope
-  }) : globalTable = scope ?? CellTable();
+  }) : scope = scope ?? CellTable();
 
   /// Build the cell specifications from the given [declarations].
   Future<void> build(Stream<Expression> declarations) async {
     await for (final declaration in declarations) {
-      buildDeclaration(declaration);
+      buildExpression(declaration);
     }
   }
 
-  /// Build a cell specification from a single [expression]
-  CellSpec buildDeclaration(Expression expression) {
+  /// Build a cell specification from a single [expression].
+  ///
+  /// The built cell is added to the [scope] of this builder.
+  CellSpec buildExpression(Expression expression) {
     final spec = _buildCell(expression);
-    globalTable.add(spec);
+    scope.add(spec);
 
     return spec;
   }
 
   // Private
 
-  /// Build a cell from a given [declaration].
-  CellSpec _buildCell(Expression declaration) {
-    switch (declaration) {
-      case NamedCell(:final name):
-        return CellSpec(
+  /// Build a cell from a given [expression].
+  CellSpec _buildCell(Expression expression) => switch (expression) {
+    NamedCell(:final name) =>
+        CellSpec(
             id: NamedCellId(name),
             definition: const StubExpression()
-        );
+        ),
 
-      case Constant():
-        return declaration.accept(_ConstantCellVisitor());
+    Constant() =>
+        expression.accept(_ConstantCellVisitor()),
 
-      // TODO: Match proper definition operator
-      case Operation(
-        operator: NamedCell(name: '='),
-        :final args
-      ):
-        return _buildDefinition(args);
+    // TODO: Match proper definition operator
+    Operation(
+      operator: NamedCell(name: '='),
+      :final args
+    ) => _buildDefinition(args),
 
-      case Operation(:final operator, :final args):
-        return CellSpec(
-            id: _idForExpression(declaration),
+    Operation(:final operator, :final args) =>
+        CellSpec(
+            id: _idForExpression(expression),
 
             definition: CellApplication(
-                operator: _refCell(buildDeclaration(operator)),
+                operator: _refCell(buildExpression(operator)),
 
-                operands: args.map(buildDeclaration)
+                operands: args.map(buildExpression)
                     .map(_refCell)
                     .toList()
             )
-        );
-    }
-  }
+        )
+  };
 
   // Definitions
 
@@ -96,7 +98,7 @@ class CellBuilder {
     required Expression definition
   }) => CellSpec(
       id: NamedCellId(name),
-      definition: _refCell(buildDeclaration(definition))
+      definition: _refCell(buildExpression(definition))
   );
 
   /// Build a specification for a function cell identified by [name].
@@ -108,7 +110,7 @@ class CellBuilder {
     required List<Expression> arguments,
     required Expression definition
   }) {
-    final scope = CellTable(parent: globalTable);
+    final scope = CellTable(parent: this.scope);
 
     final argCells = arguments.map((arg) => switch(arg) {
       NamedCell(:final name) => NamedCellId(name),
@@ -144,7 +146,7 @@ class CellBuilder {
     ValueCellSpec(:final definition) => definition,
 
     _ => _NamedCellRef(
-        table: globalTable,
+        table: scope,
         id: spec.id
     )
   };
