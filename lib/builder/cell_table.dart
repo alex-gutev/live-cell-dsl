@@ -1,4 +1,4 @@
-import 'package:live_cell/builder/cell_spec.dart';
+import 'cell_spec.dart';
 
 /// Table containing cells defined in a given module/scope
 class CellTable {
@@ -37,7 +37,9 @@ class CellTable {
 
   /// Add/replace a cell specification to the table
   void add(CellSpec spec) {
-    _cells[spec.id] = spec;
+    if (spec.id is! ValueCellId) {
+      _cells[spec.id] = spec;
+    }
   }
 
   // Private
