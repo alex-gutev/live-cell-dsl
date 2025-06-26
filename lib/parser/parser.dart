@@ -303,8 +303,8 @@ class _Parser {
 /// Converts a [Literal] to a [Constant] holding the same value.
 ///
 /// *NOTE*: This visitor is necessary to preserve the [Literal]'s type.
-class _LiteralToConstantVisitor extends LiteralVisitor<Constant> {
+class _LiteralToConstantVisitor extends LiteralVisitor<Expression> {
   @override
-  Constant<T> visitLiteral<T>(Literal<T> token) =>
+  Expression visitLiteral<T>(Literal<T> token) =>
       Constant<T>(token.value);
 }
