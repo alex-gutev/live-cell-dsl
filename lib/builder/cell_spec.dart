@@ -52,6 +52,14 @@ class ValueCellId extends CellId {
   final dynamic value;
 
   const ValueCellId(this.value);
+
+  @override
+  bool operator ==(Object other) =>
+      other is ValueCellId &&
+      value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 /// A specification for a cell
@@ -106,4 +114,15 @@ class CellApplication extends CellExpression {
     required this.operator,
     required this.operands
   });
+}
+
+/// An expression that is built at a later stage
+abstract class DeferredExpression extends CellExpression {
+  const DeferredExpression();
+
+  /// Build the expression
+  ///
+  /// *NOTE*: This method should cache the expression after it is built for
+  /// the first time, rather than building it every time this method called.
+  CellExpression build();
 }
