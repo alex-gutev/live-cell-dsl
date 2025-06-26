@@ -238,17 +238,9 @@ class _Parser {
         await _advance();
         return NamedCell(name);
 
-      case Literal<int>(:final value):
+      case Literal literal:
         await _advance();
-        return Constant(value);
-
-      case Literal<num>(:final value):
-        await _advance();
-        return Constant(value);
-
-      case Literal<String>(:final value):
-        await _advance();
-        return Constant(value);
+        return literal.accept(_LiteralToConstantVisitor());
 
       case ParenOpen():
         return await _parseParenExpression();
@@ -306,4 +298,13 @@ class _Parser {
     await _advance();
     return args;
   }
+}
+
+/// Converts a [Literal] to a [Constant] holding the same value.
+///
+/// *NOTE*: This visitor is necessary to preserve the [Literal]'s type.
+class _LiteralToConstantVisitor extends LiteralVisitor<Constant> {
+  @override
+  Constant<T> visitLiteral<T>(Literal<T> token) =>
+      Constant<T>(token.value);
 }
