@@ -76,6 +76,20 @@ class CellSpec {
   });
 }
 
+/// Specification for a cell holding a constant value
+class ValueCellSpec extends CellSpec {
+  const ValueCellSpec({
+    required super.id,
+    required super.definition
+  });
+
+  /// Create a [ValueCellSpec] holding a given constant [value].
+  static ValueCellSpec forValue<T>(T value) => ValueCellSpec(
+      id: ValueCellId(value),
+      definition: ConstantValue(value)
+  );
+}
+
 /// Base class representing a cell expression specification
 sealed class CellExpression {
   const CellExpression();

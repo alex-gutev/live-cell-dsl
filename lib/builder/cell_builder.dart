@@ -49,19 +49,17 @@ class CellBuilder {
         return _buildDefinition(args);
 
       case Operation(:final operator, :final args):
-        final spec = CellSpec(
+        return CellSpec(
             id: _idForExpression(declaration),
 
             definition: CellApplication(
-                operator: _refCell(operator),
-                operands: args.map(_refCell).toList()
+                operator: _refCell(buildDeclaration(operator)),
+
+                operands: args.map(buildDeclaration)
+                    .map(_refCell)
+                    .toList()
             )
         );
-
-        buildDeclaration(operator);
-        args.forEach(buildDeclaration);
-
-        return spec;
     }
   }
 
@@ -96,19 +94,10 @@ class CellBuilder {
   CellSpec _buildCellDefinition({
     required String name,
     required Expression definition
-  }) {
-    final spec = CellSpec(
-        id: NamedCellId(name),
-        definition: _NamedCellRef(
-            table: globalTable,
-            id: _idForExpression(definition)
-        )
-    );
-
-    buildDeclaration(definition);
-
-    return spec;
-  }
+  }) => CellSpec(
+      id: NamedCellId(name),
+      definition: _refCell(buildDeclaration(definition))
+  );
 
   /// Build a specification for a function cell identified by [name].
   ///
@@ -150,12 +139,13 @@ class CellBuilder {
 
   // Expressions
 
-  /// Create a [CellRef] for the cell represented by [expression]
-  CellExpression _refCell(Expression expression) => switch (expression) {
-    Constant() => expression.accept(_ConstantToExpressionVisitor()),
+  /// Create a [CellRef] for reference the cell specified by [spec]
+  CellExpression _refCell(CellSpec spec) => switch (spec) {
+    ValueCellSpec(:final definition) => definition,
+
     _ => _NamedCellRef(
         table: globalTable,
-        id: _idForExpression(expression)
+        id: spec.id
     )
   };
 
@@ -193,15 +183,6 @@ class _NamedCellRef extends CellRef {
 /// Converts a [Constant] expression to a [CellSpec].
 class _ConstantCellVisitor extends ConstantVisitor<CellSpec> {
   @override
-  CellSpec visitConstant<T>(Constant<T> expression) => CellSpec(
-    id: ValueCellId(expression.value),
-    definition: ConstantValue(expression.value)
-  );
-}
-
-/// Converts a [Constant] to a [CellExpression].
-class _ConstantToExpressionVisitor extends ConstantVisitor<CellExpression> {
-  @override
-  CellExpression visitConstant<T>(Constant<T> expression) =>
-      ConstantValue(expression.value);
+  CellSpec visitConstant<T>(Constant<T> expression) =>
+      ValueCellSpec.forValue(expression.value);
 }
