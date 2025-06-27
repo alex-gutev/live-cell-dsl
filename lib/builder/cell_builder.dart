@@ -20,6 +20,8 @@ class CellBuilder {
     await for (final declaration in declarations) {
       buildExpression(declaration);
     }
+
+    finalize();
   }
 
   /// Build a cell specification from a single [expression].
@@ -30,6 +32,16 @@ class CellBuilder {
     scope.add(spec);
 
     return spec;
+  }
+
+  /// Build all deferred definitions
+  void finalize() {
+    for (final spec in scope.cells) {
+      // TODO: Walk through definition and build nested deferred expressions
+      if (spec.definition case final DeferredExpression deferred) {
+        deferred.build();
+      }
+    }
   }
 
   // Private

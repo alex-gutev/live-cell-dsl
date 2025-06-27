@@ -41,6 +41,7 @@ class DeferredFunctionDefinition extends DeferredExpression {
       );
 
       final valueCell = builder.buildExpression(definition);
+      builder.finalize();
 
       // TODO: Consider referencing the cell instead
       _builtDefinition = valueCell.definition;
