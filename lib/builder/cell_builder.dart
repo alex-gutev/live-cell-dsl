@@ -66,6 +66,12 @@ class CellBuilder {
       :final args
     ) => _addCell(_buildDefinition(args)),
 
+    // TODO: Match proper var keyword
+    Operation(
+      operator: NamedCell(name: 'var'),
+      :final args
+    ) => _addVarCell(args),
+
     Operation(:final operator, :final args) =>
         CellSpec(
             id: _idForExpression(expression),
@@ -107,6 +113,27 @@ class CellBuilder {
 
     _ => throw Exception('Definition Parse Error')
   };
+
+  /// Process a `var` declaration
+  CellSpec _addVarCell(List<Expression> args) => switch (args) {
+    [NamedCell(:final name)] => _makeVarCell(name),
+    // TODO: Proper exception type
+    _ => throw Exception('Parse error in var declaration')
+  };
+
+  CellSpec _makeVarCell(String name) {
+    final id = NamedCellId(name);
+
+    // TODO: Throw exception if cell is already defined in scope and it is not a stub
+
+    return _addCell(
+        CellSpec(
+            id: id,
+            definition: const VariableValue(),
+            scope: scope
+        )
+    );
+  }
 
   /// Build a specification for a cell identified by [name] and defined by [definition]
   CellSpec _buildCellDefinition({

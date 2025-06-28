@@ -126,6 +126,15 @@ class ConstantValue<T> extends CellExpression {
       visitor.visitConstantValue(this);
 }
 
+/// Represents a cell with a value that can be changed
+class VariableValue extends CellExpression {
+  const VariableValue();
+
+  @override
+  R accept<R>(CellExpressionVisitor<R> visitor) =>
+      visitor.visitVariableValue(this);
+}
+
 /// Base class representing a reference to a cell's value
 abstract class CellRef extends CellExpression {
   /// Get the specification of the referenced cell
@@ -188,9 +197,11 @@ class FunctionExpression extends CellExpression {
       _external = {};
 
       for (final spec in scope.cells) {
-        _walkSpec(
-            spec: spec,
-            external: _external!
+        spec.definition.accept(
+          _ExternalCellVisitor(
+              scope: scope,
+              external: _external!
+          )
         );
       }
     }
@@ -239,6 +250,7 @@ class FunctionExpression extends CellExpression {
     switch (expression) {
       case StubExpression():
       case ConstantValue():
+      case VariableValue():
         break;
 
       case CellRef(get: final cell):
@@ -274,5 +286,36 @@ class FunctionExpression extends CellExpression {
             external: external,
         );
     }
+  }
+}
+
+/// Visitor that determines set of referenced cells that are external to [scope].
+///
+/// Cells referenced within [scope], which are not defined in [scope] are
+/// added to the set [external].
+class _ExternalCellVisitor extends CellExpressionTreeVisitor {
+  final CellTable scope;
+  final Set<CellSpec> external;
+
+  _ExternalCellVisitor({
+    required this.scope,
+    required this.external
+  });
+
+  @override
+  void visitRef(CellRef expression) {
+    final cell = expression.get;
+
+    if (cell.scope != scope) {
+      external.add(cell);
+    }
+  }
+
+  @override
+  void visitFunction(FunctionExpression expression) {
+    external.addAll(
+        expression.referencedCells
+            .where((c) => c.scope != scope)
+    );
   }
 }
