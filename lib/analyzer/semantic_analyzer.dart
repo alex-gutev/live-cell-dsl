@@ -57,9 +57,11 @@ class SemanticAnalyzer {
         case null:
           visited[cell] = true;
 
-          _walkExpression(
-              expression: cell.definition,
-              visited: visited
+          cell.definition.accept(
+              _AnalysisVisitor(
+                  analyzer: this,
+                  visited: visited
+              )
           );
 
           visited[cell] = false;
@@ -67,55 +69,35 @@ class SemanticAnalyzer {
       }
     }
   }
+}
 
-  /// Check for cyclic definitions in a given [expression].
-  void _walkExpression({
-    required CellExpression expression,
-    required Map<CellSpec, bool> visited
-  }) {
-    switch (expression) {
-      case StubExpression():
-        // TODO: Handle this case.
-        break;
+/// Check for cycles in a given expression tree
+class _AnalysisVisitor extends CellExpressionTreeVisitor {
+  final SemanticAnalyzer analyzer;
 
-      case ConstantValue():
-        break;
+  /// Map of visited cells
+  final Map<CellSpec, bool> visited;
 
-      case CellRef(get: final cell):
-        _walkCell(
-            cell,
-            visited: visited
-        );
-
-      case CellApplication(
-        :final operator,
-        :final operands
-      ):
-        _walkExpression(
-            expression: operator,
-            visited: visited
-        );
-
-        for (final operand in operands) {
-          _walkExpression(
-              expression: operand,
-              visited: visited
-          );
-        }
-
-      case final DeferredExpression deferred:
-        _walkExpression(
-            expression: deferred.build(),
-            visited: visited
-        );
-
-      case final FunctionExpression function:
-        for (final cell in function.referencedCells) {
-          _walkCell(
-              cell,
-              visited: visited
-          );
-        }
+  _AnalysisVisitor({
+    required this.analyzer,
+    required this.visited
+  });
+  
+  @override
+  void visitRef(CellRef expression) {
+    analyzer._walkCell(
+        expression.get,
+        visited: visited
+    );
+  }
+  
+  @override
+  void visitFunction(FunctionExpression expression) {
+    for (final cell in expression.referencedCells) {
+      analyzer._walkCell(
+          cell,
+          visited: visited
+      );
     }
   }
 }
