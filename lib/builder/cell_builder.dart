@@ -29,7 +29,9 @@ class CellBuilder {
   /// The built cell is added to the [scope] of this builder.
   CellSpec buildExpression(Expression expression) {
     final spec = _buildCell(expression);
-    scope.add(spec);
+    if (scope.lookup(spec.id) == null) {
+      scope.add(spec);
+    }
 
     return spec;
   }
@@ -51,6 +53,7 @@ class CellBuilder {
     NamedCell(:final name) =>
         CellSpec(
             id: NamedCellId(name),
+            scope: scope,
             definition: const StubExpression()
         ),
 
@@ -61,11 +64,12 @@ class CellBuilder {
     Operation(
       operator: NamedCell(name: '='),
       :final args
-    ) => _buildDefinition(args),
+    ) => _addCell(_buildDefinition(args)),
 
     Operation(:final operator, :final args) =>
         CellSpec(
             id: _idForExpression(expression),
+            scope: scope,
 
             definition: CellApplication(
                 operator: _refCell(buildExpression(operator)),
@@ -110,6 +114,7 @@ class CellBuilder {
     required Expression definition
   }) => CellSpec(
       id: NamedCellId(name),
+      scope: scope,
       definition: _refCell(buildExpression(definition))
   );
 
@@ -134,21 +139,28 @@ class CellBuilder {
       scope.add(
           CellSpec(
               id: arg,
+              scope: scope,
               definition: StubExpression()
           )
       );
     }
 
-    return FunctionSpec(
+    return CellSpec(
       id: NamedCellId(name),
-      arguments: argCells,
       scope: scope,
 
       definition: DeferredFunctionDefinition(
+          arguments: argCells,
           scope: scope,
           definition: definition
       ),
     );
+  }
+
+  /// Add a cell to the current [scope].
+  CellSpec _addCell(CellSpec spec) {
+    scope.add(spec);
+    return spec;
   }
 
   // Expressions

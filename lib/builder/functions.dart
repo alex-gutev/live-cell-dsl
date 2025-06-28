@@ -4,24 +4,11 @@ import '../parser/declarations.dart';
 import 'cell_spec.dart';
 import 'cell_table.dart';
 
-/// Specification for a function defining a cell
-class FunctionSpec extends CellSpec {
-  /// Identifiers of the cells holding the function arguments
-  final List<CellId> arguments;
-
-  /// The function local scope
-  final CellTable scope;
-  
-  const FunctionSpec({
-    required super.id, 
-    required super.definition,
-    required this.arguments,
-    required this.scope
-  });
-}
-
 /// A deferred expression defining a function.
 class DeferredFunctionDefinition extends DeferredExpression {
+  /// List of argument cell identifiers
+  final List<CellId> arguments;
+
   /// The function's scope
   final CellTable scope;
 
@@ -29,6 +16,7 @@ class DeferredFunctionDefinition extends DeferredExpression {
   final Expression definition;
 
   DeferredFunctionDefinition({
+    required this.arguments,
     required this.scope,
     required this.definition
   });
@@ -43,13 +31,17 @@ class DeferredFunctionDefinition extends DeferredExpression {
       final valueCell = builder.buildExpression(definition);
       builder.finalize();
 
-      // TODO: Consider referencing the cell instead
-      _builtDefinition = valueCell.definition;
+      _builtDefinition = FunctionExpression(
+          arguments: arguments,
+          scope: scope,
+          // TODO: Consider referencing the cell instead
+          definition: valueCell.definition
+      );
     }
 
     return _builtDefinition!;
   }
 
   /// The built cell definition
-  CellExpression? _builtDefinition;
+  FunctionExpression? _builtDefinition;
 }
