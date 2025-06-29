@@ -362,5 +362,16 @@ void main() {
         Terminator(soft: true)
       ]));
     });
+
+    test('Unclosed', () async {
+      final src = Stream.fromIterable([
+        '"hello world'
+      ]);
+
+      final tokens = src.transform(Lexer());
+
+      expect(() async => await tokens.toList(), 
+          throwsA(isA<UnclosedStringError>()));
+    });
   });
 }

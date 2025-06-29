@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'exceptions.dart';
 import 'tokens.dart';
 
 /// A stream transformer that converts Strings to [Token]s.
@@ -42,8 +43,14 @@ class TokenEventSink implements EventSink<String> {
   /// Identifies the token currently being parsed
   _LexState? _state;
 
+  /// Has this stream been closed?
+  var _closed = false;
+
   /// The data associated with the current token
   var _data = '';
+
+  var _line = 0;
+  var _column = 0;
 
   /// The output [Token] stream
   final EventSink<Token> _output;
@@ -52,27 +59,59 @@ class TokenEventSink implements EventSink<String> {
 
   @override
   void add(String event) {
+    if (_closed) {
+      return;
+    }
+
     var start = 0;
 
     while (start < event.length) {
-      start = _consumeToken(event, start);
+      _column = _consumeToken(event, start);
+
+      if (_column == start) {
+        _emitError(
+            InvalidTokenError(
+                line: _line,
+                column: _column,
+                data: event.substring(start)
+            )
+        );
+
+        return;
+      }
+
+      start = _column;
     }
 
-    // TODO: If inside a string token add line breaks to data
-    _emitToken(Terminator(soft: true));
+    switch (_state) {
+      case null:
+        _emitToken(Terminator(soft: true));
+
+      case _LexState.string:
+        _data += '\n';
+    }
+
+    _line++;
   }
 
   @override
   void addError(Object error, [StackTrace? stackTrace]) {
+    if (_closed) {
+      return;
+    }
+
     _output.addError(error, stackTrace);
   }
 
   @override
   void close() {
-    if (_state != null) {
-      // TODO: Proper exception type
-      // TODO: Add to output stream instead of throwing
-      throw Exception('Unclosed string');
+    if (_state == _LexState.string) {
+      _emitError(
+          UnclosedStringError(
+              line: _line,
+              column: _column
+          )
+      );
     }
 
     _output.close();
@@ -102,9 +141,7 @@ class TokenEventSink implements EventSink<String> {
       }
     }
 
-    // TODO: Proper exception type
-    // TODO: Add error to output stream
-    throw Exception('Unrecognized token: "${data.substring(start)}"');
+    return start;
   }
 
   /// Consume and emit an identifier.
@@ -247,4 +284,11 @@ class TokenEventSink implements EventSink<String> {
   /// Emit a [token] to the output stream
   void _emitToken(Token token) =>
       _output.add(token);
+
+  /// Emit an error to the output stream and close the event sink
+  void _emitError(Object error) {
+    _output.addError(error);
+    _output.close();
+    _closed = true;
+  }
 }
