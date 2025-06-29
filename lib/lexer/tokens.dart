@@ -1,4 +1,7 @@
+import 'package:live_cells_core/live_cells_core.dart';
+
 part 'token_visitor.dart';
+part 'tokens.g.dart';
 
 /// Base token class
 sealed class Token {
@@ -6,9 +9,16 @@ sealed class Token {
 
   /// Visit this token with [visitor].
   R accept<R>(TokenVisitor<R> visitor);
+
+  @override
+  bool operator ==(Object other) => runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
 }
 
 /// An identifier
+@DataClass()
 class IdToken extends Token {
   /// The name of the identifier
   final String name;
@@ -20,9 +30,19 @@ class IdToken extends Token {
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
       visitor.visitId(this);
+
+  @override
+  bool operator ==(Object other) => _$IdTokenEquals(this, other);
+
+  @override
+  int get hashCode => _$IdTokenHashCode(this);
+
+  @override
+  String toString() => 'ID($name)';
 }
 
 /// A literal constant value of type [T]
+@DataClass()
 class Literal<T> extends Token {
   /// The parsed literal value
   final T value;
@@ -32,9 +52,20 @@ class Literal<T> extends Token {
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
       visitor.visitLiteral<T>(this);
+
+  // TODO: Consider calling super == which compares type
+  @override
+  bool operator ==(Object other) => _$LiteralEquals(this, other);
+
+  @override
+  int get hashCode => _$LiteralHashCode(this);
+
+  @override
+  String toString() => 'Literal($value)';
 }
 
 /// A declaration terminator
+@DataClass()
 class Terminator extends Token {
   /// Is this a soft terminator?
   ///
@@ -50,6 +81,15 @@ class Terminator extends Token {
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
       visitor.visitTerminator(this);
+
+  @override
+  bool operator ==(Object other) => _$TerminatorEquals(this, other);
+
+  @override
+  int get hashCode => _$TerminatorHashCode(this);
+
+  @override
+  String toString() => 'Terminator(soft: $soft)';
 }
 
 /// Argument separator ','
