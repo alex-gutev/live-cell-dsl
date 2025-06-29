@@ -205,7 +205,7 @@ class TokenEventSink implements EventSink<String> {
       _emitToken(const BraceOpen());
       return start + 1;
     }
-    else if (data[start] == ')') {
+    else if (data[start] == '}') {
       _emitToken(const BraceClose());
       return start + 1;
     }
