@@ -223,18 +223,16 @@ class _Parser {
   /// An operand may be a function application or a parenthesized expression
   /// but not an expression of an infix operator.
   Future<Expression> _parseOperand() async {
-    final op = await _parseSubExpression();
+    var op = await _parseSubExpression();
 
-    switch (_current) {
-      case ParenOpen():
-        return Operation(
-            operator: op,
-            args: await _parseArgList()
-        );
-
-      default:
-        return op;
+    while (_current is ParenOpen) {
+      op = Operation(
+          operator: op,
+          args: await _parseArgList()
+      );
     }
+
+    return op;
   }
 
   /// Parse an expression that is not a function application
