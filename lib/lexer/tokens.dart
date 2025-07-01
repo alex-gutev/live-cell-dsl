@@ -5,7 +5,16 @@ part 'tokens.g.dart';
 
 /// Base token class
 sealed class Token {
-  const Token();
+  /// The line at which the token starts
+  final int line;
+
+  /// The column at which the token starts
+  final int column;
+
+  const Token({
+    this.line = 0,
+    this.column = 0
+  });
 
   /// Visit this token with [visitor].
   R accept<R>(TokenVisitor<R> visitor);
@@ -24,7 +33,9 @@ class IdToken extends Token {
   final String name;
 
   const IdToken({
-    required this.name
+    required this.name,
+    super.line,
+    super.column
   });
 
   @override
@@ -47,7 +58,11 @@ class Literal<T> extends Token {
   /// The parsed literal value
   final T value;
 
-  const Literal({required this.value});
+  const Literal({
+    required this.value,
+    super.line,
+    super.column
+  });
 
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
@@ -75,7 +90,9 @@ class Terminator extends Token {
   final bool soft;
 
   const Terminator({
-    required this.soft
+    required this.soft,
+    super.line,
+    super.column
   });
 
   @override
@@ -94,7 +111,10 @@ class Terminator extends Token {
 
 /// Argument separator ','
 class Separator extends Token {
-  const Separator();
+  const Separator({
+    super.line,
+    super.column
+  });
 
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
@@ -103,7 +123,10 @@ class Separator extends Token {
 
 /// Represents the end of the input
 class EndOfInput extends Token {
-  const EndOfInput();
+  const EndOfInput({
+    super.line,
+    super.column
+  });
 
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
@@ -112,7 +135,10 @@ class EndOfInput extends Token {
 
 /// Opening parenthesis '('
 class ParenOpen extends Token {
-  const ParenOpen();
+  const ParenOpen({
+    super.line,
+    super.column
+  });
 
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
@@ -121,7 +147,10 @@ class ParenOpen extends Token {
 
 /// Closing parenthesis ')'
 class ParenClose extends Token {
-  const ParenClose();
+  const ParenClose({
+    super.line,
+    super.column
+  });
 
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
@@ -130,7 +159,10 @@ class ParenClose extends Token {
 
 /// Opening brace '{'
 class BraceOpen extends Token {
-  const BraceOpen();
+  const BraceOpen({
+    super.line,
+    super.column
+  });
 
   @override
   R accept<R>(TokenVisitor<R> visitor) =>
@@ -139,7 +171,10 @@ class BraceOpen extends Token {
 
 /// Closing brace '}'
 class BraceClose extends Token {
-  const BraceClose();
+  const BraceClose({
+    super.line,
+    super.column
+  });
 
   @override
   R accept<R>(TokenVisitor<R> visitor) =>

@@ -51,7 +51,6 @@ abstract class LiteralVisitor<R> implements TokenVisitor<R> {
 
   @override
   R visitTerminator(Terminator token) {
-    // TODO: implement visitTerminator
     throw UnimplementedError();
   }
 }

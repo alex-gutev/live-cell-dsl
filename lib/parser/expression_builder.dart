@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'exceptions.dart';
 import 'declarations.dart';
 import 'operators.dart';
 
@@ -35,8 +36,7 @@ class ExpressionBuilder {
     final expression = _popExpression();
 
     if (_output.isNotEmpty) {
-      // TODO: Proper exception type
-      throw Exception('Parse Error');
+      throw MalformedInfixExpression();
     }
     
     return expression;
@@ -48,8 +48,7 @@ class ExpressionBuilder {
   /// Build the expression from the operator/operand at the top of the stack
   Expression _popExpression() {
     if (_output.isEmpty) {
-      // TODO: Proper exception type
-      throw Exception('Parse Error');
+      throw MalformedInfixExpression();
     }
 
     switch (_output.removeLast()) {

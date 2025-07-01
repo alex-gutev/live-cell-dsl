@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'exceptions.dart';
 import '../lexer/index.dart';
 import 'declarations.dart';
 import 'expression_builder.dart';
@@ -50,20 +51,23 @@ class _Parser {
 
   /// Parse a stream of [Expression]s from the token stream
   Stream<Expression> parse() async* {
-    await _advance();
+    try {
+      await _advance();
 
-    while (true) {
-      final declaration = await _parseDeclaration();
+      while (true) {
+        final declaration = await _parseDeclaration();
 
-      if (declaration != null) {
-        yield declaration;
-      }
-      else {
-        break;
+        if (declaration != null) {
+          yield declaration;
+        }
+        else {
+          break;
+        }
       }
     }
-
-    // TODO: Close token stream
+    finally {
+      tokens.cancel();
+    }
   }
 
   /// Advance the token stream to the next position
@@ -154,8 +158,10 @@ class _Parser {
         break;
 
       default:
-        // TODO: Proper exception type
-        throw Exception('Parse Error');
+        throw UnexpectedTokenParseError(
+            token: _current, 
+            expected: ExpectedFormType.terminator
+        );
     }
   }
 
@@ -250,8 +256,10 @@ class _Parser {
         throw UnimplementedError();
 
       default:
-        // TODO: Proper exception type
-        throw Exception('Parse Error');
+        throw UnexpectedTokenParseError(
+            token: _current,
+            expected: ExpectedFormType.subExpression
+        );
     }
   }
 
@@ -262,8 +270,10 @@ class _Parser {
       final expr = await _parseExpression();
 
       if (_current is! ParenClose) {
-        // TODO: Proper exception type
-        throw Exception('Parse Error');
+        throw UnexpectedTokenParseError(
+            token: _current,
+            expected: ExpectedFormType.parenClose
+        );
       }
 
       return expr;
@@ -285,8 +295,10 @@ class _Parser {
 
         while (_current is! ParenClose) {
           if (_current is! Separator) {
-            // TODO: Proper exception type
-            throw Exception('Parse Error');
+            throw UnexpectedTokenParseError(
+                token: _current,
+                expected: ExpectedFormType.separator
+            );
           }
 
           await _advance();

@@ -85,7 +85,13 @@ class TokenEventSink implements EventSink<String> {
 
     switch (_state) {
       case null:
-        _emitToken(Terminator(soft: true));
+        _emitToken(
+            Terminator(
+                soft: true,
+                line: _line,
+                column: _column
+            )
+        );
 
       case _LexState.string:
         _data += '\n';
@@ -151,7 +157,11 @@ class TokenEventSink implements EventSink<String> {
 
     if (match != null) {
       _emitToken(
-        IdToken(name: match.group(0)!)
+        IdToken(
+          name: match.group(0)!,
+          line: _line,
+          column: start
+        )
       );
 
       return match.end;
@@ -166,7 +176,14 @@ class TokenEventSink implements EventSink<String> {
     final match = regex.matchAsPrefix(data, start);
 
     if (match != null) {
-      _emitToken(Terminator(soft: false));
+      _emitToken(
+          Terminator(
+              soft: false,
+              line: _line,
+              column: start
+          )
+      );
+
       return match.end;
     }
 
@@ -181,10 +198,24 @@ class TokenEventSink implements EventSink<String> {
     if (match != null) {
       final isFloat = match.group(2) != null;
 
-      _emitToken(isFloat
-          ? Literal(value: num.parse(match.group(0)!))
-          : Literal(value: int.parse(match.group(0)!))
-      );
+      if (isFloat) {
+        _emitToken(
+            Literal(
+                value: num.parse(match.group(0)!),
+                line: _line,
+                column: start
+            )
+        );
+      }
+      else {
+        _emitToken(
+            Literal(
+                value: int.parse(match.group(0)!),
+                line: _line,
+                column: start
+            )
+        );
+      }
 
       return match.end;
     }
@@ -212,7 +243,13 @@ class TokenEventSink implements EventSink<String> {
         _data += data.substring(start, i);
         _state = null;
 
-        _emitToken(Literal(value: _data));
+        _emitToken(
+            Literal(
+                value: _data,
+                line: _line,
+                column: start
+            )
+        );
 
         return i+1;
       }
@@ -225,11 +262,23 @@ class TokenEventSink implements EventSink<String> {
   /// Consume and emit a parenthesis
   int _consumeParen(String data, int start) {
     if (data[start] == '(') {
-      _emitToken(const ParenOpen());
+      _emitToken(
+          ParenOpen(
+            line: _line,
+            column: start
+          )
+      );
+
       return start + 1;
     }
     else if (data[start] == ')') {
-      _emitToken(const ParenClose());
+      _emitToken(
+          ParenClose(
+            line: _line,
+            column: start
+          )
+      );
+
       return start + 1;
     }
 
@@ -239,11 +288,23 @@ class TokenEventSink implements EventSink<String> {
   /// Consume and emit a brace
   int _consumeBrace(String data, int start) {
     if (data[start] == '{') {
-      _emitToken(const BraceOpen());
+      _emitToken(
+          BraceOpen(
+            line: _line,
+            column: start
+          )
+      );
+
       return start + 1;
     }
     else if (data[start] == '}') {
-      _emitToken(const BraceClose());
+      _emitToken(
+          BraceClose(
+            line: _line,
+            column: start
+          )
+      );
+
       return start + 1;
     }
 
@@ -274,7 +335,12 @@ class TokenEventSink implements EventSink<String> {
   /// Consume and emit a separator token
   int _consumeSeparator(String data, int start) {
     if (data[start] == ',') {
-      _emitToken(const Separator());
+      _emitToken(
+          Separator(
+            line: _line,
+            column: _column
+          )
+      );
       return start + 1;
     }
 
