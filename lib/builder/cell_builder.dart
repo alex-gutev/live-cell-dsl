@@ -84,7 +84,10 @@ class CellBuilder {
                     .map(_refCell)
                     .toList()
             )
-        )
+        ),
+
+    Block(:final expressions) =>
+        expressions.map(buildExpression).last,
   };
 
   // Definitions
@@ -213,6 +216,8 @@ class CellBuilder {
             operator: _idForExpression(operator),
             operands: args.map(_idForExpression).toList()
         ),
+
+    Block() => throw UnimplementedError(),
   };
 }
 

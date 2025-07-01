@@ -250,8 +250,7 @@ class _Parser {
         return await _parseParenExpression();
 
       case BraceOpen():
-        // TODO: Handle this case.
-        throw UnimplementedError();
+        return await _parseBlock();
 
       default:
         throw UnexpectedTokenParseError(
@@ -307,6 +306,36 @@ class _Parser {
 
     await _advance();
     return args;
+  }
+
+  /// Parse a block of expressions delimited by {...}
+  Future<Block> _parseBlock() async {
+    await _advance();
+
+    final expressions = <Expression>[];
+
+    while (_current is! BraceClose) {
+      await _skipTerminators();
+      expressions.add(await _parseExpression());
+
+      switch (_current) {
+        case Terminator():
+        case BraceClose():
+          break;
+
+        default:
+          throw UnexpectedTokenParseError(
+              token: _current,
+              expected: ExpectedFormType.braceClose
+          );
+      }
+    }
+
+    await _advance();
+
+    return Block(
+        expressions: expressions
+    );
   }
 }
 

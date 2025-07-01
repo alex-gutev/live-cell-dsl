@@ -5,14 +5,16 @@ enum ExpectedFormType {
   terminator,
   subExpression,
   parenClose,
-  separator;
+  separator,
+  braceClose;
   
   @override
   String toString() => switch (this) {
     ExpectedFormType.terminator => 'terminator',
     ExpectedFormType.subExpression => 'sub-expression',
     ExpectedFormType.parenClose => 'closing parenthesis',
-    ExpectedFormType.separator => 'comma'
+    ExpectedFormType.separator => 'comma',
+    ExpectedFormType.braceClose => 'closing brace'
   };
 }
 
@@ -40,7 +42,7 @@ class UnexpectedTokenParseError extends ParseError {
   });
   
   @override
-  String toString() => '${super}: Expected declaration $expected, '
+  String toString() => '${super.toString()}: Expected declaration $expected, '
       'found ${_describeToken(token)}';
   
   static String _describeToken(Token token) => switch (token) {

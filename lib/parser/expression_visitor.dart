@@ -5,6 +5,7 @@ abstract interface class ExpressionVisitor<R> {
   R visitNamedCell(NamedCell expression);
   R visitConstant<T>(Constant<T> expression);
   R visitOperation(Operation expression);
+  R visitBlock(Block expression);
 }
 
 /// Visitor for [Constant] expressions.
@@ -28,6 +29,11 @@ abstract class ConstantVisitor<R> implements ExpressionVisitor<R> {
 
   @override
   R visitOperation(Operation expression) {
+    throw UnimplementedError();
+  }
+
+  @override
+  R visitBlock(Block expression) {
     throw UnimplementedError();
   }
 }
