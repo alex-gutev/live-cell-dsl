@@ -654,6 +654,56 @@ void main() {
         ]
     ));
 
+    test('Blocks as operands', () => testParser(
+        'inc(n) = { next = n + 1; next}',
+        [
+          Operation(
+            operator: NamedCell('='),
+            args: [
+              Operation(
+                operator: NamedCell('inc'),
+                args: [
+                  NamedCell('n')
+                ]
+              ),
+              Block(
+                expressions: [
+                  Operation(
+                      operator: NamedCell('='),
+                      args: [
+                        NamedCell('next'),
+                        Operation(
+                          operator: NamedCell('+'),
+                          args: [
+                            NamedCell('n'),
+                            Constant(1)
+                          ]
+                        )
+                      ]
+                  ),
+                  NamedCell('next')
+                ]
+              )
+            ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '+',
+              type: OperatorType.infix,
+              precedence: 5,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '=',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: false
+          )
+        ]
+    ));
+
     test('Malformed: Identifier not registered as operator', () {
       expect(() => parse('a + b').toList(),
         throwsA(isA<UnexpectedTokenParseError>()));
