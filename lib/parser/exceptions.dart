@@ -42,7 +42,7 @@ class UnexpectedTokenParseError extends ParseError {
   });
   
   @override
-  String toString() => '${super.toString()}: Expected declaration $expected, '
+  String toString() => '${super.toString()}: Expected $expected, '
       'found ${_describeToken(token)}';
   
   static String _describeToken(Token token) => switch (token) {
