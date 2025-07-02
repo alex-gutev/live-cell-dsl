@@ -86,9 +86,23 @@ class CellBuilder {
             )
         ),
 
-    Block(:final expressions) =>
-        expressions.map(buildExpression).last,
+    Block(:final expressions) => _buildBlock(expressions),
   };
+
+  CellSpec _buildBlock(List<Expression> expressions) {
+    CellSpec? cell;
+
+    for (final expression in expressions) {
+      cell = buildExpression(expression);
+    }
+
+    if (cell == null) {
+      // TODO: Proper exception type
+      throw Exception('Empty block');
+    }
+
+    return cell;
+  }
 
   // Definitions
 
