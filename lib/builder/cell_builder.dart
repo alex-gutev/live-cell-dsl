@@ -1,7 +1,8 @@
-import 'functions.dart';
 import 'cell_spec.dart';
 import 'cell_table.dart';
 import '../parser/index.dart';
+
+part 'functions.dart';
 
 /// Builds cell specifications from parsed cell [Expression]s
 class CellBuilder {

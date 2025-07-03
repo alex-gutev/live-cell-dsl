@@ -1,8 +1,4 @@
-import 'cell_builder.dart';
-import '../parser/declarations.dart';
-
-import 'cell_spec.dart';
-import 'cell_table.dart';
+part of 'cell_builder.dart';
 
 /// A deferred expression defining a function.
 class DeferredFunctionDefinition extends DeferredExpression {
@@ -34,8 +30,10 @@ class DeferredFunctionDefinition extends DeferredExpression {
       _builtDefinition = FunctionExpression(
           arguments: arguments,
           scope: scope,
-          // TODO: Consider referencing the cell instead
-          definition: valueCell.definition
+          definition: _NamedCellRef(
+              table: scope,
+              id: valueCell.id
+          )
       );
     }
 
