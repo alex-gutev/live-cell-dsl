@@ -17,6 +17,9 @@ class BuildTester {
   /// Test output function
   late RunTest _runTest = () => builder.build(expressions);
 
+  /// The scope in which the cells are built
+  CellTable get scope => builder.scope;
+
   /// Create a tester using a given input string
   BuildTester(String src, {
     List<Operator>? operators
@@ -33,11 +36,11 @@ class BuildTester {
     _runTest = () async {
       await run();
 
-      final cell = builder.scope.lookup(id);
+      final cell = scope.lookup(id);
       expect(cell, isNotNull);
 
-      tester?.run(
-          scope: builder.scope,
+      await tester?.test(
+          scope: scope,
           expression: cell!.definition
       );
     };
@@ -73,6 +76,42 @@ class BuildTester {
   Future<void> run() => _runTest();
 }
 
+/// A [BuildTester] for testing function local cells
+class FunctionTester extends BuildTester {
+  /// The scope in which the function local cells are defined
+  late final CellTable _scope;
+
+  @override
+  CellTable get scope => _scope;
+
+  FunctionTester() :
+    super('') {
+    _runTest = () async {};
+  }
+
+  @override
+  FunctionTester hasCell(CellId id, [ExpressionTester? tester]) {
+    super.hasCell(id, tester);
+    return this;
+  }
+
+  @override
+  FunctionTester hasNamed(String name, [ExpressionTester? tester]) {
+    super.hasNamed(name, tester);
+    return this;
+  }
+
+  @override
+  FunctionTester hasApplication({
+    required CellId operator,
+    required List<CellId> operands,
+    ExpressionTester? tester
+  }) {
+    super.hasApplication(operator: operator, operands: operands, tester: tester);
+    return this;
+  }
+}
+
 /// Helper for testing the definition of a cell
 sealed class ExpressionTester {
   ExpressionTester();
@@ -95,8 +134,40 @@ sealed class ExpressionTester {
   /// Create a tester that checks whether a [CellExpression] is a constant [value].
   factory ExpressionTester.value(value) = _ValueExpressionTester;
 
+  /// Create a tester that tests [FunctionExpression]s.
+  ///
+  /// This testers tests that the expressions is a [FunctionExpression] defining
+  /// a function with a given list of [arguments]. The tester [definition] is
+  /// used to test the expression defining the function and [tester] is run
+  /// to test the cells local to the function.
+  factory ExpressionTester.func({
+    required List<CellId> arguments,
+    required ExpressionTester definition,
+    required FunctionTester tester
+  }) = _FunctionExpressionTester;
+
   /// Run the test on a given cell definition [expression].
-  void run({
+  ///
+  /// The difference between this method and [run] is that this method builds
+  /// [DeferredExpression]s before calling [run].
+  Future<void> test({
+    required CellTable scope,
+    required CellExpression expression
+  }) => switch (expression) {
+    final DeferredExpression deferred =>
+      run(
+          scope: scope,
+          expression: deferred.build()
+      ),
+
+    _ => run(
+        scope: scope,
+        expression: expression
+    )
+  };
+
+  /// Run the test on a given cell definition [expression].
+  Future<void> run({
     required CellTable scope,
     required CellExpression expression
   });
@@ -109,10 +180,10 @@ class _RefExpressionTester extends ExpressionTester {
   _RefExpressionTester(this.refId);
 
   @override
-  void run({
+  Future<void> run({
     required CellTable scope,
     required CellExpression expression
-  }) {
+  }) async {
     expect(expression, isA<CellRef>());
     expect((expression as CellRef).get, equals(scope.get(refId)));
   }
@@ -129,17 +200,26 @@ class _ApplyExpressionTester extends ExpressionTester {
   });
 
   @override
-  void run({required CellTable scope, required CellExpression expression}) {
+  Future<void> run({
+    required CellTable scope,
+    required CellExpression expression
+  }) async {
     expect(expression, isA<CellApplication>());
 
     final apply = expression as CellApplication;
 
-    operator.run(scope: scope, expression: apply.operator);
+    await operator.test(
+        scope: scope,
+        expression: apply.operator
+    );
 
     expect(expression.operands.length, operands.length);
 
     for (var i = 0; i < operands.length; i++) {
-      operands[i].run(scope: scope, expression: expression.operands[i]);
+      await operands[i].test(
+          scope: scope,
+          expression: expression.operands[i]
+      );
     }
   }
 }
@@ -151,8 +231,49 @@ class _ValueExpressionTester extends ExpressionTester {
   _ValueExpressionTester(this.value);
 
   @override
-  void run({required CellTable scope, required CellExpression expression}) {
+  Future<void> run({
+    required CellTable scope,
+    required CellExpression expression
+  }) async {
     expect(expression, isA<ConstantValue>());
     expect((expression as ConstantValue).value, equals(value));
+  }
+}
+
+/// [FunctionExpression] tester
+class _FunctionExpressionTester extends ExpressionTester {
+  final List<CellId> arguments;
+  final ExpressionTester definition;
+
+  final FunctionTester tester;
+
+  _FunctionExpressionTester({
+    required this.arguments,
+    required this.definition,
+    required this.tester
+  });
+
+  @override
+  Future<void> run({
+    required CellTable scope,
+    required CellExpression expression
+  }) async {
+    expect(expression, isA<FunctionExpression>());
+
+    final func = expression as FunctionExpression;
+
+    tester._scope = func.scope;
+    expect(func.arguments, equals(arguments));
+
+    definition.test(
+        scope: func.scope,
+        expression: func.definition
+    );
+
+    for (final arg in arguments) {
+      tester.hasCell(arg);
+    }
+
+    await tester.run();
   }
 }

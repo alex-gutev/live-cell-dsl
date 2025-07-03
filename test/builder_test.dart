@@ -151,4 +151,271 @@ void main() {
         )
         .run());
   });
+
+  group('Function definitions', () {
+    test('Single expression functions', () =>
+        BuildTester('inc(n, d) = n + d\nx = inc(y, 1)',
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            )
+          ]
+        ).hasNamed('x', ExpressionTester.ref(
+            AppliedCellId(
+                operator: NamedCellId('inc'),
+                operands: [
+                  NamedCellId('y'),
+                  ValueCellId(1)
+                ]
+            )
+        )).hasApplication(
+            operator: NamedCellId('inc'),
+            operands: [
+              NamedCellId('y'),
+              ValueCellId(1)
+            ],
+
+            tester: ExpressionTester.apply(
+              operator: ExpressionTester.ref(NamedCellId('inc')),
+              operands: [
+                ExpressionTester.ref(NamedCellId('y')),
+                ExpressionTester.value(1)
+              ]
+            )
+        ).hasNamed('inc', ExpressionTester.func(
+            arguments: [NamedCellId('n'), NamedCellId('d')],
+            definition: ExpressionTester.ref(
+              AppliedCellId(
+                operator: NamedCellId('+'),
+                operands: [
+                  NamedCellId('n'),
+                  NamedCellId('d')
+                ]
+              )
+            ),
+            tester: FunctionTester()
+              .hasApplication(
+                operator: NamedCellId('+'),
+                operands: [
+                  NamedCellId('n'),
+                  NamedCellId('d')
+                ],
+
+                tester: ExpressionTester.apply(
+                    operator: ExpressionTester.ref(NamedCellId('+')),
+                    operands: [
+                      ExpressionTester.ref(NamedCellId('n')),
+                      ExpressionTester.ref(NamedCellId('d'))
+                    ]
+                )
+            )
+        )).run());
+
+    test('Multiple expression functions', () =>
+        BuildTester('inc(n, d) = {'
+            'sum = n + d; '
+            'result = sum + 1\n'
+            'result '
+            '}\nx = inc(y, 1)',
+
+            operators: [
+              Operator(
+                  name: '=',
+                  type: OperatorType.infix,
+                  precedence: 1,
+                  leftAssoc: false
+              ),
+              Operator(
+                  name: '+',
+                  type: OperatorType.infix,
+                  precedence: 5,
+                  leftAssoc: true
+              )
+            ]
+        ).hasNamed('x', ExpressionTester.ref(
+            AppliedCellId(
+                operator: NamedCellId('inc'),
+                operands: [
+                  NamedCellId('y'),
+                  ValueCellId(1)
+                ]
+            )
+        )).hasApplication(
+            operator: NamedCellId('inc'),
+            operands: [
+              NamedCellId('y'),
+              ValueCellId(1)
+            ],
+
+            tester: ExpressionTester.apply(
+                operator: ExpressionTester.ref(NamedCellId('inc')),
+                operands: [
+                  ExpressionTester.ref(NamedCellId('y')),
+                  ExpressionTester.value(1)
+                ]
+            )
+        ).hasNamed('inc', ExpressionTester.func(
+            arguments: [NamedCellId('n'), NamedCellId('d')],
+            definition: ExpressionTester.ref(NamedCellId('result')),
+            tester: FunctionTester()
+                .hasApplication(
+                operator: NamedCellId('+'),
+                operands: [
+                  NamedCellId('n'),
+                  NamedCellId('d')
+                ],
+
+                tester: ExpressionTester.apply(
+                    operator: ExpressionTester.ref(NamedCellId('+')),
+                    operands: [
+                      ExpressionTester.ref(NamedCellId('n')),
+                      ExpressionTester.ref(NamedCellId('d'))
+                    ]
+                )
+            )
+        )).run());
+
+    test('Multiple expression functions with irregular order', () =>
+        BuildTester('inc(n, d) = {'
+            'result = sum + 1\n'
+            'sum = n + d; '
+            'result '
+            '}\nx = inc(y, 1)',
+
+            operators: [
+              Operator(
+                  name: '=',
+                  type: OperatorType.infix,
+                  precedence: 1,
+                  leftAssoc: false
+              ),
+              Operator(
+                  name: '+',
+                  type: OperatorType.infix,
+                  precedence: 5,
+                  leftAssoc: true
+              )
+            ]
+        ).hasNamed('x', ExpressionTester.ref(
+            AppliedCellId(
+                operator: NamedCellId('inc'),
+                operands: [
+                  NamedCellId('y'),
+                  ValueCellId(1)
+                ]
+            )
+        )).hasApplication(
+            operator: NamedCellId('inc'),
+            operands: [
+              NamedCellId('y'),
+              ValueCellId(1)
+            ],
+
+            tester: ExpressionTester.apply(
+                operator: ExpressionTester.ref(NamedCellId('inc')),
+                operands: [
+                  ExpressionTester.ref(NamedCellId('y')),
+                  ExpressionTester.value(1)
+                ]
+            )
+        ).hasNamed('inc', ExpressionTester.func(
+            arguments: [NamedCellId('n'), NamedCellId('d')],
+            definition: ExpressionTester.ref(NamedCellId('result')),
+            tester: FunctionTester()
+                .hasApplication(
+                operator: NamedCellId('+'),
+                operands: [
+                  NamedCellId('n'),
+                  NamedCellId('d')
+                ],
+
+                tester: ExpressionTester.apply(
+                    operator: ExpressionTester.ref(NamedCellId('+')),
+                    operands: [
+                      ExpressionTester.ref(NamedCellId('n')),
+                      ExpressionTester.ref(NamedCellId('d'))
+                    ]
+                )
+            )
+        )).run());
+
+    test('Referencing cells defined outside function', () =>
+        BuildTester('inc(n) = n + delta;'
+            'delta = 1; '
+            'x = inc(y)',
+
+            operators: [
+              Operator(
+                  name: '=',
+                  type: OperatorType.infix,
+                  precedence: 1,
+                  leftAssoc: false
+              ),
+              Operator(
+                  name: '+',
+                  type: OperatorType.infix,
+                  precedence: 5,
+                  leftAssoc: true
+              )
+            ]
+        ).hasNamed('x', ExpressionTester.ref(
+            AppliedCellId(
+                operator: NamedCellId('inc'),
+                operands: [
+                  NamedCellId('y'),
+                ]
+            )
+        )).hasApplication(
+            operator: NamedCellId('inc'),
+            operands: [
+              NamedCellId('y'),
+            ],
+
+            tester: ExpressionTester.apply(
+                operator: ExpressionTester.ref(NamedCellId('inc')),
+                operands: [
+                  ExpressionTester.ref(NamedCellId('y')),
+                ]
+            )
+        ).hasNamed(
+            'delta',
+            ExpressionTester.value(1)
+        ).hasNamed('inc', ExpressionTester.func(
+            arguments: [NamedCellId('n')],
+            definition: ExpressionTester.ref(
+                AppliedCellId(
+                    operator: NamedCellId('+'),
+                    operands: [
+                      NamedCellId('n'),
+                      NamedCellId('delta')
+                    ]
+                )
+            ),
+            tester: FunctionTester()
+                .hasApplication(
+                operator: NamedCellId('+'),
+                operands: [
+                  NamedCellId('n'),
+                  NamedCellId('delta')
+                ],
+
+                tester: ExpressionTester.apply(
+                    operator: ExpressionTester.ref(NamedCellId('+')),
+                    operands: [
+                      ExpressionTester.ref(NamedCellId('n')),
+                      ExpressionTester.ref(NamedCellId('delta'))
+                    ]
+                )
+            )
+        )).run());
+  });
 }
