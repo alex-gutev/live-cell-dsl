@@ -497,5 +497,216 @@ void main() {
                 )
                 .hasNamed('delta', local: false)
         )).run());
+
+    test('Nested functions', () =>
+      BuildTester('inc(n) = {'
+          'x = add-delta(n)\n'
+          'add-delta(m) = m + delta;'
+          'x'
+          '}\n'
+          'delta = 1\n'
+          'x = inc(y);',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            )
+          ]
+      ).hasNamed('x', tester: ExpressionTester.ref(
+          AppliedCellId(
+              operator: NamedCellId('inc'),
+              operands: [
+                NamedCellId('y'),
+              ]
+          )
+      )).hasApplication(
+          operator: NamedCellId('inc'),
+          operands: [
+            NamedCellId('y'),
+          ],
+
+          tester: ExpressionTester.apply(
+              operator: ExpressionTester.ref(NamedCellId('inc')),
+              operands: [
+                ExpressionTester.ref(NamedCellId('y')),
+              ]
+          )
+      ).hasNamed(
+          'delta',
+          tester: ExpressionTester.value(1)
+      ).hasNamed('inc', tester: ExpressionTester.func(
+          arguments: [NamedCellId('n')],
+          definition: ExpressionTester.ref(NamedCellId('x')),
+          tester: FunctionTester()
+              .hasApplication(
+                operator: NamedCellId('add-delta'),
+                operands: [
+                  NamedCellId('n'),
+                ],
+
+                tester: ExpressionTester.apply(
+                    operator: ExpressionTester.ref(NamedCellId('add-delta')),
+                    operands: [
+                      ExpressionTester.ref(NamedCellId('n')),
+                    ]
+                )
+              )
+              .hasNamed(
+                'x',
+                tester: ExpressionTester.ref(
+                  AppliedCellId(
+                      operator: NamedCellId('add-delta'),
+                      operands: [
+                        NamedCellId('n'),
+                      ]
+                  )
+                ),
+                local: true
+              )
+              .hasNamed('add-delta', tester: ExpressionTester.func(
+                arguments: [NamedCellId('m')],
+                definition: ExpressionTester.ref(
+                  AppliedCellId(
+                    operator: NamedCellId('+'),
+                    operands: [
+                      NamedCellId('m'),
+                      NamedCellId('delta')
+                    ]
+                  )
+                ),
+
+                tester: FunctionTester()
+                  .hasApplication(
+                    operator: NamedCellId('+'),
+                    operands: [
+                      NamedCellId('m'),
+                      NamedCellId('delta')
+                    ],
+
+                    tester: ExpressionTester.apply(
+                        operator: ExpressionTester.ref(NamedCellId('+')),
+                        operands: [
+                          ExpressionTester.ref(NamedCellId('m')),
+                          ExpressionTester.ref(NamedCellId('delta'))
+                        ]
+                    ),
+
+                    local: true
+                  )
+                  .hasNamed('delta', local: false)
+              ))
+      )).run());
+
+    test('Recursive function', () =>
+      BuildTester('f(x) = f(x - 1) + 1',
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            ),
+            Operator(
+                name: '-',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            )
+          ]
+      ).hasNamed('f', tester: ExpressionTester.func(
+        arguments: [NamedCellId('x')],
+        definition: ExpressionTester.ref(
+          AppliedCellId(
+            operator: NamedCellId('+'),
+            operands: [
+              AppliedCellId(
+                  operator: NamedCellId('f'),
+                  operands: [
+                    AppliedCellId(
+                      operator: NamedCellId('-'),
+                      operands: [
+                        NamedCellId('x'),
+                        ValueCellId(1)
+                      ]
+                    )
+                  ]
+              ),
+              ValueCellId(1)
+            ]
+          )
+        ),
+
+        tester: FunctionTester().hasNamed('f', local: false)
+      )).run());
+
+    test('Mutually recursive functions', () =>
+        BuildTester('f(x) = g(x) + 1;'
+            'g(y) = f(y) + 2',
+            operators: [
+              Operator(
+                  name: '=',
+                  type: OperatorType.infix,
+                  precedence: 1,
+                  leftAssoc: false
+              ),
+              Operator(
+                  name: '+',
+                  type: OperatorType.infix,
+                  precedence: 5,
+                  leftAssoc: true
+              ),
+            ]
+        ).hasNamed('f', tester: ExpressionTester.func(
+            arguments: [NamedCellId('x')],
+            definition: ExpressionTester.ref(
+                AppliedCellId(
+                    operator: NamedCellId('+'),
+                    operands: [
+                      AppliedCellId(
+                          operator: NamedCellId('g'),
+                          operands: [
+                            NamedCellId('x'),
+                          ]
+                      ),
+                      ValueCellId(1)
+                    ]
+                )
+            ),
+
+            tester: FunctionTester().hasNamed('g', local: false)
+        )).hasNamed('g', tester: ExpressionTester.func(
+            arguments: [NamedCellId('y')],
+            definition: ExpressionTester.ref(
+                AppliedCellId(
+                    operator: NamedCellId('+'),
+                    operands: [
+                      AppliedCellId(
+                          operator: NamedCellId('f'),
+                          operands: [
+                            NamedCellId('y'),
+                          ]
+                      ),
+                      ValueCellId(2)
+                    ]
+                )
+            ),
+
+            tester: FunctionTester().hasNamed('f', local: false)
+        )).run());
   });
 }
