@@ -30,7 +30,14 @@ class BuildTester {
   /// Add a test that checks that a cell with a given [id] has been built.
   ///
   /// If [tester] is not null, it used to test the definition of the cell.
-  BuildTester hasCell(CellId id, [ExpressionTester? tester]) {
+  ///
+  /// If [local] is true, the scope of the cell is tested that it is
+  /// equal to [scope]. If [local] is false, the scope of the cell is tested
+  /// that it is not equal to [scope].
+  BuildTester hasCell(CellId id, {
+    ExpressionTester? tester,
+    bool local = true
+  }) {
     final run = _runTest;
 
     _runTest = () async {
@@ -43,6 +50,13 @@ class BuildTester {
           scope: scope,
           expression: cell!.definition
       );
+
+      if (local) {
+        expect(cell!.scope, equals(scope));
+      }
+      else {
+        expect(cell!.scope, isNot(equals(scope)));
+      }
     };
 
     return this;
@@ -51,8 +65,17 @@ class BuildTester {
   /// Add a test that checks that a cell named [name] has been built.
   ///
   /// If [tester] is not null, it used to test the definition of the cell.
-  BuildTester hasNamed(String name, [ExpressionTester? tester]) =>
-      hasCell(NamedCellId(name), tester);
+  ///
+  /// If [local] is true, the scope of the cell is tested that it is
+  /// equal to [scope]. If [local] is false, the scope of the cell is tested
+  /// that it is not equal to [scope].
+  BuildTester hasNamed(String name, {
+    ExpressionTester? tester,
+    bool local = true
+  }) => hasCell(NamedCellId(name),
+      tester: tester,
+      local: local
+  );
 
   /// Add a test that checks that a cell for a given expression has been built.
   ///
@@ -60,16 +83,22 @@ class BuildTester {
   /// with [operator] applied to [operands] has been built.
   ///
   /// If [tester] is not null, it used to test the definition of the cell.
+  ///
+  /// If [local] is true, the scope of the cell is tested that it is
+  /// equal to [scope]. If [local] is false, the scope of the cell is tested
+  /// that it is not equal to [scope].
   BuildTester hasApplication({
     required CellId operator,
     required List<CellId> operands,
-    ExpressionTester? tester
+    ExpressionTester? tester,
+    bool local = true
   }) => hasCell(
       AppliedCellId(
           operator: operator,
           operands: operands
       ),
-      tester
+      tester: tester,
+      local: local
   );
 
   /// Run all tests
@@ -90,14 +119,26 @@ class FunctionTester extends BuildTester {
   }
 
   @override
-  FunctionTester hasCell(CellId id, [ExpressionTester? tester]) {
-    super.hasCell(id, tester);
+  FunctionTester hasCell(CellId id, {
+    ExpressionTester? tester,
+    bool local = true
+  }) {
+    super.hasCell(id,
+        tester: tester,
+        local: local
+    );
     return this;
   }
 
   @override
-  FunctionTester hasNamed(String name, [ExpressionTester? tester]) {
-    super.hasNamed(name, tester);
+  FunctionTester hasNamed(String name, {
+    ExpressionTester? tester,
+    bool local = true
+  }) {
+    super.hasNamed(name,
+        tester: tester,
+        local: local
+    );
     return this;
   }
 
@@ -105,9 +146,16 @@ class FunctionTester extends BuildTester {
   FunctionTester hasApplication({
     required CellId operator,
     required List<CellId> operands,
-    ExpressionTester? tester
+    ExpressionTester? tester,
+    bool local = true
   }) {
-    super.hasApplication(operator: operator, operands: operands, tester: tester);
+    super.hasApplication(
+        operator: operator,
+        operands: operands,
+        tester: tester,
+        local: local
+    );
+
     return this;
   }
 }

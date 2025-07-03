@@ -49,8 +49,8 @@ void main() {
               precedence: 1,
               leftAssoc: false
           )
-        ]).hasNamed('a', ExpressionTester.ref(NamedCellId('b')))
-          .hasNamed('b', ExpressionTester.ref(NamedCellId('c')))
+        ]).hasNamed('a', tester: ExpressionTester.ref(NamedCellId('b')))
+          .hasNamed('b', tester: ExpressionTester.ref(NamedCellId('c')))
           .run());
 
     test('Chained alias definitions', () =>
@@ -61,8 +61,8 @@ void main() {
               precedence: 1,
               leftAssoc: false
           )
-        ]).hasNamed('a', ExpressionTester.ref(NamedCellId('b')))
-            .hasNamed('b', ExpressionTester.ref(NamedCellId('c')))
+        ]).hasNamed('a', tester: ExpressionTester.ref(NamedCellId('b')))
+            .hasNamed('b', tester: ExpressionTester.ref(NamedCellId('c')))
             .run());
 
     test('Later declarations do not overwrite earlier definitions.', () =>
@@ -73,8 +73,8 @@ void main() {
               precedence: 1,
               leftAssoc: false
           )
-        ]).hasNamed('a', ExpressionTester.ref(NamedCellId('b')))
-            .hasNamed('b', ExpressionTester.ref(NamedCellId('c')))
+        ]).hasNamed('a', tester: ExpressionTester.ref(NamedCellId('b')))
+            .hasNamed('b', tester: ExpressionTester.ref(NamedCellId('c')))
             .run());
 
     test('Expression definitions', () =>
@@ -85,7 +85,7 @@ void main() {
               precedence: 1,
               leftAssoc: false
           )
-        ]).hasNamed('a', ExpressionTester.ref(
+        ]).hasNamed('a', tester: ExpressionTester.ref(
           AppliedCellId(
             operator: NamedCellId('f'),
             operands: [
@@ -125,8 +125,8 @@ void main() {
               precedence: 5,
               leftAssoc: true
           )
-        ]).hasNamed('a', ExpressionTester.ref(NamedCellId('b')))
-        .hasNamed('b', ExpressionTester.ref(
+        ]).hasNamed('a', tester: ExpressionTester.ref(NamedCellId('b')))
+        .hasNamed('b', tester: ExpressionTester.ref(
           AppliedCellId(
             operator: NamedCellId('+'),
             operands: [
@@ -169,7 +169,7 @@ void main() {
                 leftAssoc: true
             )
           ]
-        ).hasNamed('x', ExpressionTester.ref(
+        ).hasNamed('x', tester: ExpressionTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -191,7 +191,7 @@ void main() {
                 ExpressionTester.value(1)
               ]
             )
-        ).hasNamed('inc', ExpressionTester.func(
+        ).hasNamed('inc', tester: ExpressionTester.func(
             arguments: [NamedCellId('n'), NamedCellId('d')],
             definition: ExpressionTester.ref(
               AppliedCellId(
@@ -241,7 +241,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', ExpressionTester.ref(
+        ).hasNamed('x', tester: ExpressionTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -263,7 +263,7 @@ void main() {
                   ExpressionTester.value(1)
                 ]
             )
-        ).hasNamed('inc', ExpressionTester.func(
+        ).hasNamed('inc', tester: ExpressionTester.func(
             arguments: [NamedCellId('n'), NamedCellId('d')],
             definition: ExpressionTester.ref(NamedCellId('result')),
             tester: FunctionTester()
@@ -305,7 +305,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', ExpressionTester.ref(
+        ).hasNamed('x', tester: ExpressionTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -327,7 +327,7 @@ void main() {
                   ExpressionTester.value(1)
                 ]
             )
-        ).hasNamed('inc', ExpressionTester.func(
+        ).hasNamed('inc', tester: ExpressionTester.func(
             arguments: [NamedCellId('n'), NamedCellId('d')],
             definition: ExpressionTester.ref(NamedCellId('result')),
             tester: FunctionTester()
@@ -350,8 +350,8 @@ void main() {
 
     test('Referencing cells defined outside function', () =>
         BuildTester('inc(n) = n + delta;'
-            'delta = 1; '
-            'x = inc(y)',
+            'x = inc(y);'
+            'delta = 1;',
 
             operators: [
               Operator(
@@ -367,7 +367,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', ExpressionTester.ref(
+        ).hasNamed('x', tester: ExpressionTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -388,8 +388,8 @@ void main() {
             )
         ).hasNamed(
             'delta',
-            ExpressionTester.value(1)
-        ).hasNamed('inc', ExpressionTester.func(
+            tester: ExpressionTester.value(1)
+        ).hasNamed('inc', tester: ExpressionTester.func(
             arguments: [NamedCellId('n')],
             definition: ExpressionTester.ref(
                 AppliedCellId(
@@ -402,20 +402,100 @@ void main() {
             ),
             tester: FunctionTester()
                 .hasApplication(
-                operator: NamedCellId('+'),
-                operands: [
-                  NamedCellId('n'),
-                  NamedCellId('delta')
-                ],
+                  operator: NamedCellId('+'),
+                  operands: [
+                    NamedCellId('n'),
+                    NamedCellId('delta')
+                  ],
 
-                tester: ExpressionTester.apply(
-                    operator: ExpressionTester.ref(NamedCellId('+')),
-                    operands: [
-                      ExpressionTester.ref(NamedCellId('n')),
-                      ExpressionTester.ref(NamedCellId('delta'))
-                    ]
+                  tester: ExpressionTester.apply(
+                      operator: ExpressionTester.ref(NamedCellId('+')),
+                      operands: [
+                        ExpressionTester.ref(NamedCellId('n')),
+                        ExpressionTester.ref(NamedCellId('delta'))
+                      ]
+                  )
                 )
+                .hasNamed('delta', local: false)
+        )).run());
+
+    test('Shadowing cells defined outside function', () =>
+        BuildTester('inc(n) = {'
+            'x = n + delta;'
+            'x;'
+            '}\n'
+            'x = inc(y);'
+            'delta = 1;',
+
+            operators: [
+              Operator(
+                  name: '=',
+                  type: OperatorType.infix,
+                  precedence: 1,
+                  leftAssoc: false
+              ),
+              Operator(
+                  name: '+',
+                  type: OperatorType.infix,
+                  precedence: 5,
+                  leftAssoc: true
+              )
+            ]
+        ).hasNamed('x', tester: ExpressionTester.ref(
+            AppliedCellId(
+                operator: NamedCellId('inc'),
+                operands: [
+                  NamedCellId('y'),
+                ]
             )
+        )).hasApplication(
+            operator: NamedCellId('inc'),
+            operands: [
+              NamedCellId('y'),
+            ],
+
+            tester: ExpressionTester.apply(
+                operator: ExpressionTester.ref(NamedCellId('inc')),
+                operands: [
+                  ExpressionTester.ref(NamedCellId('y')),
+                ]
+            )
+        ).hasNamed(
+            'delta',
+            tester: ExpressionTester.value(1)
+        ).hasNamed('inc', tester: ExpressionTester.func(
+            arguments: [NamedCellId('n')],
+            definition: ExpressionTester.ref(NamedCellId('x')),
+            tester: FunctionTester()
+                .hasApplication(
+                  operator: NamedCellId('+'),
+                  operands: [
+                    NamedCellId('n'),
+                    NamedCellId('delta')
+                  ],
+
+                  tester: ExpressionTester.apply(
+                      operator: ExpressionTester.ref(NamedCellId('+')),
+                      operands: [
+                        ExpressionTester.ref(NamedCellId('n')),
+                        ExpressionTester.ref(NamedCellId('delta'))
+                      ]
+                  )
+                )
+                .hasNamed(
+                  'x',
+                  tester: ExpressionTester.ref(
+                    AppliedCellId(
+                      operator: NamedCellId('+'),
+                      operands: [
+                        NamedCellId('n'),
+                        NamedCellId('delta')
+                      ]
+                    )
+                  ),
+                  local: true
+                )
+                .hasNamed('delta', local: false)
         )).run());
   });
 }
