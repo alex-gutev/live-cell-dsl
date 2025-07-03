@@ -24,6 +24,9 @@ class NamedCellId extends CellId {
 
   @override
   int get hashCode => _$NamedCellIdHashCode(this);
+
+  @override
+  String toString() => name;
 }
 
 /// Identifies a cell consisting of an [operator] applied on one or more [operands].
@@ -44,6 +47,9 @@ class AppliedCellId extends CellId {
 
   @override
   int get hashCode => _$AppliedCellIdHashCode(this);
+
+  @override
+  String toString() => '$operator(${operands.join(', ')})';
 }
 
 /// Identifies a constant value
@@ -62,6 +68,9 @@ class ValueCellId extends CellId {
 
   @override
   int get hashCode => value.hashCode;
+
+  @override
+  String toString() => 'Value($value)';
 }
 
 /// A specification for a cell
