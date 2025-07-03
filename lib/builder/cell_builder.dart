@@ -192,7 +192,7 @@ class CellBuilder {
 
     return CellSpec(
       id: NamedCellId(name),
-      scope: scope,
+      scope: this.scope,
 
       definition: DeferredFunctionDefinition(
           arguments: argCells,
