@@ -315,19 +315,19 @@ class _Parser {
     final expressions = <Expression>[];
 
     while (_current is! BraceClose) {
-      await _skipTerminators();
-      expressions.add(await _parseExpression());
-
       switch (_current) {
         case Terminator():
-        case BraceClose():
+          await _advance();
           break;
 
-        default:
+        case EndOfInput():
           throw UnexpectedTokenParseError(
               token: _current,
               expected: ExpectedFormType.braceClose
           );
+
+        default:
+          expressions.add(await _parseExpression());
       }
     }
 

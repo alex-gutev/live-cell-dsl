@@ -264,6 +264,41 @@ void main() {
       ]
     ));
 
+    test('Block with multiple expressions with hard terminators', () => testParser(
+        '{fn(a, b, c); g(x)\n\n123;\nu(arg1\n,arg2);}',
+        [
+          Block(
+              expressions: [
+                Operation(
+                    operator: NamedCell('fn'),
+                    args: [
+                      NamedCell('a'),
+                      NamedCell('b'),
+                      NamedCell('c')
+                    ]
+                ),
+
+                Operation(
+                    operator: NamedCell('g'),
+                    args: [
+                      NamedCell('x')
+                    ]
+                ),
+
+                Constant(123),
+
+                Operation(
+                    operator: NamedCell('u'),
+                    args: [
+                      NamedCell('arg1'),
+                      NamedCell('arg2')
+                    ]
+                )
+              ]
+          )
+        ]
+    ));
+
     test('Nested Blocks', () => testParser(
         '{ f1(a1); { f2(a1, a2)\n add(x,y)}; f3("1", x)}',
         [
