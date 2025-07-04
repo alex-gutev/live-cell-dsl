@@ -74,21 +74,36 @@ class CellBuilder {
     ) => _addVarCell(args),
 
     Operation(:final operator, :final args) =>
-        CellSpec(
-            id: _idForExpression(expression),
-            scope: scope,
-
-            definition: CellApplication(
-                operator: _refCell(buildExpression(operator)),
-
-                operands: args.map(buildExpression)
-                    .map(_refCell)
-                    .toList()
-            )
+        _buildAppliedCell(
+            operator: operator,
+            operands: args
         ),
 
     Block(:final expressions) => _buildBlock(expressions),
   };
+
+  /// Build a cell representing the application of an [operator] to one or more [operands].
+  CellSpec _buildAppliedCell({
+    required Expression operator,
+    required List<Expression> operands
+  }) {
+    final operatorCell = buildExpression(operator);
+    final operandCells = operands.map(buildExpression);
+
+    return CellSpec(
+        scope: scope,
+
+        id: AppliedCellId(
+            operator: operatorCell.id,
+            operands: operandCells.map((c) => c.id).toList()
+        ),
+
+        definition: CellApplication(
+            operator: _refCell(buildExpression(operator)),
+            operands: operandCells.map(_refCell).toList()
+        ),
+    );
+  }
 
   CellSpec _buildBlock(List<Expression> expressions) {
     CellSpec? cell;
@@ -218,21 +233,6 @@ class CellBuilder {
         table: scope,
         id: spec.id
     )
-  };
-
-  /// Get the identifier for the cell represented by [expression].
-  CellId _idForExpression(Expression expression) => switch (expression) {
-    NamedCell(:final name) => NamedCellId(name),
-
-    Constant(:final value) => ValueCellId(value),
-
-    Operation(:final operator, :final args) =>
-        AppliedCellId(
-            operator: _idForExpression(operator),
-            operands: args.map(_idForExpression).toList()
-        ),
-
-    Block() => throw UnimplementedError(),
   };
 }
 
