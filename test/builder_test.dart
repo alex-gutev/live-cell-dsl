@@ -709,4 +709,75 @@ void main() {
             tester: FunctionTester().hasNamed('f', local: false)
         )).run());
   });
+
+  group('Variable cell declarations', () {
+    test('Simple variable declarations', () =>
+      BuildTester('var(a); var(b)')
+        .hasNamed('a', tester: ExpressionTester.variable())
+        .hasNamed('b', tester: ExpressionTester.variable())
+        .run());
+
+    test('Variable declarations nested in other cells', () =>
+      BuildTester('f(x, var(y))')
+        .hasNamed('x')
+        .hasNamed('y', tester: ExpressionTester.variable())
+        .hasApplication(
+          operator: NamedCellId('f'),
+          operands: [
+            NamedCellId('x'),
+            NamedCellId('y')
+          ],
+
+          tester: ExpressionTester.apply(
+            operator: ExpressionTester.ref(NamedCellId('f')),
+            operands: [
+              ExpressionTester.ref(NamedCellId('x')),
+              ExpressionTester.ref(NamedCellId('y'))
+            ]
+          )
+        )
+        .run());
+
+    test('Variable declarations following cell declarations', () =>
+      BuildTester('f(x, y); var(y)')
+          .hasNamed('x')
+          .hasNamed('y', tester: ExpressionTester.variable())
+          .hasApplication(
+            operator: NamedCellId('f'),
+            operands: [
+              NamedCellId('x'),
+              NamedCellId('y')
+            ],
+
+            tester: ExpressionTester.apply(
+              operator: ExpressionTester.ref(NamedCellId('f')),
+              operands: [
+                ExpressionTester.ref(NamedCellId('x')),
+                ExpressionTester.ref(NamedCellId('y'))
+              ]
+            )
+          )
+          .run());
+
+    test('Variable declarations preceding cell declarations', () =>
+        BuildTester('var(y); f(x, y)')
+            .hasNamed('x')
+            .hasNamed('y', tester: ExpressionTester.variable())
+            .hasApplication(
+              operator: NamedCellId('f'),
+              operands: [
+                NamedCellId('x'),
+                NamedCellId('y')
+              ],
+
+              tester: ExpressionTester.apply(
+                operator: ExpressionTester.ref(NamedCellId('f')),
+                operands: [
+                  ExpressionTester.ref(NamedCellId('x')),
+                  ExpressionTester.ref(NamedCellId('y'))
+                ]
+              )
+            )
+            .run());
+  });
 }

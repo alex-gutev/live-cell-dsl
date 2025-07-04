@@ -44,7 +44,7 @@ class BuildTester {
       await run();
 
       final cell = scope.lookup(id);
-      expect(cell, isNotNull);
+      expect(cell, isNotNull, reason: 'Cell not found `$id`');
 
       await tester?.test(
           scope: scope,
@@ -194,6 +194,9 @@ sealed class ExpressionTester {
     required FunctionTester tester
   }) = _FunctionExpressionTester;
 
+  /// Create a test that tests [VariableValue] expressions.
+  factory ExpressionTester.variable() = _VariableExpressionTester;
+
   /// Run the test on a given cell definition [expression].
   ///
   /// The difference between this method and [run] is that this method builds
@@ -286,6 +289,15 @@ class _ValueExpressionTester extends ExpressionTester {
     expect(expression, isA<ConstantValue>());
     expect((expression as ConstantValue).value, equals(value));
   }
+}
+
+/// [VariableValue] expression tester
+class _VariableExpressionTester extends ExpressionTester {
+  @override
+  Future<void> run({
+    required CellTable scope,
+    required CellExpression expression
+  }) async => expression is VariableValue;
 }
 
 /// [FunctionExpression] tester
