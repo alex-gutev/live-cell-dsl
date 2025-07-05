@@ -1,5 +1,6 @@
-import 'package:live_cell/builder/cell_spec.dart';
+import 'package:live_cell/builder/index.dart';
 import 'package:live_cell/parser/index.dart';
+import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 import 'build_test_utils.dart';
@@ -779,5 +780,163 @@ void main() {
               )
             )
             .run());
+  });
+
+  group('Malformed definitions', () {
+    test('Redefining Literal', () {
+      final builder = BuildTester(
+          '123 = a',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(builder.run, throwsA(isA<MalformedDefinitionError>()));
+    });
+
+    test('Function with literal as identifier', () {
+      final builder = BuildTester(
+          '"fn"(x) = g(x)',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(builder.run, throwsA(isA<MalformedDefinitionError>()));
+    });
+
+    test('Literals as argument names', () {
+      final builder = BuildTester(
+          'fn(x, y, 1) = g(x, y)',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(builder.run, throwsA(isA<MalformedFunctionArgumentListError>()));
+    });
+
+    test('Expressions as argument names', () {
+      final builder = BuildTester(
+          'fn(x, y(z)) = g(x, y)',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(builder.run, throwsA(isA<MalformedFunctionArgumentListError>()));
+    });
+
+    test('Empty block definition', () {
+      final builder = BuildTester(
+          'fn(x) = {}',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(builder.run, throwsA(isA<EmptyBlockError>()));
+    });
+
+    test('Multiple definitions for named cell', () {
+      final builder = BuildTester(
+          'a = b\nb = c\na = 2',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(builder.run, throwsA(isA<MultipleDefinitionError>()));
+    });
+
+    test('Multiple definitions for function cell', () {
+      final builder = BuildTester(
+          'f(x) = x; g(x) = x; f(x) = z(x)',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(builder.run, throwsA(isA<MultipleDefinitionError>()));
+    });
+  });
+
+  group('Malformed variable cell declarations', () {
+    test('Literals', () {
+      final tester = BuildTester('var(123)');
+
+      expect(tester.run(), throwsA(isA<MalformedVarDeclarationError>()));
+    });
+
+    test('Expressions', () {
+      final tester = BuildTester('var(f(x,y))');
+
+      expect(tester.run(), throwsA(isA<MalformedVarDeclarationError>()));
+    });
+
+    test('Empty cell list', () {
+      final tester = BuildTester('var()');
+
+      expect(tester.run(), throwsA(isA<MalformedVarDeclarationError>()));
+    });
+
+    test('Incompatible var declaration with cell definition', () {
+      final tester = BuildTester(
+          'a = b; var(a)',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(tester.run(), throwsA(isA<IncompatibleVarDeclarationError>()));
+    });
   });
 }

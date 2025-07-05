@@ -6,7 +6,16 @@ part 'declarations.g.dart';
 
 /// Base class representing a parsed expression
 sealed class Expression {
-  const Expression();
+  /// The line in the source where the expression is located
+  final int line;
+
+  /// The column in the source where the expression is located
+  final int column;
+
+  const Expression({
+    required this.line,
+    required this.column
+  });
 
   /// Visit this expression with [visitor].
   R accept<R>(ExpressionVisitor<R> visitor);
@@ -18,7 +27,10 @@ class NamedCell extends Expression {
   /// The name of the cell
   final String name;
 
-  const NamedCell(this.name);
+  const NamedCell(this.name, {
+    super.line = 0,
+    super.column = 0
+  });
 
   @override
   R accept<R>(ExpressionVisitor<R> visitor) =>
@@ -38,7 +50,10 @@ class Constant<T> extends Expression {
   /// The constant value
   final T value;
 
-  const Constant(this.value);
+  const Constant(this.value, {
+    super.line = 0,
+    super.column = 0
+  });
 
   @override
   R accept<R>(ExpressionVisitor<R> visitor) =>
@@ -64,7 +79,9 @@ class Operation extends Expression {
 
   const Operation({
     required this.operator,
-    required this.args
+    required this.args,
+    super.line = 0,
+    super.column = 0
   });
 
   @override
@@ -87,7 +104,9 @@ class Block extends Expression {
   final List<Expression> expressions;
 
   const Block({
-    required this.expressions
+    required this.expressions,
+    super.line = 0,
+    super.column = 0
   });
 
   @override

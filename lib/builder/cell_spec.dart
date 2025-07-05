@@ -84,10 +84,18 @@ class CellSpec {
   /// The scope in which this cell is defined
   final CellTable? scope;
 
+  /// The line in the source where the cell is defined?
+  final int? line;
+
+  /// The column in the source where the cell is defined?
+  final int? column;
+
   const CellSpec({
     required this.id,
     required this.definition,
-    required this.scope
+    required this.scope,
+    this.line,
+    this.column
   });
 }
 

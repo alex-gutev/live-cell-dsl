@@ -64,7 +64,10 @@ class ExpressionBuilder {
             args: [
               lhs,
               rhs
-            ]
+            ],
+
+            line: lhs.line,
+            column: lhs.column
         );
     }
   }

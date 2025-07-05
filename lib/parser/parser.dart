@@ -228,7 +228,9 @@ class _Parser {
     while (_current is ParenOpen) {
       op = Operation(
           operator: op,
-          args: await _parseArgList()
+          args: await _parseArgList(),
+          line: op.line,
+          column: op.column
       );
     }
 
@@ -238,9 +240,12 @@ class _Parser {
   /// Parse an expression that is not a function application
   Future<Expression> _parseSubExpression() async {
     switch (_current) {
-      case IdToken(:final name):
+      case IdToken(:final name, :final line, :final column):
         await _advance();
-        return NamedCell(name);
+        return NamedCell(name,
+          line: line,
+          column: column
+        );
 
       case Literal literal:
         await _advance();
@@ -310,6 +315,9 @@ class _Parser {
 
   /// Parse a block of expressions delimited by {...}
   Future<Block> _parseBlock() async {
+    final line = _current.line;
+    final column = _current.column;
+
     await _advance();
 
     final expressions = <Expression>[];
@@ -334,7 +342,9 @@ class _Parser {
     await _advance();
 
     return Block(
-        expressions: expressions
+        expressions: expressions,
+        line: line,
+        column: column
     );
   }
 }
@@ -345,5 +355,8 @@ class _Parser {
 class _LiteralToConstantVisitor extends LiteralVisitor<Expression> {
   @override
   Expression visitLiteral<T>(Literal<T> token) =>
-      Constant<T>(token.value);
+      Constant<T>(token.value,
+        line: token.line,
+        column: token.column
+      );
 }

@@ -1,3 +1,4 @@
+import 'exceptions.dart';
 import 'cell_spec.dart';
 import 'cell_table.dart';
 import '../parser/index.dart';
@@ -64,14 +65,26 @@ class CellBuilder {
     // TODO: Match proper definition operator
     Operation(
       operator: NamedCell(name: '='),
-      :final args
-    ) => _addCell(_buildDefinition(args)),
+      :final args,
+      :final line,
+      :final column
+    ) => _addCell(_buildDefinition(
+        operands: args,
+        line: line,
+        column: column
+    )),
 
     // TODO: Match proper var keyword
     Operation(
       operator: NamedCell(name: 'var'),
-      :final args
-    ) => _addVarCell(args),
+      :final args,
+      :final line,
+      :final column
+    ) => _addVarCell(
+      operands: args,
+      line: line,
+      column: column
+    ),
 
     Operation(:final operator, :final args) =>
         _buildAppliedCell(
@@ -79,7 +92,7 @@ class CellBuilder {
             operands: args
         ),
 
-    Block(:final expressions) => _buildBlock(expressions),
+    final Block block => _buildBlock(block),
   };
 
   /// Build a cell representing the application of an [operator] to one or more [operands].
@@ -105,16 +118,18 @@ class CellBuilder {
     );
   }
 
-  CellSpec _buildBlock(List<Expression> expressions) {
+  CellSpec _buildBlock(Block block) {
     CellSpec? cell;
 
-    for (final expression in expressions) {
+    for (final expression in block.expressions) {
       cell = buildExpression(expression);
     }
 
     if (cell == null) {
-      // TODO: Proper exception type
-      throw Exception('Empty block');
+      throw EmptyBlockError(
+          line: block.line,
+          column: block.column
+      );
     }
 
     return cell;
@@ -125,7 +140,11 @@ class CellBuilder {
   /// Build a cell specification from a definition declaration.
   ///
   /// [operands] is the list of operands given to the definition operator.
-  CellSpec _buildDefinition(List<Expression> operands) => switch (operands) {
+  CellSpec _buildDefinition({
+    required List<Expression> operands,
+    required int line,
+    required int column
+  }) => switch (operands) {
     [NamedCell(:final name), final definition] =>
         _buildCellDefinition(
             name: name,
@@ -135,7 +154,7 @@ class CellBuilder {
     [
       Operation(
         operator: NamedCell(:final name),
-        args: final arguments
+        args: final arguments,
       ),
       final definition
     ] => _buildFunctionDefinition(
@@ -144,20 +163,60 @@ class CellBuilder {
         definition: definition
     ),
 
-    _ => throw Exception('Definition Parse Error')
+    _ => throw MalformedDefinitionError(
+        line: line,
+        column: column
+    )
   };
 
   /// Process a `var` declaration
-  CellSpec _addVarCell(List<Expression> args) => switch (args) {
-    [NamedCell(:final name)] => _makeVarCell(name),
-    // TODO: Proper exception type
-    _ => throw Exception('Parse error in var declaration')
+  CellSpec _addVarCell({
+    required List<Expression> operands,
+    required int line,
+    required int column
+  }) => switch (operands) {
+    [
+      NamedCell(
+          :final name,
+          :final line,
+          :final column
+      )
+    ] => _makeVarCell(
+        name: name,
+        line: line,
+        column: column
+    ),
+
+    _ => throw MalformedVarDeclarationError(
+      line: line,
+      column: column
+    )
   };
 
-  CellSpec _makeVarCell(String name) {
+  CellSpec _makeVarCell({
+    required String name,
+    required int line,
+    required int column
+  }) {
     final id = NamedCellId(name);
 
-    // TODO: Throw exception if cell is already defined in scope and it is not a stub
+    final existing = scope.lookup(id);
+
+    if (existing != null && existing.scope == scope) {
+      switch (existing.definition) {
+        case StubExpression():
+          break;
+
+        case VariableValue():
+          return existing;
+
+        default:
+          throw IncompatibleVarDeclarationError(
+              line: line,
+              column: column
+          );
+      }
+    }
 
     return _addCell(
         CellSpec(
@@ -171,11 +230,14 @@ class CellBuilder {
   /// Build a specification for a cell identified by [name] and defined by [definition]
   CellSpec _buildCellDefinition({
     required String name,
-    required Expression definition
+    required Expression definition,
   }) => CellSpec(
       id: NamedCellId(name),
       scope: scope,
-      definition: _refCell(buildExpression(definition))
+      definition: _refCell(buildExpression(definition)),
+
+      line: definition.line,
+      column: definition.column
   );
 
   /// Build a specification for a function cell identified by [name].
@@ -185,14 +247,17 @@ class CellBuilder {
   CellSpec _buildFunctionDefinition({
     required String name,
     required List<Expression> arguments,
-    required Expression definition
+    required Expression definition,
   }) {
     final scope = CellTable(parent: this.scope);
 
     final argCells = arguments.map((arg) => switch(arg) {
       NamedCell(:final name) => NamedCellId(name),
-      // TODO: Proper exception type
-      _ => throw Exception('Function definition parse error')
+
+      _ => throw MalformedFunctionArgumentListError(
+        line: arg.line,
+        column: arg.column
+      )
     }).toList();
 
     for (final arg in argCells) {
@@ -209,6 +274,9 @@ class CellBuilder {
       id: NamedCellId(name),
       scope: this.scope,
 
+      line: definition.line,
+      column: definition.column,
+
       definition: DeferredFunctionDefinition(
           arguments: argCells,
           scope: scope,
@@ -219,6 +287,18 @@ class CellBuilder {
 
   /// Add a cell to the current [scope].
   CellSpec _addCell(CellSpec spec) {
+    final existing = scope.lookup(spec.id);
+
+    if (existing != null && existing.scope == scope) {
+      if (existing.definition is! StubExpression) {
+        throw MultipleDefinitionError(
+            id: spec.id,
+            line: spec.line ?? 0,
+            column: spec.column ?? 0
+        );
+      }
+    }
+
     scope.add(spec);
     return spec;
   }
