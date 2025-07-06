@@ -92,7 +92,7 @@ class CellBuilder {
             operands: args
         ),
 
-    final Block block => _buildBlock(block),
+    Block() => _buildBlock(expression),
   };
 
   /// Build a cell representing the application of an [operator] to one or more [operands].
