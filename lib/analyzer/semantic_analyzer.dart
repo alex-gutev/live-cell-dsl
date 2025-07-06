@@ -19,8 +19,6 @@ class SemanticAnalyzer {
     // TODO: Check that all functions are called with correct number of arguments
     // TODO: Check that all cells are defined or are variable cells
     _checkCycles();
-
-    // TODO: Run semantic analysis in all function definitions
   }
 
   // Private
@@ -47,7 +45,7 @@ class SemanticAnalyzer {
   }) {
     visited ??= {};
 
-    if (cell is! ValueCellSpec) {
+    if (cell is! ValueCellSpec && cell.scope == scope) {
       switch (visited[cell]) {
         case false:
           break;
@@ -67,6 +65,7 @@ class SemanticAnalyzer {
 
           visited[cell] = false;
 
+          cell.definition.accept(_FunctionAnalysisVisitor());
       }
     }
   }
@@ -91,14 +90,17 @@ class _AnalysisVisitor extends CellExpressionTreeVisitor {
         visited: visited
     );
   }
-  
+
   @override
   void visitFunction(FunctionExpression expression) {
-    for (final cell in expression.referencedCells) {
-      analyzer._walkCell(
-          cell,
-          visited: visited
-      );
-    }
+  }
+}
+
+/// Performs semantic analysis in [FunctionExpression]s
+class _FunctionAnalysisVisitor extends CellExpressionTreeVisitor {
+  @override
+  void visitFunction(FunctionExpression expression) {
+    final analyzer = SemanticAnalyzer(scope: expression.scope);
+    analyzer.analyze();
   }
 }
