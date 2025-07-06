@@ -105,6 +105,7 @@ class CellBuilder {
 
     return CellSpec(
         scope: scope,
+        defined: true,
 
         id: AppliedCellId(
             operator: operatorCell.id,
@@ -222,6 +223,7 @@ class CellBuilder {
         CellSpec(
             id: id,
             definition: const VariableValue(),
+            defined: true,
             scope: scope
         )
     );
@@ -234,6 +236,7 @@ class CellBuilder {
   }) => CellSpec(
       id: NamedCellId(name),
       scope: scope,
+      defined: true,
       definition: _refCell(buildExpression(definition)),
 
       line: definition.line,
@@ -265,6 +268,7 @@ class CellBuilder {
           CellSpec(
               id: arg,
               scope: scope,
+              defined: true,
               definition: StubExpression()
           )
       );
@@ -274,6 +278,7 @@ class CellBuilder {
       id: NamedCellId(name),
       scope: this.scope,
 
+      defined: true,
       line: definition.line,
       column: definition.column,
 
@@ -290,7 +295,7 @@ class CellBuilder {
     final existing = scope.lookup(spec.id);
 
     if (existing != null && existing.scope == scope) {
-      if (existing.definition is! StubExpression) {
+      if (existing.definition is! StubExpression || existing.defined) {
         throw MultipleDefinitionError(
             id: spec.id,
             line: spec.line ?? 0,

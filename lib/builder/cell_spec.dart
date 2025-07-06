@@ -90,12 +90,18 @@ class CellSpec {
   /// The column in the source where the cell is defined?
   final int? column;
 
+  /// Has this cell been defined?
+  ///
+  /// If false then this cell has been declared but not defined.
+  final bool defined;
+
   const CellSpec({
     required this.id,
     required this.definition,
     required this.scope,
     this.line,
-    this.column
+    this.column,
+    this.defined = false
   });
 }
 

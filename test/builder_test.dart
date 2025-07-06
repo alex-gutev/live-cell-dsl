@@ -901,6 +901,26 @@ void main() {
 
       expect(builder.run, throwsA(isA<MultipleDefinitionError>()));
     });
+
+    test('Redefining function argument cells', () {
+      final builder = BuildTester(
+          'add(a, b) = {'
+              'a = b + 1;'
+              'a + b'
+              '}',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            )
+          ]
+      );
+
+      expect(builder.run, throwsA(isA<MultipleDefinitionError>()));
+    });
   });
 
   group('Malformed variable cell declarations', () {
