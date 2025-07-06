@@ -1,3 +1,4 @@
+import 'package:live_cell/analyzer/index.dart';
 import 'package:live_cell/builder/index.dart';
 import 'package:live_cell/lexer/index.dart';
 import 'package:live_cell/parser/index.dart';
@@ -103,6 +104,17 @@ class BuildTester {
 
   /// Run all tests
   Future<void> run() => _runTest();
+
+  /// Run all tests and perform semantic analysis
+  Future<void> analyze() async {
+    await run();
+
+    final analyzer = SemanticAnalyzer(
+        scope: scope
+    );
+
+    analyzer.analyze();
+  }
 }
 
 /// A [BuildTester] for testing function local cells

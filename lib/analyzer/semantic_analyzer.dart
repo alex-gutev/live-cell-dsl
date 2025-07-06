@@ -1,3 +1,4 @@
+import 'exceptions.dart';
 import '../builder/index.dart';
 
 /// Checks that the cell definitions are semantically valid
@@ -52,7 +53,7 @@ class SemanticAnalyzer {
           break;
 
         case true:
-          throw Exception('Cycle detected');
+          throw CyclicDefinitionError(cell);
 
         case null:
           visited[cell] = true;
