@@ -17,7 +17,6 @@ class SemanticAnalyzer {
   /// Perform semantic analysis on the cells defined in [scope].
   void analyze() {
     // TODO: Check that all functions are called with correct number of arguments
-    // TODO: Check that all cells are defined or are variable cells
     _checkCycles();
   }
 
@@ -59,7 +58,8 @@ class SemanticAnalyzer {
           cell.definition.accept(
               _AnalysisVisitor(
                   analyzer: this,
-                  visited: visited
+                  visited: visited,
+                  cell: cell
               )
           );
 
@@ -73,6 +73,9 @@ class SemanticAnalyzer {
 
 /// Check for cycles in a given expression tree
 class _AnalysisVisitor extends CellExpressionTreeVisitor {
+  /// The cell of which the definition is being analysed
+  final CellSpec cell;
+
   final SemanticAnalyzer analyzer;
 
   /// Map of visited cells
@@ -80,7 +83,8 @@ class _AnalysisVisitor extends CellExpressionTreeVisitor {
 
   _AnalysisVisitor({
     required this.analyzer,
-    required this.visited
+    required this.visited,
+    required this.cell
   });
   
   @override
@@ -89,6 +93,14 @@ class _AnalysisVisitor extends CellExpressionTreeVisitor {
         expression.get,
         visited: visited
     );
+  }
+
+  @override
+  void visitStub(StubExpression expression) {
+    if (!(cell.getAttribute(Attributes.external) ?? false) &&
+        !(cell.getAttribute(Attributes.argument) ?? false)) {
+      throw UndefinedCellError(cell);
+    }
   }
 
   @override

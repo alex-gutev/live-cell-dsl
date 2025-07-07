@@ -4,6 +4,9 @@ import 'cell_spec.dart';
 class Attributes {
   /// Externally defined flag attribute
   static const external = 'external';
+
+  /// Cell represents a function argument
+  static const argument = 'argument';
 }
 
 /// Table containing cells defined in a given module/scope

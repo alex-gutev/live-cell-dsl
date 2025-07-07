@@ -265,36 +265,16 @@ class CellBuilder {
   }) {
     final scope = CellTable(parent: this.scope);
 
-    final argCells = arguments.map((arg) => switch(arg) {
-      NamedCell(:final name) => NamedCellId(name),
+    return _makeFunctionCell(
+      name: name,
+      arguments: arguments,
+      scope: scope,
 
-      _ => throw MalformedFunctionArgumentListError(
-        line: arg.line,
-        column: arg.column
-      )
-    }).toList();
-
-    for (final arg in argCells) {
-      scope.add(
-          CellSpec(
-              id: arg,
-              scope: scope,
-              defined: true,
-              definition: StubExpression()
-          )
-      );
-    }
-
-    return CellSpec(
-      id: NamedCellId(name),
-      scope: this.scope,
-
-      defined: true,
       line: definition.line,
       column: definition.column,
 
-      definition: DeferredFunctionDefinition(
-          arguments: argCells,
+      definition: (arguments) => DeferredFunctionDefinition(
+          arguments: arguments,
           scope: scope,
           definition: definition
       ),
@@ -329,7 +309,7 @@ class CellBuilder {
               scope: scope,
               defined: true,
               definition: StubExpression()
-          )
+          )..setAttribute(Attributes.argument, true)
       );
     }
 

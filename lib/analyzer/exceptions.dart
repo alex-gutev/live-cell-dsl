@@ -21,3 +21,14 @@ class CyclicDefinitionError extends AnalysisError {
   @override
   String get description => 'Cycle detected in definition of `${cell.id}`.';
 }
+
+/// Thrown when an undefined cell is encountered
+class UndefinedCellError extends AnalysisError {
+  /// The cell
+  final CellSpec cell;
+
+  const UndefinedCellError(this.cell);
+
+  @override
+  String get description => 'No definition for `${cell.id}`.';
+}
