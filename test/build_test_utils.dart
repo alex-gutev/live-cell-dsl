@@ -35,9 +35,13 @@ class BuildTester {
   /// If [local] is true, the scope of the cell is tested that it is
   /// equal to [scope]. If [local] is false, the scope of the cell is tested
   /// that it is not equal to [scope].
+  ///
+  /// If [attributes] is not null, the cell is tested that it has each
+  /// attribute in this map and with the expected value.
   BuildTester hasCell(CellId id, {
     ExpressionTester? tester,
-    bool local = true
+    bool local = true,
+    Map<String, dynamic>? attributes
   }) {
     final run = _runTest;
 
@@ -58,6 +62,12 @@ class BuildTester {
       else {
         expect(cell!.scope, isNot(equals(scope)));
       }
+
+      if (attributes != null) {
+        for (final entry in attributes.entries) {
+          expect(cell.getAttribute(entry.key), equals(entry.value));
+        }
+      }
     };
 
     return this;
@@ -70,12 +80,17 @@ class BuildTester {
   /// If [local] is true, the scope of the cell is tested that it is
   /// equal to [scope]. If [local] is false, the scope of the cell is tested
   /// that it is not equal to [scope].
+  ///
+  /// If [attributes] is not null, the cell is tested that it has each
+  /// attribute in this map and with the expected value.
   BuildTester hasNamed(String name, {
     ExpressionTester? tester,
-    bool local = true
+    bool local = true,
+    Map<String, dynamic>? attributes
   }) => hasCell(NamedCellId(name),
       tester: tester,
-      local: local
+      local: local,
+      attributes: attributes
   );
 
   /// Add a test that checks that a cell for a given expression has been built.
@@ -88,18 +103,24 @@ class BuildTester {
   /// If [local] is true, the scope of the cell is tested that it is
   /// equal to [scope]. If [local] is false, the scope of the cell is tested
   /// that it is not equal to [scope].
+  ///
+  /// If [attributes] is not null, the cell is tested that it has each
+  /// attribute in this map and with the expected value.
   BuildTester hasApplication({
     required CellId operator,
     required List<CellId> operands,
     ExpressionTester? tester,
-    bool local = true
+    bool local = true,
+    Map<String, dynamic>? attributes
   }) => hasCell(
       AppliedCellId(
           operator: operator,
           operands: operands
       ),
+
       tester: tester,
-      local: local
+      local: local,
+      attributes: attributes
   );
 
   /// Run all tests
@@ -133,11 +154,13 @@ class FunctionTester extends BuildTester {
   @override
   FunctionTester hasCell(CellId id, {
     ExpressionTester? tester,
-    bool local = true
+    bool local = true,
+    Map<String, dynamic>? attributes
   }) {
     super.hasCell(id,
         tester: tester,
-        local: local
+        local: local,
+        attributes: attributes
     );
     return this;
   }
@@ -145,11 +168,13 @@ class FunctionTester extends BuildTester {
   @override
   FunctionTester hasNamed(String name, {
     ExpressionTester? tester,
-    bool local = true
+    bool local = true,
+    Map<String, dynamic>? attributes
   }) {
     super.hasNamed(name,
         tester: tester,
-        local: local
+        local: local,
+        attributes: attributes
     );
     return this;
   }
@@ -159,13 +184,15 @@ class FunctionTester extends BuildTester {
     required CellId operator,
     required List<CellId> operands,
     ExpressionTester? tester,
-    bool local = true
+    bool local = true,
+    Map<String, dynamic>? attributes
   }) {
     super.hasApplication(
         operator: operator,
         operands: operands,
         tester: tester,
-        local: local
+        local: local,
+        attributes: attributes
     );
 
     return this;
@@ -175,6 +202,9 @@ class FunctionTester extends BuildTester {
 /// Helper for testing the definition of a cell
 sealed class ExpressionTester {
   ExpressionTester();
+
+  /// Create a tester that tests [StubExpression]s.
+  factory ExpressionTester.stub() = _StubExpressionTester;
 
   /// Create a tester that tests a [CellRef] expression.
   ///
@@ -234,6 +264,15 @@ sealed class ExpressionTester {
     required CellTable scope,
     required CellExpression expression
   });
+}
+
+class _StubExpressionTester extends ExpressionTester {
+  @override
+  Future<void> run({
+    required CellTable scope,
+    required CellExpression expression
+  }) async =>
+      expression is StubExpression;
 }
 
 /// [CellRef] expression tester

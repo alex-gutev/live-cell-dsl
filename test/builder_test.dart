@@ -782,6 +782,156 @@ void main() {
             .run());
   });
 
+  group('External cell declarations', () {
+    test('Named cells', () =>
+      BuildTester('a; external(a); external(b)')
+          .hasNamed('a', attributes: {
+            Attributes.external: true
+          })
+          .hasNamed('b', attributes: {
+            Attributes.external: true
+          })
+          .run());
+
+    test('Function cells', () =>
+        BuildTester(
+            'c = a + b; external(+(a, b));',
+
+            operators: [
+              Operator(
+                  name: '=',
+                  type: OperatorType.infix,
+                  precedence: 1,
+                  leftAssoc: false
+              ),
+              Operator(
+                  name: '+',
+                  type: OperatorType.infix,
+                  precedence: 5,
+                  leftAssoc: true
+              )
+            ]
+        ).hasNamed('+',
+            tester: ExpressionTester.func(
+                arguments: [NamedCellId('a'), NamedCellId('b')],
+                definition: ExpressionTester.stub(),
+                tester: FunctionTester()
+            ),
+
+            attributes: {
+              Attributes.external: true
+            }
+        ).run());
+
+    test('Malformed: External declaration on defined cell', () {
+      final tester = BuildTester(
+          'a = b\n external(a)',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            )
+          ]
+      );
+      expect(tester.run, throwsA(isA<MultipleDefinitionError>()));
+    });
+
+    test('Malformed: Redefining external cell', () {
+      final tester = BuildTester(
+          'external(a);a = b',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            )
+          ]
+      );
+      expect(tester.run, throwsA(isA<MultipleDefinitionError>()));
+    });
+
+    test('Malformed: External declaration on defined function cell', () {
+      final tester = BuildTester(
+          'f(n) = n + 1\n external(f(n))',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            )
+          ]
+      );
+      expect(tester.run, throwsA(isA<MultipleDefinitionError>()));
+    });
+
+    test('Malformed: Redefining external function cell', () {
+      final tester = BuildTester(
+          'external(f(n)); f(n) = n + 1',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            )
+          ]
+      );
+      expect(tester.run, throwsA(isA<MultipleDefinitionError>()));
+    });
+
+    test('Malformed: literals in external declaration', () {
+      final tester = BuildTester('external(123)');
+      expect(tester.run, throwsA(isA<MalformedExternalDeclarationError>()));
+    });
+
+    test('Malformed: Multiple cells in external declaration', () {
+      final tester = BuildTester('external(a, b, c)');
+      expect(tester.run, throwsA(isA<MalformedExternalDeclarationError>()));
+    });
+
+    test('Malformed: Literals in function argument list', () {
+      final tester = BuildTester('external(f(a, 1, b))');
+      expect(tester.run, throwsA(isA<MalformedFunctionArgumentListError>()));
+    });
+
+    test('Malformed: Expressions in function argument list', () {
+      final tester = BuildTester('external(f(a, g(x), b))');
+      expect(tester.run, throwsA(isA<MalformedFunctionArgumentListError>()));
+    });
+  });
+
   group('Malformed definitions', () {
     test('Redefining Literal', () {
       final builder = BuildTester(
