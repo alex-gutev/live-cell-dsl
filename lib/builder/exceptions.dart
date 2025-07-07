@@ -81,7 +81,7 @@ class MalformedVarDeclarationError extends BuildError {
   });
 }
 
-/// Thrown when the a variable declaration is incompatible with the cell's definition.
+/// Thrown when a variable declaration is incompatible with the cell's definition.
 class IncompatibleVarDeclarationError extends BuildError {
   // TODO: Add reference to where cell is already defined
 
@@ -89,6 +89,17 @@ class IncompatibleVarDeclarationError extends BuildError {
   String get description => 'Variable cell declaration incompatible with existing cell definition.';
 
   const IncompatibleVarDeclarationError({
+    required super.line,
+    required super.column
+  });
+}
+
+/// Thrown when a malformed `external` cell declaration is encountered.
+class MalformedExternalDeclarationError extends BuildError {
+  @override
+  String get description => 'Malformed external cell declaration.';
+
+  const MalformedExternalDeclarationError({
     required super.line,
     required super.column
   });

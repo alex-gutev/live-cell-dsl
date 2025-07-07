@@ -1,5 +1,11 @@
 import 'cell_spec.dart';
 
+/// Container for constants identifying cell attributes
+class Attributes {
+  /// Externally defined flag attribute
+  static const external = 'external';
+}
+
 /// Table containing cells defined in a given module/scope
 class CellTable {
   /// The parent scope in which this table is contained
@@ -42,10 +48,26 @@ class CellTable {
     }
   }
 
+  /// Get the value of an [attribute] applying to the cell identified by [id]
+  dynamic getAttribute(CellId id, String attribute) =>
+      _meta[(id, attribute)];
+
+  /// Set the value of an [attribute] applying to the cell identified by [id]
+  void setAttribute({
+    required CellId id,
+    required String attribute,
+    required value
+  }) {
+    _meta[(id, attribute)] = value;
+  }
+
   // Private
 
   /// Map of cells indexed by cell specifications identifiers
   final _cells = <CellId, CellSpec>{};
+
+  /// Map storing attributes applying to cells
+  final _meta = <(CellId, String), dynamic>{};
 }
 
 /// Exception indicating that a referenced cell was not found.

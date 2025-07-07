@@ -103,6 +103,19 @@ class CellSpec {
     this.column,
     this.defined = false
   });
+
+  /// Get the value of an [attribute] applying to this cell
+  dynamic getAttribute(String attribute) =>
+      scope?.getAttribute(id, attribute);
+
+  /// Set the value of an [attribute] applying to this cell
+  void setAttribute(String attribute, value) {
+    scope?.setAttribute(
+        id: id,
+        attribute: attribute,
+        value: value
+    );
+  }
 }
 
 /// Specification for a cell holding a constant value

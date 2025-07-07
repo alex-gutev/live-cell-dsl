@@ -86,6 +86,17 @@ class CellBuilder {
       column: column
     ),
 
+    Operation(
+      operator: NamedCell(name: 'external'),
+      :final args,
+      :final line,
+      :final column
+    ) => _markExternalCell(
+      args: args,
+      line: line,
+      column: column
+    ),
+
     Operation(:final operator, :final args) =>
         _buildAppliedCell(
             operator: operator,
@@ -290,6 +301,50 @@ class CellBuilder {
     );
   }
 
+  /// Create a function cell.
+  ///
+  /// [definition] is called, on the argument list parsed from
+  /// [arguments], to build the definition of the cell.
+  CellSpec _makeFunctionCell({
+    required String name,
+    required List<Expression> arguments,
+    required CellTable scope,
+    required CellExpression Function(List<CellId> args) definition,
+    required int line,
+    required int column
+  }) {
+    final argCells = arguments.map((arg) => switch(arg) {
+      NamedCell(:final name) => NamedCellId(name),
+
+      _ => throw MalformedFunctionArgumentListError(
+          line: arg.line,
+          column: arg.column
+      )
+    }).toList();
+
+    for (final arg in argCells) {
+      scope.add(
+          CellSpec(
+              id: arg,
+              scope: scope,
+              defined: true,
+              definition: StubExpression()
+          )
+      );
+    }
+
+    return CellSpec(
+      id: NamedCellId(name),
+      scope: this.scope,
+
+      defined: true,
+      line: line,
+      column: column,
+
+      definition: definition(argCells),
+    );
+  }
+
   /// Add a cell to the current [scope].
   CellSpec _addCell(CellSpec spec) {
     final existing = scope.lookup(spec.id);
@@ -306,6 +361,123 @@ class CellBuilder {
 
     scope.add(spec);
     return spec;
+  }
+
+  // External Cells
+
+  /// Mark a cell as externally defined.
+  ///
+  /// [args] is the list of arguments provided to the external declaration.
+  CellSpec _markExternalCell({
+    required List<Expression> args,
+    required int line,
+    required int column
+  }) => switch (args) {
+    [
+      NamedCell(
+        :final name,
+        :final line,
+        :final column
+      )
+    ] => _addExternalCell(
+      name: name,
+      line: line,
+      column: column
+    ),
+
+    [
+      Operation(
+        operator: NamedCell(:final name),
+        :final args,
+        :final line,
+        :final column
+      )
+    ] => _addExternalFunction(
+      name: name,
+      arguments: args,
+      line: line,
+      column: column
+    ),
+
+    [...] => throw MalformedExternalDeclarationError(
+        line: line,
+        column: column
+    ),
+  };
+
+  /// Add a named external cell
+  CellSpec _addExternalCell({
+    required String name,
+    required int line,
+    required int column
+  }) {
+    final id = NamedCellId(name);
+    final existing = scope.lookup(id);
+
+    if (existing != null && existing.scope == scope) {
+      if (existing.definition is! StubExpression) {
+        throw MultipleDefinitionError(
+            id: id,
+            line: line,
+            column: column
+        );
+      }
+
+      if (existing.getAttribute(Attributes.external) ?? false) {
+        return existing;
+      }
+    }
+
+    return _addCell(
+      CellSpec(
+          id: id,
+          defined: true,
+          definition: const StubExpression(),
+          scope: scope
+      )
+    )..setAttribute(Attributes.external, true);
+  }
+
+  /// A a function external cell
+  CellSpec _addExternalFunction({
+    required String name,
+    required List<Expression> arguments,
+    required int line,
+    required int column
+  }) {
+    final id = NamedCellId(name);
+    final existing = scope.lookup(id);
+
+    if (existing != null && existing.scope == scope) {
+      if (existing.definition is! StubExpression) {
+        throw MultipleDefinitionError(
+            id: id,
+            line: line,
+            column: column
+        );
+      }
+
+      if (existing.getAttribute(Attributes.external) ?? false) {
+        return existing;
+      }
+    }
+
+    final fnScope = CellTable(parent: scope);
+
+    return _addCell(
+        _makeFunctionCell(
+            name: name,
+            arguments: arguments,
+            scope: fnScope,
+            definition: (args) => FunctionExpression(
+                arguments: args,
+                scope: fnScope,
+                definition: const StubExpression()
+            ),
+            line: line,
+            column: column
+        )
+    )..setAttribute(Attributes.external, true);
   }
 
   // Expressions
