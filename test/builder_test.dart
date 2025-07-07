@@ -1065,6 +1065,12 @@ void main() {
                 type: OperatorType.infix,
                 precedence: 1,
                 leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
             )
           ]
       );
