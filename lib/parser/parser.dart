@@ -336,6 +336,10 @@ class _Parser {
 
         default:
           expressions.add(await _parseExpression());
+
+          if (_current is! BraceClose) {
+            await _parseTerminator();
+          }
       }
     }
 

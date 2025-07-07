@@ -346,6 +346,14 @@ void main() {
       expect(() => parse('{a; b\n').toList(),
           throwsA(isA<UnexpectedTokenParseError>()));
     });
+
+    test('Malformed: Missing terminator between expressions', () {
+      expect(() => parse('{g(m) { f(x); };}').toList(),
+          throwsA(isA<UnexpectedTokenParseError>()));
+
+      expect(() => parse('{g(m); { f(x); } u(y)}').toList(),
+          throwsA(isA<UnexpectedTokenParseError>()));
+    });
   });
 
   group('Infix operators', () {
