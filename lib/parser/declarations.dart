@@ -117,8 +117,8 @@ class Block extends Expression {
 
   @override
   bool operator ==(Object other) =>
-      _$ExpressionListEquals(this, other);
+      _$BlockEquals(this, other);
 
   @override
-  int get hashCode => _$ExpressionListHashCode(this);
+  int get hashCode => _$BlockHashCode(this);
 }
