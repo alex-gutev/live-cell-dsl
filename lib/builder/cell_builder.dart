@@ -5,7 +5,7 @@ import '../parser/index.dart';
 
 part 'functions.dart';
 
-/// Builds cell specifications from parsed cell [Expression]s
+/// Builds cell specifications from parsed cell [AstNode]s
 class CellBuilder {
   /// The scope in which the cells are built
   final CellTable scope;
@@ -18,7 +18,7 @@ class CellBuilder {
   }) : scope = scope ?? CellTable();
 
   /// Build the cell specifications from the given [declarations].
-  Future<void> build(Stream<Expression> declarations) async {
+  Future<void> build(Stream<AstNode> declarations) async {
     await for (final declaration in declarations) {
       buildExpression(declaration);
     }
@@ -29,7 +29,7 @@ class CellBuilder {
   /// Build a cell specification from a single [expression].
   ///
   /// The built cell is added to the [scope] of this builder.
-  CellSpec buildExpression(Expression expression) {
+  CellSpec buildExpression(AstNode expression) {
     final spec = _buildCell(expression);
     if (scope.lookup(spec.id) == null) {
       scope.add(spec);
@@ -51,7 +51,7 @@ class CellBuilder {
   // Private
 
   /// Build a cell from a given [expression].
-  CellSpec _buildCell(Expression expression) => switch (expression) {
+  CellSpec _buildCell(AstNode expression) => switch (expression) {
     NamedCell(:final name) =>
         CellSpec(
             id: NamedCellId(name),
@@ -108,8 +108,8 @@ class CellBuilder {
 
   /// Build a cell representing the application of an [operator] to one or more [operands].
   CellSpec _buildAppliedCell({
-    required Expression operator,
-    required List<Expression> operands
+    required AstNode operator,
+    required List<AstNode> operands
   }) {
     final operatorCell = buildExpression(operator);
     final operandCells = operands.map(buildExpression);
@@ -153,7 +153,7 @@ class CellBuilder {
   ///
   /// [operands] is the list of operands given to the definition operator.
   CellSpec _buildDefinition({
-    required List<Expression> operands,
+    required List<AstNode> operands,
     required int line,
     required int column
   }) => switch (operands) {
@@ -183,7 +183,7 @@ class CellBuilder {
 
   /// Process a `var` declaration
   CellSpec _addVarCell({
-    required List<Expression> operands,
+    required List<AstNode> operands,
     required int line,
     required int column
   }) => switch (operands) {
@@ -243,7 +243,7 @@ class CellBuilder {
   /// Build a specification for a cell identified by [name] and defined by [definition]
   CellSpec _buildCellDefinition({
     required String name,
-    required Expression definition,
+    required AstNode definition,
   }) => CellSpec(
       id: NamedCellId(name),
       scope: scope,
@@ -260,8 +260,8 @@ class CellBuilder {
   /// function definition.
   CellSpec _buildFunctionDefinition({
     required String name,
-    required List<Expression> arguments,
-    required Expression definition,
+    required List<AstNode> arguments,
+    required AstNode definition,
   }) {
     final scope = CellTable(parent: this.scope);
 
@@ -287,7 +287,7 @@ class CellBuilder {
   /// [arguments], to build the definition of the cell.
   CellSpec _makeFunctionCell({
     required String name,
-    required List<Expression> arguments,
+    required List<AstNode> arguments,
     required CellTable scope,
     required CellExpression Function(List<CellId> args) definition,
     required int line,
@@ -349,7 +349,7 @@ class CellBuilder {
   ///
   /// [args] is the list of arguments provided to the external declaration.
   CellSpec _markExternalCell({
-    required List<Expression> args,
+    required List<AstNode> args,
     required int line,
     required int column
   }) => switch (args) {
@@ -421,7 +421,7 @@ class CellBuilder {
   /// A a function external cell
   CellSpec _addExternalFunction({
     required String name,
-    required List<Expression> arguments,
+    required List<AstNode> arguments,
     required int line,
     required int column
   }) {

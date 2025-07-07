@@ -1,29 +1,29 @@
 import 'package:live_cell/util/equality.dart';
 import 'package:live_cells_core/live_cells_core.dart';
 
-part 'expression_visitor.dart';
-part 'declarations.g.dart';
+part 'ast_visitor.dart';
+part 'ast.g.dart';
 
-/// Base class representing a parsed expression
-sealed class Expression {
-  /// The line in the source where the expression is located
+/// Base class representing a node in the abstract syntax tree
+sealed class AstNode {
+  /// The line in the source where the node is located
   final int line;
 
-  /// The column in the source where the expression is located
+  /// The column in the source where the node is located
   final int column;
 
-  const Expression({
+  const AstNode({
     required this.line,
     required this.column
   });
 
   /// Visit this expression with [visitor].
-  R accept<R>(ExpressionVisitor<R> visitor);
+  R accept<R>(AstVisitor<R> visitor);
 }
 
 /// Expression representing a reference to a named cell
 @DataClass()
-class NamedCell extends Expression {
+class NamedCell extends AstNode {
   /// The name of the cell
   final String name;
 
@@ -33,7 +33,7 @@ class NamedCell extends Expression {
   });
 
   @override
-  R accept<R>(ExpressionVisitor<R> visitor) =>
+  R accept<R>(AstVisitor<R> visitor) =>
       visitor.visitNamedCell(this);
 
   @override
@@ -46,7 +46,7 @@ class NamedCell extends Expression {
 
 /// Expression representing a literal constant value
 @DataClass()
-class Constant<T> extends Expression {
+class Constant<T> extends AstNode {
   /// The constant value
   final T value;
 
@@ -56,7 +56,7 @@ class Constant<T> extends Expression {
   });
 
   @override
-  R accept<R>(ExpressionVisitor<R> visitor) =>
+  R accept<R>(AstVisitor<R> visitor) =>
       visitor.visitConstant<T>(this);
 
   @override
@@ -69,13 +69,13 @@ class Constant<T> extends Expression {
 
 /// Expression representing an [operator] applied to one or more arguments
 @DataClass()
-class Operation extends Expression {
+class Operation extends AstNode {
   /// The expression operator
-  final Expression operator;
+  final AstNode operator;
 
   /// List of arguments on which [operator] is applied
   @listField
-  final List<Expression> args;
+  final List<AstNode> args;
 
   const Operation({
     required this.operator,
@@ -85,7 +85,7 @@ class Operation extends Expression {
   });
 
   @override
-  R accept<R>(ExpressionVisitor<R> visitor) =>
+  R accept<R>(AstVisitor<R> visitor) =>
       visitor.visitOperation(this);
 
   @override
@@ -98,10 +98,10 @@ class Operation extends Expression {
 
 /// A block of multiple [expressions]
 @DataClass()
-class Block extends Expression {
+class Block extends AstNode {
   /// List of expressions in the block
   @listField
-  final List<Expression> expressions;
+  final List<AstNode> expressions;
 
   const Block({
     required this.expressions,
@@ -110,7 +110,7 @@ class Block extends Expression {
   });
 
   @override
-  R accept<R>(ExpressionVisitor<R> visitor) {
+  R accept<R>(AstVisitor<R> visitor) {
     // TODO: implement accept
     throw UnimplementedError();
   }

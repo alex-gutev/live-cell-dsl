@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'exceptions.dart';
 import '../lexer/index.dart';
-import 'declarations.dart';
+import 'ast.dart';
 import 'expression_builder.dart';
 import 'operators.dart';
 
-/// A stream transformer that parses [Expression]s from a [Token] stream.
+/// A stream transformer that parses [AstNode]s from a [Token] stream.
 ///
 /// This transformer consumes the tokens in the input [Token] stream, and
-/// parses [Expression]s from them, until the [EndOfInput] token or the end
+/// parses [AstNode]s from them, until the [EndOfInput] token or the end
 /// of the stream is reached.
-class Parser extends StreamTransformerBase<Token, Expression> {
+class Parser extends StreamTransformerBase<Token, AstNode> {
   /// Operator table
   /// 
   /// This stores information about prefix, infix and postfix operators, and
@@ -21,7 +21,7 @@ class Parser extends StreamTransformerBase<Token, Expression> {
   Parser(this.operatorTable);
 
   @override
-  Stream<Expression> bind(Stream<Token> stream) {
+  Stream<AstNode> bind(Stream<Token> stream) {
     final parser = _Parser(
         tokens: StreamIterator(stream),
         operatorTable: operatorTable
@@ -49,8 +49,8 @@ class _Parser {
     required this.tokens
   });
 
-  /// Parse a stream of [Expression]s from the token stream
-  Stream<Expression> parse() async* {
+  /// Parse a stream of [AstNode]s from the token stream
+  Stream<AstNode> parse() async* {
     try {
       await _advance();
 
@@ -132,7 +132,7 @@ class _Parser {
   ///
   /// Additionally this method skips terminator tokens at the current
   /// position of the stream.
-  Future<Expression?> _parseDeclaration() async {
+  Future<AstNode?> _parseDeclaration() async {
     await _skipTerminators();
 
     if (_current is EndOfInput) {
@@ -176,7 +176,7 @@ class _Parser {
   ///
   /// The difference between a declaration and expression is that an expression
   /// is not necessarily followed by a [Terminator] token.
-  Future<Expression> _parseExpression() async {
+  Future<AstNode> _parseExpression() async {
     final builder = ExpressionBuilder();
     builder.addOperand(await _parseOperand());
 
@@ -222,7 +222,7 @@ class _Parser {
   ///
   /// An operand may be a function application or a parenthesized expression
   /// but not an expression of an infix operator.
-  Future<Expression> _parseOperand() async {
+  Future<AstNode> _parseOperand() async {
     var op = await _parseSubExpression();
 
     while (_current is ParenOpen) {
@@ -238,7 +238,7 @@ class _Parser {
   }
 
   /// Parse an expression that is not a function application
-  Future<Expression> _parseSubExpression() async {
+  Future<AstNode> _parseSubExpression() async {
     switch (_current) {
       case IdToken(:final name, :final line, :final column):
         await _advance();
@@ -266,7 +266,7 @@ class _Parser {
   }
 
   /// Parse a parenthesized expression
-  Future<Expression> _parseParenExpression() async {
+  Future<AstNode> _parseParenExpression() async {
     final expr = await _withSkipSoft(() async {
       await _advance();
       final expr = await _parseExpression();
@@ -286,8 +286,8 @@ class _Parser {
   }
 
   /// Parse the argument list of a function application expression
-  Future<List<Expression>> _parseArgList() async {
-    final args = <Expression>[];
+  Future<List<AstNode>> _parseArgList() async {
+    final args = <AstNode>[];
 
     await _withSkipSoft(() async {
       await _advance();
@@ -320,7 +320,7 @@ class _Parser {
 
     await _advance();
 
-    final expressions = <Expression>[];
+    final expressions = <AstNode>[];
 
     while (_current is! BraceClose) {
       switch (_current) {
@@ -356,9 +356,9 @@ class _Parser {
 /// Converts a [Literal] to a [Constant] holding the same value.
 ///
 /// *NOTE*: This visitor is necessary to preserve the [Literal]'s type.
-class _LiteralToConstantVisitor extends LiteralVisitor<Expression> {
+class _LiteralToConstantVisitor extends LiteralVisitor<AstNode> {
   @override
-  Expression visitLiteral<T>(Literal<T> token) =>
+  AstNode visitLiteral<T>(Literal<T> token) =>
       Constant<T>(token.value,
         line: token.line,
         column: token.column

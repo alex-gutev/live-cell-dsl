@@ -9,7 +9,7 @@ class DeferredFunctionDefinition extends DeferredExpression {
   final CellTable scope;
 
   /// The parsed expression defining the function
-  final Expression definition;
+  final AstNode definition;
 
   DeferredFunctionDefinition({
     required this.arguments,

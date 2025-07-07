@@ -1,22 +1,22 @@
-part of 'declarations.dart';
+part of 'ast.dart';
 
-/// Visitor interface for [Expression] objects
-abstract interface class ExpressionVisitor<R> {
+/// Visitor interface for [AstNode] objects
+abstract interface class AstVisitor<R> {
   R visitNamedCell(NamedCell expression);
   R visitConstant<T>(Constant<T> expression);
   R visitOperation(Operation expression);
   R visitBlock(Block expression);
 }
 
-/// Visitor for [Constant] expressions.
+/// Visitor for [Constant] nodes.
 ///
 /// The only method that needs to be implemented is [visitConstant]. The
 /// remaining methods throw [UnimplementedError] if called.
 ///
-/// Extend this class, instead of implementing [ExpressionVisitor], when you're
-/// only interested in [Constant] expressions.
-abstract class ConstantVisitor<R> implements ExpressionVisitor<R> {
-  /// Visit a [Constant] expression.
+/// Extend this class, instead of implementing [AstVisitor], when you're
+/// only interested in visiting [Constant] nodes.
+abstract class ConstantVisitor<R> implements AstVisitor<R> {
+  /// Visit a [Constant] node.
   ///
   /// Only this method needs to be implemented by subclasses.
   @override

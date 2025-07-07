@@ -5,18 +5,18 @@ import 'package:test/scaffolding.dart';
 
 /// Parse a source string.
 ///
-/// Returns a stream of the parsed [Expression]s.
-Stream<Expression> parse(String src, {
+/// Returns a stream of the parsed [AstNode]s.
+Stream<AstNode> parse(String src, {
   Iterable<Operator>? operators
 }) => Stream.fromIterable([src])
     .transform(Lexer())
     .transform(Parser(OperatorTable(operators ?? [])));
 
-/// Test that parsing a source stream produces the expected [Expression]s.
+/// Test that parsing a source stream produces the expected [AstNode]s.
 ///
 /// [operators] is an optional list of infix operators to register while
 /// parsing [src].
-Future<void> testParser(final String src, final List<Expression> expected, {
+Future<void> testParser(final String src, final List<AstNode> expected, {
   Iterable<Operator>? operators
 }) async {
   final expressions = parse(src, operators: operators);

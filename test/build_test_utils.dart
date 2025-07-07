@@ -13,7 +13,7 @@ class BuildTester {
   final builder = CellBuilder();
 
   /// Input expression stream
-  final Stream<Expression> expressions;
+  final Stream<AstNode> expressions;
 
   /// Test output function
   late RunTest _runTest = () => builder.build(expressions);

@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'exceptions.dart';
-import 'declarations.dart';
+import 'ast.dart';
 import 'operators.dart';
 
 /// Builds an expression from given operands and operators
@@ -10,11 +10,11 @@ import 'operators.dart';
 /// operands, using [addOperand], and operators, use [addOperator], to the
 /// top of the stack.
 ///
-/// The [build] method converts the postfix expression to an [Expression]
+/// The [build] method converts the postfix expression to an [AstNode]
 /// object.
 class ExpressionBuilder {
   /// Add an operand to the stack
-  void addOperand(Expression arg) {
+  void addOperand(AstNode arg) {
     _output.addLast(_Operand(arg));
   }
 
@@ -28,7 +28,7 @@ class ExpressionBuilder {
   }
 
   /// Build the expression
-  Expression build() {
+  AstNode build() {
     while (_operators.isNotEmpty) {
       _output.addLast(_Operator(_operators.removeLast()));
     }
@@ -46,7 +46,7 @@ class ExpressionBuilder {
   final _output = Queue<_Item>();
 
   /// Build the expression from the operator/operand at the top of the stack
-  Expression _popExpression() {
+  AstNode _popExpression() {
     if (_output.isEmpty) {
       throw MalformedInfixExpression();
     }
@@ -81,7 +81,7 @@ sealed class _Item {
 /// Represents an operand in the stack
 class _Operand extends _Item {
   /// The operand expression
-  final Expression expression;
+  final AstNode expression;
 
   const _Operand(this.expression);
 }
