@@ -97,8 +97,7 @@ class _AnalysisVisitor extends CellExpressionTreeVisitor {
 
   @override
   void visitStub(StubExpression expression) {
-    if (!(cell.getAttribute(Attributes.external) ?? false) &&
-        !(cell.getAttribute(Attributes.argument) ?? false)) {
+    if (!cell.isExternal() && !cell.isArgument()) {
       throw UndefinedCellError(cell);
     }
   }

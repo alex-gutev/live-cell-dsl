@@ -71,7 +71,7 @@ class CellFolder {
   /// Determine whether a given [cell] can be folded.
   bool _isFolded(CellSpec cell) {
     _visitCell(cell);
-    return cell.getAttribute(Attributes.fold) ?? false;
+    return cell.foldable();
   }
 }
 

@@ -1,17 +1,5 @@
 import 'cell_spec.dart';
 
-/// Container for constants identifying cell attributes
-class Attributes {
-  /// Externally defined flag attribute
-  static const external = 'external';
-
-  /// Cell represents a function argument
-  static const argument = 'argument';
-
-  /// Should this cell be folded?
-  static const fold = 'fold';
-}
-
 /// Table containing cells defined in a given module/scope
 class CellTable {
   /// The parent scope in which this table is contained

@@ -1,3 +1,4 @@
+import 'attributes.dart';
 import 'exceptions.dart';
 import 'cell_spec.dart';
 import 'cell_table.dart';
@@ -403,7 +404,7 @@ class CellBuilder {
         );
       }
 
-      if (existing.getAttribute(Attributes.external) ?? false) {
+      if (existing.isExternal()) {
         return existing;
       }
     }
@@ -437,7 +438,7 @@ class CellBuilder {
         );
       }
 
-      if (existing.getAttribute(Attributes.external) ?? false) {
+      if (existing.isExternal()) {
         return existing;
       }
     }
