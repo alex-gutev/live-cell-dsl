@@ -7,6 +7,9 @@ class Attributes {
 
   /// Cell represents a function argument
   static const argument = 'argument';
+
+  /// Should this cell be folded?
+  static const fold = 'fold';
 }
 
 /// Table containing cells defined in a given module/scope
