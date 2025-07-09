@@ -96,7 +96,7 @@ class Application extends AstNode {
   int get hashCode => _$ApplicationHashCode(this);
 }
 
-/// A block of multiple [expressions]
+/// Represents a block of one or more [expressions]
 @DataClass()
 class Block extends AstNode {
   /// List of expressions in the block
@@ -110,10 +110,8 @@ class Block extends AstNode {
   });
 
   @override
-  R accept<R>(AstVisitor<R> visitor) {
-    // TODO: implement accept
-    throw UnimplementedError();
-  }
+  R accept<R>(AstVisitor<R> visitor) =>
+      visitor.visitBlock(this);
 
   @override
   bool operator ==(Object other) =>
