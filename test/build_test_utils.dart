@@ -211,11 +211,11 @@ sealed class SpecTester {
   /// [refId] is the ID of the cell that should be referenced.
   factory SpecTester.ref(CellId refId) = _RefExpressionTester;
 
-  /// Create a tester that tests [CellApplication]s.
+  /// Create a tester that tests [ApplySpec]s.
   ///
-  /// This tester checks whether the definition of the cell is a
-  /// [CellApplication], and runs [operator] on the operator and each tester in
-  /// [operands] on the corresponding operands.
+  /// This tester checks whether the definition of the cell is an
+  /// [ApplySpec], and runs [operator] on the operator and each tester in
+  /// [operands] on the corresponding operand.
   factory SpecTester.apply({
     required SpecTester operator,
     required List<SpecTester> operands
@@ -291,7 +291,7 @@ class _RefExpressionTester extends SpecTester {
   }
 }
 
-/// [CellApplication] tester
+/// [ApplySpec] tester
 class _ApplyExpressionTester extends SpecTester {
   final SpecTester operator;
   final List<SpecTester> operands;
@@ -306,9 +306,9 @@ class _ApplyExpressionTester extends SpecTester {
     required CellTable scope,
     required ValueSpec spec
   }) async {
-    expect(spec, isA<CellApplication>());
+    expect(spec, isA<ApplySpec>());
 
-    final apply = spec as CellApplication;
+    final apply = spec as ApplySpec;
 
     await operator.test(
         scope: scope,

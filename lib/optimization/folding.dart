@@ -56,7 +56,7 @@ class CellFolder {
     CellRef(get: final cell) => 
         _isFolded(cell),
 
-    CellApplication(
+    ApplySpec(
       :final operator,
       :final operands
     ) => _isConstant(operator) &&

@@ -133,7 +133,7 @@ class CellBuilder {
         scope: scope,
         defined: true,
 
-        definition: CellApplication(
+        definition: ApplySpec(
             operator: _refCell(buildExpression(operator)),
             operands: operandCells.map(_refCell).toList()
         ),

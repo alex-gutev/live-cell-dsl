@@ -6,7 +6,7 @@ abstract interface class ValueSpecVisitor<R> {
   R visitConstant<T>(Constant<T> expression);
   R visitVariable(Variable expression);
   R visitRef(CellRef expression);
-  R visitApplication(CellApplication expression);
+  R visitApply(ApplySpec expression);
   R visitDeferred(DeferredExpression expression);
   R visitFunction(FunctionExpression expression);
 }
@@ -14,7 +14,7 @@ abstract interface class ValueSpecVisitor<R> {
 /// A visitor that visits every node of a [ValueSpec] tree.
 abstract class ValueSpecTreeVisitor extends ValueSpecVisitor<void> {
   @override
-  void visitApplication(CellApplication expression) {
+  void visitApply(ApplySpec expression) {
     expression.operator.accept(this);
     
     for (final operand in expression.operands) {

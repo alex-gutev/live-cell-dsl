@@ -189,22 +189,22 @@ abstract class CellRef extends ValueSpec {
       visitor.visitRef(this);
 }
 
-/// Represents an expression consisting of an [operator] applied on one or more [operands].
-class CellApplication extends ValueSpec {
+/// Represents the application of an [operator] on one or more [operands].
+class ApplySpec extends ValueSpec {
   /// The operator that is applied
   final ValueSpec operator;
 
   /// The operands on which the [operator] is applied
   final List<ValueSpec> operands;
 
-  const CellApplication({
+  const ApplySpec({
     required this.operator,
     required this.operands
   });
 
   @override
   R accept<R>(ValueSpecVisitor<R> visitor) =>
-      visitor.visitApplication(this);
+      visitor.visitApply(this);
 }
 
 /// An expression that is built at a later stage
