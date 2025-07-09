@@ -18,7 +18,7 @@ class DeferredFunctionDefinition extends DeferredExpression {
   });
 
   @override
-  CellExpression build() {
+  ValueSpec build() {
     if (_builtDefinition == null) {
       final builder = CellBuilder(
         scope: scope

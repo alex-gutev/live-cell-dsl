@@ -50,8 +50,8 @@ void main() {
               precedence: 1,
               leftAssoc: false
           )
-        ]).hasNamed('a', tester: ExpressionTester.ref(NamedCellId('b')))
-          .hasNamed('b', tester: ExpressionTester.ref(NamedCellId('c')))
+        ]).hasNamed('a', tester: SpecTester.ref(NamedCellId('b')))
+          .hasNamed('b', tester: SpecTester.ref(NamedCellId('c')))
           .run());
 
     test('Chained alias definitions', () =>
@@ -62,8 +62,8 @@ void main() {
               precedence: 1,
               leftAssoc: false
           )
-        ]).hasNamed('a', tester: ExpressionTester.ref(NamedCellId('b')))
-            .hasNamed('b', tester: ExpressionTester.ref(NamedCellId('c')))
+        ]).hasNamed('a', tester: SpecTester.ref(NamedCellId('b')))
+            .hasNamed('b', tester: SpecTester.ref(NamedCellId('c')))
             .run());
 
     test('Later declarations do not overwrite earlier definitions.', () =>
@@ -74,8 +74,8 @@ void main() {
               precedence: 1,
               leftAssoc: false
           )
-        ]).hasNamed('a', tester: ExpressionTester.ref(NamedCellId('b')))
-            .hasNamed('b', tester: ExpressionTester.ref(NamedCellId('c')))
+        ]).hasNamed('a', tester: SpecTester.ref(NamedCellId('b')))
+            .hasNamed('b', tester: SpecTester.ref(NamedCellId('c')))
             .run());
 
     test('Expression definitions', () =>
@@ -86,7 +86,7 @@ void main() {
               precedence: 1,
               leftAssoc: false
           )
-        ]).hasNamed('a', tester: ExpressionTester.ref(
+        ]).hasNamed('a', tester: SpecTester.ref(
           AppliedCellId(
             operator: NamedCellId('f'),
             operands: [
@@ -102,11 +102,11 @@ void main() {
               NamedCellId('c')
             ],
 
-            tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('f')),
+            tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('f')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('b')),
-                  ExpressionTester.ref(NamedCellId('c'))
+                  SpecTester.ref(NamedCellId('b')),
+                  SpecTester.ref(NamedCellId('c'))
                 ]
             )
         )
@@ -126,8 +126,8 @@ void main() {
               precedence: 5,
               leftAssoc: true
           )
-        ]).hasNamed('a', tester: ExpressionTester.ref(NamedCellId('b')))
-        .hasNamed('b', tester: ExpressionTester.ref(
+        ]).hasNamed('a', tester: SpecTester.ref(NamedCellId('b')))
+        .hasNamed('b', tester: SpecTester.ref(
           AppliedCellId(
             operator: NamedCellId('+'),
             operands: [
@@ -142,11 +142,11 @@ void main() {
               NamedCellId('c'),
               ValueCellId(1)
             ],
-            tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('+')),
+            tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('+')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('c')),
-                  ExpressionTester.value(1)
+                  SpecTester.ref(NamedCellId('c')),
+                  SpecTester.value(1)
                 ]
             )
         )
@@ -170,7 +170,7 @@ void main() {
                 leftAssoc: true
             )
           ]
-        ).hasNamed('x', tester: ExpressionTester.ref(
+        ).hasNamed('x', tester: SpecTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -185,16 +185,16 @@ void main() {
               ValueCellId(1)
             ],
 
-            tester: ExpressionTester.apply(
-              operator: ExpressionTester.ref(NamedCellId('inc')),
+            tester: SpecTester.apply(
+              operator: SpecTester.ref(NamedCellId('inc')),
               operands: [
-                ExpressionTester.ref(NamedCellId('y')),
-                ExpressionTester.value(1)
+                SpecTester.ref(NamedCellId('y')),
+                SpecTester.value(1)
               ]
             )
-        ).hasNamed('inc', tester: ExpressionTester.func(
+        ).hasNamed('inc', tester: SpecTester.func(
             arguments: [NamedCellId('n'), NamedCellId('d')],
-            definition: ExpressionTester.ref(
+            definition: SpecTester.ref(
               AppliedCellId(
                 operator: NamedCellId('+'),
                 operands: [
@@ -211,11 +211,11 @@ void main() {
                   NamedCellId('d')
                 ],
 
-                tester: ExpressionTester.apply(
-                    operator: ExpressionTester.ref(NamedCellId('+')),
+                tester: SpecTester.apply(
+                    operator: SpecTester.ref(NamedCellId('+')),
                     operands: [
-                      ExpressionTester.ref(NamedCellId('n')),
-                      ExpressionTester.ref(NamedCellId('d'))
+                      SpecTester.ref(NamedCellId('n')),
+                      SpecTester.ref(NamedCellId('d'))
                     ]
                 )
             )
@@ -242,7 +242,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', tester: ExpressionTester.ref(
+        ).hasNamed('x', tester: SpecTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -257,16 +257,16 @@ void main() {
               ValueCellId(1)
             ],
 
-            tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('inc')),
+            tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('inc')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('y')),
-                  ExpressionTester.value(1)
+                  SpecTester.ref(NamedCellId('y')),
+                  SpecTester.value(1)
                 ]
             )
-        ).hasNamed('inc', tester: ExpressionTester.func(
+        ).hasNamed('inc', tester: SpecTester.func(
             arguments: [NamedCellId('n'), NamedCellId('d')],
-            definition: ExpressionTester.ref(NamedCellId('result')),
+            definition: SpecTester.ref(NamedCellId('result')),
             tester: FunctionTester()
                 .hasApplication(
                 operator: NamedCellId('+'),
@@ -275,11 +275,11 @@ void main() {
                   NamedCellId('d')
                 ],
 
-                tester: ExpressionTester.apply(
-                    operator: ExpressionTester.ref(NamedCellId('+')),
+                tester: SpecTester.apply(
+                    operator: SpecTester.ref(NamedCellId('+')),
                     operands: [
-                      ExpressionTester.ref(NamedCellId('n')),
-                      ExpressionTester.ref(NamedCellId('d'))
+                      SpecTester.ref(NamedCellId('n')),
+                      SpecTester.ref(NamedCellId('d'))
                     ]
                 )
             )
@@ -306,7 +306,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', tester: ExpressionTester.ref(
+        ).hasNamed('x', tester: SpecTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -321,16 +321,16 @@ void main() {
               ValueCellId(1)
             ],
 
-            tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('inc')),
+            tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('inc')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('y')),
-                  ExpressionTester.value(1)
+                  SpecTester.ref(NamedCellId('y')),
+                  SpecTester.value(1)
                 ]
             )
-        ).hasNamed('inc', tester: ExpressionTester.func(
+        ).hasNamed('inc', tester: SpecTester.func(
             arguments: [NamedCellId('n'), NamedCellId('d')],
-            definition: ExpressionTester.ref(NamedCellId('result')),
+            definition: SpecTester.ref(NamedCellId('result')),
             tester: FunctionTester()
                 .hasApplication(
                 operator: NamedCellId('+'),
@@ -339,11 +339,11 @@ void main() {
                   NamedCellId('d')
                 ],
 
-                tester: ExpressionTester.apply(
-                    operator: ExpressionTester.ref(NamedCellId('+')),
+                tester: SpecTester.apply(
+                    operator: SpecTester.ref(NamedCellId('+')),
                     operands: [
-                      ExpressionTester.ref(NamedCellId('n')),
-                      ExpressionTester.ref(NamedCellId('d'))
+                      SpecTester.ref(NamedCellId('n')),
+                      SpecTester.ref(NamedCellId('d'))
                     ]
                 )
             )
@@ -368,7 +368,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', tester: ExpressionTester.ref(
+        ).hasNamed('x', tester: SpecTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -381,18 +381,18 @@ void main() {
               NamedCellId('y'),
             ],
 
-            tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('inc')),
+            tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('inc')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('y')),
+                  SpecTester.ref(NamedCellId('y')),
                 ]
             )
         ).hasNamed(
             'delta',
-            tester: ExpressionTester.value(1)
-        ).hasNamed('inc', tester: ExpressionTester.func(
+            tester: SpecTester.value(1)
+        ).hasNamed('inc', tester: SpecTester.func(
             arguments: [NamedCellId('n')],
-            definition: ExpressionTester.ref(
+            definition: SpecTester.ref(
                 AppliedCellId(
                     operator: NamedCellId('+'),
                     operands: [
@@ -409,11 +409,11 @@ void main() {
                     NamedCellId('delta')
                   ],
 
-                  tester: ExpressionTester.apply(
-                      operator: ExpressionTester.ref(NamedCellId('+')),
+                  tester: SpecTester.apply(
+                      operator: SpecTester.ref(NamedCellId('+')),
                       operands: [
-                        ExpressionTester.ref(NamedCellId('n')),
-                        ExpressionTester.ref(NamedCellId('delta'))
+                        SpecTester.ref(NamedCellId('n')),
+                        SpecTester.ref(NamedCellId('delta'))
                       ]
                   )
                 )
@@ -442,7 +442,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', tester: ExpressionTester.ref(
+        ).hasNamed('x', tester: SpecTester.ref(
             AppliedCellId(
                 operator: NamedCellId('inc'),
                 operands: [
@@ -455,18 +455,18 @@ void main() {
               NamedCellId('y'),
             ],
 
-            tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('inc')),
+            tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('inc')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('y')),
+                  SpecTester.ref(NamedCellId('y')),
                 ]
             )
         ).hasNamed(
             'delta',
-            tester: ExpressionTester.value(1)
-        ).hasNamed('inc', tester: ExpressionTester.func(
+            tester: SpecTester.value(1)
+        ).hasNamed('inc', tester: SpecTester.func(
             arguments: [NamedCellId('n')],
-            definition: ExpressionTester.ref(NamedCellId('x')),
+            definition: SpecTester.ref(NamedCellId('x')),
             tester: FunctionTester()
                 .hasApplication(
                   operator: NamedCellId('+'),
@@ -475,17 +475,17 @@ void main() {
                     NamedCellId('delta')
                   ],
 
-                  tester: ExpressionTester.apply(
-                      operator: ExpressionTester.ref(NamedCellId('+')),
+                  tester: SpecTester.apply(
+                      operator: SpecTester.ref(NamedCellId('+')),
                       operands: [
-                        ExpressionTester.ref(NamedCellId('n')),
-                        ExpressionTester.ref(NamedCellId('delta'))
+                        SpecTester.ref(NamedCellId('n')),
+                        SpecTester.ref(NamedCellId('delta'))
                       ]
                   )
                 )
                 .hasNamed(
                   'x',
-                  tester: ExpressionTester.ref(
+                  tester: SpecTester.ref(
                     AppliedCellId(
                       operator: NamedCellId('+'),
                       operands: [
@@ -517,7 +517,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', tester: ExpressionTester.ref(
+        ).hasNamed('x', tester: SpecTester.ref(
             AppliedCellId(
                 operator: NamedCellId('+'),
                 operands: [
@@ -532,16 +532,16 @@ void main() {
               NamedCellId('b')
             ],
 
-            tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('+')),
+            tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('+')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('a')),
-                  ExpressionTester.ref(NamedCellId('b'))
+                  SpecTester.ref(NamedCellId('a')),
+                  SpecTester.ref(NamedCellId('b'))
                 ]
             )
-        ).hasNamed('add', tester: ExpressionTester.func(
+        ).hasNamed('add', tester: SpecTester.func(
             arguments: [NamedCellId('a'), NamedCellId('b')],
-            definition: ExpressionTester.ref(
+            definition: SpecTester.ref(
               AppliedCellId(
                 operator: NamedCellId('+'),
                 operands: [NamedCellId('a'), NamedCellId('b')]
@@ -557,11 +557,11 @@ void main() {
 
                   local: true,
 
-                  tester: ExpressionTester.apply(
-                    operator: ExpressionTester.ref(NamedCellId('+')),
+                  tester: SpecTester.apply(
+                    operator: SpecTester.ref(NamedCellId('+')),
                     operands: [
-                      ExpressionTester.ref(NamedCellId('a')),
-                      ExpressionTester.ref(NamedCellId('b'))
+                      SpecTester.ref(NamedCellId('a')),
+                      SpecTester.ref(NamedCellId('b'))
                     ]
                   )
                 )
@@ -585,7 +585,7 @@ void main() {
                   leftAssoc: true
               )
             ]
-        ).hasNamed('x', tester: ExpressionTester.ref(
+        ).hasNamed('x', tester: SpecTester.ref(
             AppliedCellId(
                 operator: NamedCellId('+'),
                 operands: [
@@ -600,16 +600,16 @@ void main() {
               NamedCellId('b')
             ],
 
-            tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('+')),
+            tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('+')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('a')),
-                  ExpressionTester.ref(NamedCellId('b'))
+                  SpecTester.ref(NamedCellId('a')),
+                  SpecTester.ref(NamedCellId('b'))
                 ]
             )
-        ).hasNamed('add', tester: ExpressionTester.func(
+        ).hasNamed('add', tester: SpecTester.func(
             arguments: [NamedCellId('a'), NamedCellId('b')],
-            definition: ExpressionTester.ref(
+            definition: SpecTester.ref(
                 AppliedCellId(
                     operator: NamedCellId('+'),
                     operands: [NamedCellId('a'), NamedCellId('b')]
@@ -625,11 +625,11 @@ void main() {
 
                 local: true,
 
-                tester: ExpressionTester.apply(
-                    operator: ExpressionTester.ref(NamedCellId('+')),
+                tester: SpecTester.apply(
+                    operator: SpecTester.ref(NamedCellId('+')),
                     operands: [
-                      ExpressionTester.ref(NamedCellId('a')),
-                      ExpressionTester.ref(NamedCellId('b'))
+                      SpecTester.ref(NamedCellId('a')),
+                      SpecTester.ref(NamedCellId('b'))
                     ]
                 )
             )
@@ -658,7 +658,7 @@ void main() {
                 leftAssoc: true
             )
           ]
-      ).hasNamed('x', tester: ExpressionTester.ref(
+      ).hasNamed('x', tester: SpecTester.ref(
           AppliedCellId(
               operator: NamedCellId('inc'),
               operands: [
@@ -671,18 +671,18 @@ void main() {
             NamedCellId('y'),
           ],
 
-          tester: ExpressionTester.apply(
-              operator: ExpressionTester.ref(NamedCellId('inc')),
+          tester: SpecTester.apply(
+              operator: SpecTester.ref(NamedCellId('inc')),
               operands: [
-                ExpressionTester.ref(NamedCellId('y')),
+                SpecTester.ref(NamedCellId('y')),
               ]
           )
       ).hasNamed(
           'delta',
-          tester: ExpressionTester.value(1)
-      ).hasNamed('inc', tester: ExpressionTester.func(
+          tester: SpecTester.value(1)
+      ).hasNamed('inc', tester: SpecTester.func(
           arguments: [NamedCellId('n')],
-          definition: ExpressionTester.ref(NamedCellId('x')),
+          definition: SpecTester.ref(NamedCellId('x')),
           tester: FunctionTester()
               .hasApplication(
                 operator: NamedCellId('add-delta'),
@@ -690,16 +690,16 @@ void main() {
                   NamedCellId('n'),
                 ],
 
-                tester: ExpressionTester.apply(
-                    operator: ExpressionTester.ref(NamedCellId('add-delta')),
+                tester: SpecTester.apply(
+                    operator: SpecTester.ref(NamedCellId('add-delta')),
                     operands: [
-                      ExpressionTester.ref(NamedCellId('n')),
+                      SpecTester.ref(NamedCellId('n')),
                     ]
                 )
               )
               .hasNamed(
                 'x',
-                tester: ExpressionTester.ref(
+                tester: SpecTester.ref(
                   AppliedCellId(
                       operator: NamedCellId('add-delta'),
                       operands: [
@@ -709,9 +709,9 @@ void main() {
                 ),
                 local: true
               )
-              .hasNamed('add-delta', tester: ExpressionTester.func(
+              .hasNamed('add-delta', tester: SpecTester.func(
                 arguments: [NamedCellId('m')],
-                definition: ExpressionTester.ref(
+                definition: SpecTester.ref(
                   AppliedCellId(
                     operator: NamedCellId('+'),
                     operands: [
@@ -729,11 +729,11 @@ void main() {
                       NamedCellId('delta')
                     ],
 
-                    tester: ExpressionTester.apply(
-                        operator: ExpressionTester.ref(NamedCellId('+')),
+                    tester: SpecTester.apply(
+                        operator: SpecTester.ref(NamedCellId('+')),
                         operands: [
-                          ExpressionTester.ref(NamedCellId('m')),
-                          ExpressionTester.ref(NamedCellId('delta'))
+                          SpecTester.ref(NamedCellId('m')),
+                          SpecTester.ref(NamedCellId('delta'))
                         ]
                     ),
 
@@ -765,9 +765,9 @@ void main() {
                 leftAssoc: true
             )
           ]
-      ).hasNamed('f', tester: ExpressionTester.func(
+      ).hasNamed('f', tester: SpecTester.func(
         arguments: [NamedCellId('x')],
-        definition: ExpressionTester.ref(
+        definition: SpecTester.ref(
           AppliedCellId(
             operator: NamedCellId('+'),
             operands: [
@@ -808,9 +808,9 @@ void main() {
                   leftAssoc: true
               ),
             ]
-        ).hasNamed('f', tester: ExpressionTester.func(
+        ).hasNamed('f', tester: SpecTester.func(
             arguments: [NamedCellId('x')],
-            definition: ExpressionTester.ref(
+            definition: SpecTester.ref(
                 AppliedCellId(
                     operator: NamedCellId('+'),
                     operands: [
@@ -826,9 +826,9 @@ void main() {
             ),
 
             tester: FunctionTester().hasNamed('g', local: false)
-        )).hasNamed('g', tester: ExpressionTester.func(
+        )).hasNamed('g', tester: SpecTester.func(
             arguments: [NamedCellId('y')],
-            definition: ExpressionTester.ref(
+            definition: SpecTester.ref(
                 AppliedCellId(
                     operator: NamedCellId('+'),
                     operands: [
@@ -850,14 +850,14 @@ void main() {
   group('Variable cell declarations', () {
     test('Simple variable declarations', () =>
       BuildTester('var(a); var(b)')
-        .hasNamed('a', tester: ExpressionTester.variable())
-        .hasNamed('b', tester: ExpressionTester.variable())
+        .hasNamed('a', tester: SpecTester.variable())
+        .hasNamed('b', tester: SpecTester.variable())
         .run());
 
     test('Variable declarations nested in other cells', () =>
       BuildTester('f(x, var(y))')
         .hasNamed('x')
-        .hasNamed('y', tester: ExpressionTester.variable())
+        .hasNamed('y', tester: SpecTester.variable())
         .hasApplication(
           operator: NamedCellId('f'),
           operands: [
@@ -865,11 +865,11 @@ void main() {
             NamedCellId('y')
           ],
 
-          tester: ExpressionTester.apply(
-            operator: ExpressionTester.ref(NamedCellId('f')),
+          tester: SpecTester.apply(
+            operator: SpecTester.ref(NamedCellId('f')),
             operands: [
-              ExpressionTester.ref(NamedCellId('x')),
-              ExpressionTester.ref(NamedCellId('y'))
+              SpecTester.ref(NamedCellId('x')),
+              SpecTester.ref(NamedCellId('y'))
             ]
           )
         )
@@ -878,7 +878,7 @@ void main() {
     test('Variable declarations following cell declarations', () =>
       BuildTester('f(x, y); var(y)')
           .hasNamed('x')
-          .hasNamed('y', tester: ExpressionTester.variable())
+          .hasNamed('y', tester: SpecTester.variable())
           .hasApplication(
             operator: NamedCellId('f'),
             operands: [
@@ -886,11 +886,11 @@ void main() {
               NamedCellId('y')
             ],
 
-            tester: ExpressionTester.apply(
-              operator: ExpressionTester.ref(NamedCellId('f')),
+            tester: SpecTester.apply(
+              operator: SpecTester.ref(NamedCellId('f')),
               operands: [
-                ExpressionTester.ref(NamedCellId('x')),
-                ExpressionTester.ref(NamedCellId('y'))
+                SpecTester.ref(NamedCellId('x')),
+                SpecTester.ref(NamedCellId('y'))
               ]
             )
           )
@@ -899,7 +899,7 @@ void main() {
     test('Variable declarations preceding cell declarations', () =>
         BuildTester('var(y); f(x, y)')
             .hasNamed('x')
-            .hasNamed('y', tester: ExpressionTester.variable())
+            .hasNamed('y', tester: SpecTester.variable())
             .hasApplication(
               operator: NamedCellId('f'),
               operands: [
@@ -907,11 +907,11 @@ void main() {
                 NamedCellId('y')
               ],
 
-              tester: ExpressionTester.apply(
-                operator: ExpressionTester.ref(NamedCellId('f')),
+              tester: SpecTester.apply(
+                operator: SpecTester.ref(NamedCellId('f')),
                 operands: [
-                  ExpressionTester.ref(NamedCellId('x')),
-                  ExpressionTester.ref(NamedCellId('y'))
+                  SpecTester.ref(NamedCellId('x')),
+                  SpecTester.ref(NamedCellId('y'))
                 ]
               )
             )
@@ -948,9 +948,9 @@ void main() {
               )
             ]
         ).hasNamed('+',
-            tester: ExpressionTester.func(
+            tester: SpecTester.func(
                 arguments: [NamedCellId('a'), NamedCellId('b')],
-                definition: ExpressionTester.stub(),
+                definition: SpecTester.stub(),
                 tester: FunctionTester()
             ),
 

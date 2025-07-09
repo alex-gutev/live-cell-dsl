@@ -47,8 +47,8 @@ class CellFolder {
     }
   }
 
-  /// Determine whether a given [expression] evaluates to a constant value.
-  bool _isConstant(CellExpression expression) => switch (expression) {
+  /// Determine whether a given [spec] represents a constant value.
+  bool _isConstant(ValueSpec spec) => switch (spec) {
     StubExpression() => false,
     Constant() => true,
     VariableValue() => false,
@@ -63,7 +63,7 @@ class CellFolder {
         operands.every(_isConstant),
 
     DeferredExpression() => 
-        _isConstant(expression.build()),
+        _isConstant(spec.build()),
   
     FunctionExpression() => true,
   };
@@ -76,7 +76,7 @@ class CellFolder {
 }
 
 /// Visitor that performs cell folding analysis in the local scope of a [FunctionExpression].
-class _FunctionAnalysisVisitor extends CellExpressionTreeVisitor {
+class _FunctionAnalysisVisitor extends ValueSpecTreeVisitor {
   @override
   void visitFunction(FunctionExpression expression) {
     final folder = CellFolder(

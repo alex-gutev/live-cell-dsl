@@ -78,8 +78,8 @@ class CellSpec {
   /// Cell identifier
   final CellId id;
 
-  /// Expression defining how the cell's value is computed
-  final CellExpression definition;
+  /// Specification defining how the cell's value is computed
+  final ValueSpec definition;
 
   /// The scope in which this cell is defined
   final CellTable? scope;
@@ -133,63 +133,63 @@ class ValueCellSpec extends CellSpec {
   );
 }
 
-/// Base class representing a cell expression specification
-sealed class CellExpression {
-  const CellExpression();
+/// Base class specifying the definition of a cell's value
+sealed class ValueSpec {
+  const ValueSpec();
 
-  /// Visit this expression with [visitor].
-  R accept<R>(CellExpressionVisitor<R> visitor);
+  /// Visit this spec with [visitor].
+  R accept<R>(ValueSpecVisitor<R> visitor);
 }
 
 /// Represents a cell which hasn't been defined yet
-class StubExpression extends CellExpression {
+class StubExpression extends ValueSpec {
   const StubExpression();
 
   @override
-  R accept<R>(CellExpressionVisitor<R> visitor) =>
+  R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitStub(this);
 }
 
 /// Represents a constant value
-class Constant<T> extends CellExpression {
+class Constant<T> extends ValueSpec {
   /// The value
   final T value;
 
   const Constant(this.value);
 
   @override
-  R accept<R>(CellExpressionVisitor<R> visitor) =>
+  R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitConstant(this);
 }
 
 /// Represents a cell with a value that can be changed
-class VariableValue extends CellExpression {
+class VariableValue extends ValueSpec {
   const VariableValue();
 
   @override
-  R accept<R>(CellExpressionVisitor<R> visitor) =>
+  R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitVariableValue(this);
 }
 
 /// Base class representing a reference to a cell's value
-abstract class CellRef extends CellExpression {
+abstract class CellRef extends ValueSpec {
   /// Get the specification of the referenced cell
   CellSpec get get;
 
   const CellRef();
 
   @override
-  R accept<R>(CellExpressionVisitor<R> visitor) =>
+  R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitRef(this);
 }
 
 /// Represents an expression consisting of an [operator] applied on one or more [operands].
-class CellApplication extends CellExpression {
+class CellApplication extends ValueSpec {
   /// The operator that is applied
-  final CellExpression operator;
+  final ValueSpec operator;
 
   /// The operands on which the [operator] is applied
-  final List<CellExpression> operands;
+  final List<ValueSpec> operands;
 
   const CellApplication({
     required this.operator,
@@ -197,27 +197,27 @@ class CellApplication extends CellExpression {
   });
 
   @override
-  R accept<R>(CellExpressionVisitor<R> visitor) =>
+  R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitApplication(this);
 }
 
 /// An expression that is built at a later stage
-abstract class DeferredExpression extends CellExpression {
+abstract class DeferredExpression extends ValueSpec {
   const DeferredExpression();
 
   /// Build the expression
   ///
   /// *NOTE*: This method should cache the expression after it is built for
   /// the first time, rather than building it every time this method called.
-  CellExpression build();
+  ValueSpec build();
 
   @override
-  R accept<R>(CellExpressionVisitor<R> visitor) =>
+  R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitDeferred(this);
 }
 
 /// Represents a function definition
-class FunctionExpression extends CellExpression {
+class FunctionExpression extends ValueSpec {
   /// List of argument cell identifiers
   final List<CellId> arguments;
 
@@ -225,7 +225,7 @@ class FunctionExpression extends CellExpression {
   final CellTable scope;
 
   /// Expression defining the result of the function
-  final CellExpression definition;
+  final ValueSpec definition;
 
   /// Set of cells referenced by this function
   Set<CellSpec> get referencedCells {
@@ -252,7 +252,7 @@ class FunctionExpression extends CellExpression {
   });
 
   @override
-  R accept<R>(CellExpressionVisitor<R> visitor) =>
+  R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitFunction(this);
 
   // Private
@@ -265,7 +265,7 @@ class FunctionExpression extends CellExpression {
 ///
 /// Cells referenced within [scope], which are not defined in [scope] are
 /// added to the set [external].
-class _ExternalCellVisitor extends CellExpressionTreeVisitor {
+class _ExternalCellVisitor extends ValueSpecTreeVisitor {
   final CellTable scope;
   final Set<CellSpec> external;
 

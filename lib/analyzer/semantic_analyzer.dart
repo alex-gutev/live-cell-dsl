@@ -71,8 +71,8 @@ class SemanticAnalyzer {
   }
 }
 
-/// Check for cycles in a given expression tree
-class _AnalysisVisitor extends CellExpressionTreeVisitor {
+/// Check for cycles in a given [ValueSpec] tree
+class _AnalysisVisitor extends ValueSpecTreeVisitor {
   /// The cell of which the definition is being analysed
   final CellSpec cell;
 
@@ -108,7 +108,7 @@ class _AnalysisVisitor extends CellExpressionTreeVisitor {
 }
 
 /// Performs semantic analysis in [FunctionExpression]s
-class _FunctionAnalysisVisitor extends CellExpressionTreeVisitor {
+class _FunctionAnalysisVisitor extends ValueSpecTreeVisitor {
   @override
   void visitFunction(FunctionExpression expression) {
     final analyzer = SemanticAnalyzer(scope: expression.scope);

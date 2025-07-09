@@ -305,7 +305,7 @@ class CellBuilder {
     required String name,
     required List<AstNode> arguments,
     required CellTable scope,
-    required CellExpression Function(List<CellId> args) definition,
+    required ValueSpec Function(List<CellId> args) definition,
     required int line,
     required int column
   }) {
@@ -478,8 +478,8 @@ class CellBuilder {
 
   // Expressions
 
-  /// Create a [CellRef] for reference the cell specified by [spec]
-  CellExpression _refCell(CellSpec spec) => switch (spec) {
+  /// Create a [CellRef] that references the cell specified by [spec]
+  ValueSpec _refCell(CellSpec spec) => switch (spec) {
     ValueCellSpec(:final definition) => definition,
 
     _ => _NamedCellRef(

@@ -39,7 +39,7 @@ class BuildTester {
   /// If [attributes] is not null, the cell is tested that it has each
   /// attribute in this map and with the expected value.
   BuildTester hasCell(CellId id, {
-    ExpressionTester? tester,
+    SpecTester? tester,
     bool local = true,
     Map<String, dynamic>? attributes
   }) {
@@ -53,7 +53,7 @@ class BuildTester {
 
       await tester?.test(
           scope: scope,
-          expression: cell!.definition
+          spec: cell!.definition
       );
 
       if (local) {
@@ -84,7 +84,7 @@ class BuildTester {
   /// If [attributes] is not null, the cell is tested that it has each
   /// attribute in this map and with the expected value.
   BuildTester hasNamed(String name, {
-    ExpressionTester? tester,
+    SpecTester? tester,
     bool local = true,
     Map<String, dynamic>? attributes
   }) => hasCell(NamedCellId(name),
@@ -109,7 +109,7 @@ class BuildTester {
   BuildTester hasApplication({
     required CellId operator,
     required List<CellId> operands,
-    ExpressionTester? tester,
+    SpecTester? tester,
     bool local = true,
     Map<String, dynamic>? attributes
   }) => hasCell(
@@ -153,7 +153,7 @@ class FunctionTester extends BuildTester {
 
   @override
   FunctionTester hasCell(CellId id, {
-    ExpressionTester? tester,
+    SpecTester? tester,
     bool local = true,
     Map<String, dynamic>? attributes
   }) {
@@ -167,7 +167,7 @@ class FunctionTester extends BuildTester {
 
   @override
   FunctionTester hasNamed(String name, {
-    ExpressionTester? tester,
+    SpecTester? tester,
     bool local = true,
     Map<String, dynamic>? attributes
   }) {
@@ -183,7 +183,7 @@ class FunctionTester extends BuildTester {
   FunctionTester hasApplication({
     required CellId operator,
     required List<CellId> operands,
-    ExpressionTester? tester,
+    SpecTester? tester,
     bool local = true,
     Map<String, dynamic>? attributes
   }) {
@@ -200,83 +200,83 @@ class FunctionTester extends BuildTester {
 }
 
 /// Helper for testing the definition of a cell
-sealed class ExpressionTester {
-  ExpressionTester();
+sealed class SpecTester {
+  SpecTester();
 
   /// Create a tester that tests [StubExpression]s.
-  factory ExpressionTester.stub() = _StubExpressionTester;
+  factory SpecTester.stub() = _StubExpressionTester;
 
-  /// Create a tester that tests a [CellRef] expression.
+  /// Create a tester that tests [CellRef]s.
   ///
   /// [refId] is the ID of the cell that should be referenced.
-  factory ExpressionTester.ref(CellId refId) = _RefExpressionTester;
+  factory SpecTester.ref(CellId refId) = _RefExpressionTester;
 
-  /// Create a tester that tests a [CellApplication] expression.
+  /// Create a tester that tests [CellApplication]s.
   ///
   /// This tester checks whether the definition of the cell is a
   /// [CellApplication], and runs [operator] on the operator and each tester in
   /// [operands] on the corresponding operands.
-  factory ExpressionTester.apply({
-    required ExpressionTester operator,
-    required List<ExpressionTester> operands
+  factory SpecTester.apply({
+    required SpecTester operator,
+    required List<SpecTester> operands
   }) = _ApplyExpressionTester;
 
-  /// Create a tester that checks whether a [CellExpression] is a constant [value].
-  factory ExpressionTester.value(value) = _ValueExpressionTester;
+  /// Create a tester that checks whether a [ValueSpec] is a constant [value].
+  factory SpecTester.value(value) = _ConstantTester;
 
   /// Create a tester that tests [FunctionExpression]s.
   ///
   /// This testers tests that the expressions is a [FunctionExpression] defining
   /// a function with a given list of [arguments]. The tester [definition] is
-  /// used to test the expression defining the function and [tester] is run
+  /// used to test the [ValueSpec] defining the function and [tester] is run
   /// to test the cells local to the function.
-  factory ExpressionTester.func({
+  factory SpecTester.func({
     required List<CellId> arguments,
-    required ExpressionTester definition,
+    required SpecTester definition,
     required FunctionTester tester
-  }) = _FunctionExpressionTester;
+  }) = _FunctionTester;
 
-  /// Create a test that tests [VariableValue] expressions.
-  factory ExpressionTester.variable() = _VariableExpressionTester;
+  /// Create a test that tests [VariableValue]s.
+  factory SpecTester.variable() = _VariableTester;
 
-  /// Run the test on a given cell definition [expression].
+  /// Run the test on a given cell definition [spec].
   ///
   /// The difference between this method and [run] is that this method builds
   /// [DeferredExpression]s before calling [run].
   Future<void> test({
     required CellTable scope,
-    required CellExpression expression
-  }) => switch (expression) {
+    required ValueSpec spec
+  }) => switch (spec) {
     final DeferredExpression deferred =>
       run(
           scope: scope,
-          expression: deferred.build()
+          spec: deferred.build()
       ),
 
     _ => run(
         scope: scope,
-        expression: expression
+        spec: spec
     )
   };
 
-  /// Run the test on a given cell definition [expression].
+  /// Run the test on a given cell definition [spec].
   Future<void> run({
     required CellTable scope,
-    required CellExpression expression
+    required ValueSpec spec
   });
 }
 
-class _StubExpressionTester extends ExpressionTester {
+class _StubExpressionTester extends SpecTester {
   @override
   Future<void> run({
     required CellTable scope,
-    required CellExpression expression
+    required ValueSpec spec
   }) async =>
-      expression is StubExpression;
+      spec is StubExpression;
 }
 
 /// [CellRef] expression tester
-class _RefExpressionTester extends ExpressionTester {
+class _RefExpressionTester extends SpecTester {
   final CellId refId;
 
   _RefExpressionTester(this.refId);
@@ -284,17 +284,17 @@ class _RefExpressionTester extends ExpressionTester {
   @override
   Future<void> run({
     required CellTable scope,
-    required CellExpression expression
+    required ValueSpec spec
   }) async {
-    expect(expression, isA<CellRef>());
-    expect((expression as CellRef).get, equals(scope.get(refId)));
+    expect(spec, isA<CellRef>());
+    expect((spec as CellRef).get, equals(scope.get(refId)));
   }
 }
 
 /// [CellApplication] tester
-class _ApplyExpressionTester extends ExpressionTester {
-  final ExpressionTester operator;
-  final List<ExpressionTester> operands;
+class _ApplyExpressionTester extends SpecTester {
+  final SpecTester operator;
+  final List<SpecTester> operands;
 
   _ApplyExpressionTester({
     required this.operator,
@@ -304,61 +304,61 @@ class _ApplyExpressionTester extends ExpressionTester {
   @override
   Future<void> run({
     required CellTable scope,
-    required CellExpression expression
+    required ValueSpec spec
   }) async {
-    expect(expression, isA<CellApplication>());
+    expect(spec, isA<CellApplication>());
 
-    final apply = expression as CellApplication;
+    final apply = spec as CellApplication;
 
     await operator.test(
         scope: scope,
-        expression: apply.operator
+        spec: apply.operator
     );
 
-    expect(expression.operands.length, operands.length);
+    expect(spec.operands.length, operands.length);
 
     for (var i = 0; i < operands.length; i++) {
       await operands[i].test(
           scope: scope,
-          expression: expression.operands[i]
+          spec: spec.operands[i]
       );
     }
   }
 }
 
-/// [Constant] expression tester
-class _ValueExpressionTester extends ExpressionTester {
+/// [Constant] tester
+class _ConstantTester extends SpecTester {
   final dynamic value;
 
-  _ValueExpressionTester(this.value);
+  _ConstantTester(this.value);
 
   @override
   Future<void> run({
     required CellTable scope,
-    required CellExpression expression
+    required ValueSpec spec
   }) async {
-    expect(expression, isA<Constant>());
-    expect((expression as Constant).value, equals(value));
+    expect(spec, isA<Constant>());
+    expect((spec as Constant).value, equals(value));
   }
 }
 
-/// [VariableValue] expression tester
-class _VariableExpressionTester extends ExpressionTester {
+/// [VariableValue] tester
+class _VariableTester extends SpecTester {
   @override
   Future<void> run({
     required CellTable scope,
-    required CellExpression expression
-  }) async => expression is VariableValue;
+    required ValueSpec spec
+  }) async => spec is VariableValue;
 }
 
 /// [FunctionExpression] tester
-class _FunctionExpressionTester extends ExpressionTester {
+class _FunctionTester extends SpecTester {
   final List<CellId> arguments;
-  final ExpressionTester definition;
+  final SpecTester definition;
 
   final FunctionTester tester;
 
-  _FunctionExpressionTester({
+  _FunctionTester({
     required this.arguments,
     required this.definition,
     required this.tester
@@ -367,18 +367,18 @@ class _FunctionExpressionTester extends ExpressionTester {
   @override
   Future<void> run({
     required CellTable scope,
-    required CellExpression expression
+    required ValueSpec spec
   }) async {
-    expect(expression, isA<FunctionExpression>());
+    expect(spec, isA<FunctionExpression>());
 
-    final func = expression as FunctionExpression;
+    final func = spec as FunctionExpression;
 
     tester._scope = func.scope;
     expect(func.arguments, equals(arguments));
 
     definition.test(
         scope: func.scope,
-        expression: func.definition
+        spec: func.definition
     );
 
     for (final arg in arguments) {
