@@ -32,6 +32,7 @@ class CellBuilder {
   /// The built cell is added to the [scope] of this builder.
   CellSpec buildExpression(AstNode expression) {
     final spec = _buildCell(expression);
+
     if (scope.lookup(spec.id) == null) {
       scope.add(spec);
     }
@@ -115,20 +116,34 @@ class CellBuilder {
     final operatorCell = buildExpression(operator);
     final operandCells = operands.map(buildExpression);
 
-    return CellSpec(
+    final id = AppliedCellId(
+        operator: operatorCell.id,
+        operands: operandCells.map((c) => c.id).toList()
+    );
+
+    final existing = scope.lookup(id);
+
+    if (existing?.scope == scope &&
+        existing?.definition is! StubExpression) {
+      return existing!;
+    }
+
+    final spec = CellSpec(
+        id: id,
         scope: scope,
         defined: true,
-
-        id: AppliedCellId(
-            operator: operatorCell.id,
-            operands: operandCells.map((c) => c.id).toList()
-        ),
 
         definition: CellApplication(
             operator: _refCell(buildExpression(operator)),
             operands: operandCells.map(_refCell).toList()
         ),
     );
+
+    if (operandCells.any((o) => o.scope == scope)) {
+      _addCell(spec);
+    }
+
+    return spec;
   }
 
   CellSpec _buildBlock(Block block) {

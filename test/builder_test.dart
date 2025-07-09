@@ -499,6 +499,142 @@ void main() {
                 .hasNamed('delta', local: false)
         )).run());
 
+    test('Shadowing expression cells defined outside function', () =>
+        BuildTester('add(a, b) = a + b;'
+            'x = a + b',
+
+            operators: [
+              Operator(
+                  name: '=',
+                  type: OperatorType.infix,
+                  precedence: 1,
+                  leftAssoc: false
+              ),
+              Operator(
+                  name: '+',
+                  type: OperatorType.infix,
+                  precedence: 5,
+                  leftAssoc: true
+              )
+            ]
+        ).hasNamed('x', tester: ExpressionTester.ref(
+            AppliedCellId(
+                operator: NamedCellId('+'),
+                operands: [
+                  NamedCellId('a'),
+                  NamedCellId('b')
+                ]
+            )
+        )).hasApplication(
+            operator: NamedCellId('+'),
+            operands: [
+              NamedCellId('a'),
+              NamedCellId('b')
+            ],
+
+            tester: ExpressionTester.apply(
+                operator: ExpressionTester.ref(NamedCellId('+')),
+                operands: [
+                  ExpressionTester.ref(NamedCellId('a')),
+                  ExpressionTester.ref(NamedCellId('b'))
+                ]
+            )
+        ).hasNamed('add', tester: ExpressionTester.func(
+            arguments: [NamedCellId('a'), NamedCellId('b')],
+            definition: ExpressionTester.ref(
+              AppliedCellId(
+                operator: NamedCellId('+'),
+                operands: [NamedCellId('a'), NamedCellId('b')]
+              )
+            ),
+            tester: FunctionTester()
+                .hasApplication(
+                  operator: NamedCellId('+'),
+                  operands: [
+                    NamedCellId('a'),
+                    NamedCellId('b')
+                  ],
+
+                  local: true,
+
+                  tester: ExpressionTester.apply(
+                    operator: ExpressionTester.ref(NamedCellId('+')),
+                    operands: [
+                      ExpressionTester.ref(NamedCellId('a')),
+                      ExpressionTester.ref(NamedCellId('b'))
+                    ]
+                  )
+                )
+        )).run());
+
+    test('Shadowing expression cells defined outside function', () =>
+        BuildTester('add(a, b) = a + b;'
+            'x = a + b',
+
+            operators: [
+              Operator(
+                  name: '=',
+                  type: OperatorType.infix,
+                  precedence: 1,
+                  leftAssoc: false
+              ),
+              Operator(
+                  name: '+',
+                  type: OperatorType.infix,
+                  precedence: 5,
+                  leftAssoc: true
+              )
+            ]
+        ).hasNamed('x', tester: ExpressionTester.ref(
+            AppliedCellId(
+                operator: NamedCellId('+'),
+                operands: [
+                  NamedCellId('a'),
+                  NamedCellId('b')
+                ]
+            )
+        )).hasApplication(
+            operator: NamedCellId('+'),
+            operands: [
+              NamedCellId('a'),
+              NamedCellId('b')
+            ],
+
+            tester: ExpressionTester.apply(
+                operator: ExpressionTester.ref(NamedCellId('+')),
+                operands: [
+                  ExpressionTester.ref(NamedCellId('a')),
+                  ExpressionTester.ref(NamedCellId('b'))
+                ]
+            )
+        ).hasNamed('add', tester: ExpressionTester.func(
+            arguments: [NamedCellId('a'), NamedCellId('b')],
+            definition: ExpressionTester.ref(
+                AppliedCellId(
+                    operator: NamedCellId('+'),
+                    operands: [NamedCellId('a'), NamedCellId('b')]
+                )
+            ),
+            tester: FunctionTester()
+                .hasApplication(
+                operator: NamedCellId('+'),
+                operands: [
+                  NamedCellId('a'),
+                  NamedCellId('b')
+                ],
+
+                local: true,
+
+                tester: ExpressionTester.apply(
+                    operator: ExpressionTester.ref(NamedCellId('+')),
+                    operands: [
+                      ExpressionTester.ref(NamedCellId('a')),
+                      ExpressionTester.ref(NamedCellId('b'))
+                    ]
+                )
+            )
+        )).run());
+
     test('Nested functions', () =>
       BuildTester('inc(n) = {'
           'x = add-delta(n)\n'
