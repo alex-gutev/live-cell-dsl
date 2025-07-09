@@ -2,9 +2,9 @@ part of 'cell_spec.dart';
 
 /// Visitor interface for [ValueSpec]s.
 abstract interface class ValueSpecVisitor<R> {
-  R visitStub(StubExpression expression);
+  R visitStub(Stub expression);
   R visitConstant<T>(Constant<T> expression);
-  R visitVariableValue(VariableValue expression);
+  R visitVariable(Variable expression);
   R visitRef(CellRef expression);
   R visitApplication(CellApplication expression);
   R visitDeferred(DeferredExpression expression);
@@ -41,10 +41,10 @@ abstract class ValueSpecTreeVisitor extends ValueSpecVisitor<void> {
   }
 
   @override
-  void visitStub(StubExpression expression) {
+  void visitStub(Stub expression) {
   }
 
   @override
-  void visitVariableValue(VariableValue expression) {
+  void visitVariable(Variable expression) {
   }
 }

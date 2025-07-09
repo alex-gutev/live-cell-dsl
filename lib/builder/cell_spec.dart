@@ -141,16 +141,20 @@ sealed class ValueSpec {
   R accept<R>(ValueSpecVisitor<R> visitor);
 }
 
-/// Represents a cell which hasn't been defined yet
-class StubExpression extends ValueSpec {
-  const StubExpression();
+/// Represents the lack of a definition.
+/// 
+/// This class is used as the definition of a cell when a cell is first
+/// declared but hasn't been defined yet. It is also used as the definition
+/// of cells that represent function arguments.
+class Stub extends ValueSpec {
+  const Stub();
 
   @override
   R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitStub(this);
 }
 
-/// Represents a constant value
+/// Represents a constant [value]
 class Constant<T> extends ValueSpec {
   /// The value
   final T value;
@@ -162,13 +166,15 @@ class Constant<T> extends ValueSpec {
       visitor.visitConstant(this);
 }
 
-/// Represents a cell with a value that can be changed
-class VariableValue extends ValueSpec {
-  const VariableValue();
+/// Represents a variable value definition.
+/// 
+/// This class is used as the definition of mutable cells.
+class Variable extends ValueSpec {
+  const Variable();
 
   @override
   R accept<R>(ValueSpecVisitor<R> visitor) =>
-      visitor.visitVariableValue(this);
+      visitor.visitVariable(this);
 }
 
 /// Base class representing a reference to a cell's value

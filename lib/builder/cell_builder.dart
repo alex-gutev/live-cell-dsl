@@ -58,7 +58,7 @@ class CellBuilder {
         CellSpec(
             id: NamedCellId(name),
             scope: scope,
-            definition: const StubExpression()
+            definition: const Stub()
         ),
 
     Value() =>
@@ -124,7 +124,7 @@ class CellBuilder {
     final existing = scope.lookup(id);
 
     if (existing?.scope == scope &&
-        existing?.definition is! StubExpression) {
+        existing?.definition is! Stub) {
       return existing!;
     }
 
@@ -232,10 +232,10 @@ class CellBuilder {
 
     if (existing != null && existing.scope == scope) {
       switch (existing.definition) {
-        case StubExpression():
+        case Stub():
           break;
 
-        case VariableValue():
+        case Variable():
           return existing;
 
         default:
@@ -249,7 +249,7 @@ class CellBuilder {
     return _addCell(
         CellSpec(
             id: id,
-            definition: const VariableValue(),
+            definition: const Variable(),
             defined: true,
             scope: scope
         )
@@ -324,7 +324,7 @@ class CellBuilder {
               id: arg,
               scope: scope,
               defined: true,
-              definition: StubExpression()
+              definition: Stub()
           )..setAttribute(Attributes.argument, true)
       );
     }
@@ -346,7 +346,7 @@ class CellBuilder {
     final existing = scope.lookup(spec.id);
 
     if (existing != null && existing.scope == scope) {
-      if (existing.definition is! StubExpression || existing.defined) {
+      if (existing.definition is! Stub || existing.defined) {
         throw MultipleDefinitionError(
             id: spec.id,
             line: spec.line ?? 0,
@@ -411,7 +411,7 @@ class CellBuilder {
     final existing = scope.lookup(id);
 
     if (existing != null && existing.scope == scope) {
-      if (existing.definition is! StubExpression) {
+      if (existing.definition is! Stub) {
         throw MultipleDefinitionError(
             id: id,
             line: line,
@@ -428,7 +428,7 @@ class CellBuilder {
       CellSpec(
           id: id,
           defined: true,
-          definition: const StubExpression(),
+          definition: const Stub(),
           scope: scope
       )
     )..setAttribute(Attributes.external, true);
@@ -445,7 +445,7 @@ class CellBuilder {
     final existing = scope.lookup(id);
 
     if (existing != null && existing.scope == scope) {
-      if (existing.definition is! StubExpression) {
+      if (existing.definition is! Stub) {
         throw MultipleDefinitionError(
             id: id,
             line: line,
@@ -468,7 +468,7 @@ class CellBuilder {
             definition: (args) => FunctionExpression(
                 arguments: args,
                 scope: fnScope,
-                definition: const StubExpression()
+                definition: const Stub()
             ),
             line: line,
             column: column

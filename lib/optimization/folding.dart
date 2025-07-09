@@ -49,9 +49,9 @@ class CellFolder {
 
   /// Determine whether a given [spec] represents a constant value.
   bool _isConstant(ValueSpec spec) => switch (spec) {
-    StubExpression() => false,
+    Stub() => false,
     Constant() => true,
-    VariableValue() => false,
+    Variable() => false,
 
     CellRef(get: final cell) => 
         _isFolded(cell),

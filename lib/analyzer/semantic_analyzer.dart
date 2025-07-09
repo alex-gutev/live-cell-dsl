@@ -96,7 +96,7 @@ class _AnalysisVisitor extends ValueSpecTreeVisitor {
   }
 
   @override
-  void visitStub(StubExpression expression) {
+  void visitStub(Stub expression) {
     if (!cell.isExternal() && !cell.isArgument()) {
       throw UndefinedCellError(cell);
     }

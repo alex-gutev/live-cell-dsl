@@ -203,7 +203,7 @@ class FunctionTester extends BuildTester {
 sealed class SpecTester {
   SpecTester();
 
-  /// Create a tester that tests [StubExpression]s.
+  /// Create a tester that tests [Stub]s.
   factory SpecTester.stub() = _StubExpressionTester;
 
   /// Create a tester that tests [CellRef]s.
@@ -236,7 +236,7 @@ sealed class SpecTester {
     required FunctionTester tester
   }) = _FunctionTester;
 
-  /// Create a test that tests [VariableValue]s.
+  /// Create a test that tests [Variable]s.
   factory SpecTester.variable() = _VariableTester;
 
   /// Run the test on a given cell definition [spec].
@@ -272,7 +272,7 @@ class _StubExpressionTester extends SpecTester {
     required CellTable scope,
     required ValueSpec spec
   }) async =>
-      spec is StubExpression;
+      spec is Stub;
 }
 
 /// [CellRef] expression tester
@@ -342,13 +342,13 @@ class _ConstantTester extends SpecTester {
   }
 }
 
-/// [VariableValue] tester
+/// [Variable] tester
 class _VariableTester extends SpecTester {
   @override
   Future<void> run({
     required CellTable scope,
     required ValueSpec spec
-  }) async => spec is VariableValue;
+  }) async => spec is Variable;
 }
 
 /// [FunctionExpression] tester
