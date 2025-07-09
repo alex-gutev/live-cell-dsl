@@ -1,4 +1,5 @@
 import '../builder/index.dart';
+import '../common/pipeline.dart';
 
 /// Determines which cells can be folded.
 /// 
@@ -9,16 +10,15 @@ import '../builder/index.dart';
 /// attribute named by [Attributes.fold] is set to true for those cells, which
 /// can be folded. For those cells, which shouldn't be folded, the attribute
 /// is set to false.
-class CellFolder {
+class CellFolder implements Operation {
   /// The scope to analyze
-  final CellTable scope;
-  
-  CellFolder({
-    required this.scope
-  });
+  late final CellTable scope;
 
   /// Perform cell folding analysis
-  void run() {
+  @override
+  void run(CellTable scope) {
+    this.scope = scope;
+
     for (final cell in scope.cells) {
       _visitCell(cell);
     }
@@ -79,10 +79,7 @@ class CellFolder {
 class _FunctionAnalysisVisitor extends ValueSpecTreeVisitor {
   @override
   void visitFunction(FunctionSpec spec) {
-    final folder = CellFolder(
-        scope: spec.scope
-    );
-
-    folder.run();
+    final folder = CellFolder();
+    folder.run(spec.scope);
   }
 }

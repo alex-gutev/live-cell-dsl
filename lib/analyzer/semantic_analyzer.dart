@@ -1,3 +1,4 @@
+import '../common/pipeline.dart';
 import 'exceptions.dart';
 import '../builder/index.dart';
 
@@ -6,16 +7,14 @@ import '../builder/index.dart';
 /// This class ensures the following:
 /// 
 /// 1. There are no circular definitions e.g. `a = b + 1; b = a + 2`
-class SemanticAnalyzer {
+class SemanticAnalyzer implements Operation {
   /// The scope on which to perform semantic analysis.
-  final CellTable scope;
+  late final CellTable scope;
 
-  SemanticAnalyzer({
-    required this.scope
-  });
+  @override
+  void run(CellTable scope) {
+    this.scope = scope;
 
-  /// Perform semantic analysis on the cells defined in [scope].
-  void analyze() {
     // TODO: Check that all functions are called with correct number of arguments
     _checkCycles();
   }
@@ -111,7 +110,7 @@ class _AnalysisVisitor extends ValueSpecTreeVisitor {
 class _FunctionAnalysisVisitor extends ValueSpecTreeVisitor {
   @override
   void visitFunction(FunctionSpec spec) {
-    final analyzer = SemanticAnalyzer(scope: spec.scope);
-    analyzer.analyze();
+    final analyzer = SemanticAnalyzer();
+    analyzer.run(spec.scope);
   }
 }

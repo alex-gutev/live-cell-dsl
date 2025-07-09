@@ -130,11 +130,9 @@ class BuildTester {
   Future<void> analyze() async {
     await run();
 
-    final analyzer = SemanticAnalyzer(
-        scope: scope
-    );
+    final analyzer = SemanticAnalyzer();
 
-    analyzer.analyze();
+    analyzer.run(scope);
   }
 }
 
