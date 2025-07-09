@@ -225,14 +225,14 @@ abstract class DeferredSpec extends ValueSpec {
 }
 
 /// Represents a function definition
-class FunctionExpression extends ValueSpec {
+class FunctionSpec extends ValueSpec {
   /// List of argument cell identifiers
   final List<CellId> arguments;
 
   /// The function's local scope
   final CellTable scope;
 
-  /// Expression defining the result of the function
+  /// Specification defining the result of the function
   final ValueSpec definition;
 
   /// Set of cells referenced by this function
@@ -253,7 +253,7 @@ class FunctionExpression extends ValueSpec {
     return _external!;
   }
 
-  FunctionExpression({
+  FunctionSpec({
     required this.arguments,
     required this.scope,
     required this.definition
@@ -292,7 +292,7 @@ class _ExternalCellVisitor extends ValueSpecTreeVisitor {
   }
 
   @override
-  void visitFunction(FunctionExpression expression) {
+  void visitFunction(FunctionSpec expression) {
     external.addAll(
         expression.referencedCells
             .where((c) => c.scope != scope)

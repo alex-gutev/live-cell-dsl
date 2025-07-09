@@ -65,7 +65,7 @@ class CellFolder {
     DeferredSpec() => 
         _isConstant(spec.build()),
   
-    FunctionExpression() => true,
+    FunctionSpec() => true,
   };
 
   /// Determine whether a given [cell] can be folded.
@@ -75,10 +75,10 @@ class CellFolder {
   }
 }
 
-/// Visitor that performs cell folding analysis in the local scope of a [FunctionExpression].
+/// Visitor that performs cell folding analysis in the local scope of a [FunctionSpec].
 class _FunctionAnalysisVisitor extends ValueSpecTreeVisitor {
   @override
-  void visitFunction(FunctionExpression expression) {
+  void visitFunction(FunctionSpec expression) {
     final folder = CellFolder(
         scope: expression.scope
     );

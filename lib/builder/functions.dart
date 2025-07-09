@@ -27,7 +27,7 @@ class DeferredFunctionDefinition extends DeferredSpec {
       final valueCell = builder.buildExpression(definition);
       builder.finalize();
 
-      _builtDefinition = FunctionExpression(
+      _builtDefinition = FunctionSpec(
           arguments: arguments,
           scope: scope,
           definition: _NamedCellRef(
@@ -41,5 +41,5 @@ class DeferredFunctionDefinition extends DeferredSpec {
   }
 
   /// The built cell definition
-  FunctionExpression? _builtDefinition;
+  FunctionSpec? _builtDefinition;
 }

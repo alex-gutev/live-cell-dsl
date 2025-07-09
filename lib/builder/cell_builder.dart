@@ -465,7 +465,7 @@ class CellBuilder {
             name: name,
             arguments: arguments,
             scope: fnScope,
-            definition: (args) => FunctionExpression(
+            definition: (args) => FunctionSpec(
                 arguments: args,
                 scope: fnScope,
                 definition: const Stub()

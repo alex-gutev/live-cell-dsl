@@ -224,12 +224,12 @@ sealed class SpecTester {
   /// Create a tester that checks whether a [ValueSpec] is a constant [value].
   factory SpecTester.value(value) = _ConstantTester;
 
-  /// Create a tester that tests [FunctionExpression]s.
+  /// Create a tester that tests [FunctionSpec]s.
   ///
-  /// This testers tests that the expressions is a [FunctionExpression] defining
-  /// a function with a given list of [arguments]. The tester [definition] is
-  /// used to test the [ValueSpec] defining the function and [tester] is run
-  /// to test the cells local to the function.
+  /// This testers checks that the definition of the cell is a [FunctionSpec]
+  /// defining a function with a given list of [arguments]. The tester
+  /// [definition] is used to test the [ValueSpec] defining the function and
+  /// [tester] is run to test the cells local to the function.
   factory SpecTester.func({
     required List<CellId> arguments,
     required SpecTester definition,
@@ -351,7 +351,7 @@ class _VariableTester extends SpecTester {
   }) async => spec is Variable;
 }
 
-/// [FunctionExpression] tester
+/// [FunctionSpec] tester
 class _FunctionTester extends SpecTester {
   final List<CellId> arguments;
   final SpecTester definition;
@@ -369,9 +369,9 @@ class _FunctionTester extends SpecTester {
     required CellTable scope,
     required ValueSpec spec
   }) async {
-    expect(spec, isA<FunctionExpression>());
+    expect(spec, isA<FunctionSpec>());
 
-    final func = spec as FunctionExpression;
+    final func = spec as FunctionSpec;
 
     tester._scope = func.scope;
     expect(func.arguments, equals(arguments));
