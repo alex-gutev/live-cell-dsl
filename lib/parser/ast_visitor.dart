@@ -4,7 +4,7 @@ part of 'ast.dart';
 abstract interface class AstVisitor<R> {
   R visitName(Name expression);
   R visitConstant<T>(Constant<T> expression);
-  R visitOperation(Operation expression);
+  R visitApplication(Application expression);
   R visitBlock(Block expression);
 }
 
@@ -28,7 +28,7 @@ abstract class ConstantVisitor<R> implements AstVisitor<R> {
   }
 
   @override
-  R visitOperation(Operation expression) {
+  R visitApplication(Application expression) {
     throw UnimplementedError();
   }
 

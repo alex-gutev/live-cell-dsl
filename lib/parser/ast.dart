@@ -67,33 +67,33 @@ class Constant<T> extends AstNode {
   int get hashCode => _$ConstantHashCode(this);
 }
 
-/// Expression representing an [operator] applied to one or more arguments
+/// Represents the application of an [operator] to one or more [operands].
 @DataClass()
-class Operation extends AstNode {
-  /// The expression operator
+class Application extends AstNode {
+  /// The application operator
   final AstNode operator;
 
-  /// List of arguments on which [operator] is applied
+  /// List of operands on which [operator] is applied
   @listField
-  final List<AstNode> args;
+  final List<AstNode> operands;
 
-  const Operation({
+  const Application({
     required this.operator,
-    required this.args,
+    required this.operands,
     super.line = 0,
     super.column = 0
   });
 
   @override
   R accept<R>(AstVisitor<R> visitor) =>
-      visitor.visitOperation(this);
+      visitor.visitApplication(this);
 
   @override
   bool operator ==(Object other) =>
-      _$OperationEquals(this, other);
+      _$ApplicationEquals(this, other);
 
   @override
-  int get hashCode => _$OperationHashCode(this);
+  int get hashCode => _$ApplicationHashCode(this);
 }
 
 /// A block of multiple [expressions]

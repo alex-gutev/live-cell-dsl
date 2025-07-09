@@ -65,44 +65,44 @@ class CellBuilder {
         expression.accept(_ConstantCellVisitor()),
 
     // TODO: Match proper definition operator
-    Operation(
+    Application(
       operator: Name(name: '='),
-      :final args,
+      :final operands,
       :final line,
       :final column
     ) => _addCell(_buildDefinition(
-        operands: args,
+        operands: operands,
         line: line,
         column: column
     )),
 
     // TODO: Match proper var keyword
-    Operation(
+    Application(
       operator: Name(name: 'var'),
-      :final args,
+      :final operands,
       :final line,
       :final column
     ) => _addVarCell(
-      operands: args,
+      operands: operands,
       line: line,
       column: column
     ),
 
-    Operation(
+    Application(
       operator: Name(name: 'external'),
-      :final args,
+      :final operands,
       :final line,
       :final column
     ) => _markExternalCell(
-      args: args,
+      args: operands,
       line: line,
       column: column
     ),
 
-    Operation(:final operator, :final args) =>
+    Application(:final operator, :final operands) =>
         _buildAppliedCell(
             operator: operator,
-            operands: args
+            operands: operands
         ),
 
     Block() => _buildBlock(expression),
@@ -180,9 +180,9 @@ class CellBuilder {
         ),
 
     [
-      Operation(
+      Application(
         operator: Name(:final name),
-        args: final arguments,
+        operands: final arguments,
       ),
       final definition
     ] => _buildFunctionDefinition(
@@ -382,15 +382,15 @@ class CellBuilder {
     ),
 
     [
-      Operation(
+      Application(
         operator: Name(:final name),
-        :final args,
+        :final operands,
         :final line,
         :final column
       )
     ] => _addExternalFunction(
       name: name,
-      arguments: args,
+      arguments: operands,
       line: line,
       column: column
     ),

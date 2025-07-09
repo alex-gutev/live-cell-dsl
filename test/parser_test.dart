@@ -52,9 +52,9 @@ void main() {
     test('Application with one argument', () => testParser(
       'fn(arg1)',
       [
-        Operation(
+        Application(
             operator: Name('fn'),
-            args: [Name('arg1')]
+            operands: [Name('arg1')]
         )
       ]
     ));
@@ -62,9 +62,9 @@ void main() {
     test('Application with multiple arguments', () => testParser(
       'fn2(\nan-arg,234\n, another-arg)',
       [
-        Operation(
+        Application(
             operator: Name('fn2'),
-            args: [
+            operands: [
               Name('an-arg'),
               Constant(234),
               Name('another-arg')
@@ -76,13 +76,13 @@ void main() {
     test('Nested application expressions', () => testParser(
       'op(arg1, fn(arg2,\n3), "x")',
       [
-        Operation(
+        Application(
           operator: Name('op'),
-          args: [
+          operands: [
             Name('arg1'),
-            Operation(
+            Application(
                 operator: Name('fn'),
-                args: [
+                operands: [
                   Name('arg2'),
                   Constant(3)
                 ]
@@ -96,17 +96,17 @@ void main() {
     test('Expression as operator', () => testParser(
       'fn1(a, b, c)(arg1, "value", arg2)',
       [
-        Operation(
-          operator: Operation(
+        Application(
+          operator: Application(
               operator: Name('fn1'),
-              args: [
+              operands: [
                 Name('a'),
                 Name('b'),
                 Name('c')
               ]
           ),
 
-          args: [
+          operands: [
             Name('arg1'),
             Constant("value"),
             Name('arg2')
@@ -152,9 +152,9 @@ void main() {
     test('Parenthesized application', () => testParser(
       '(fn(a, b, c))',
       [
-        Operation(
+        Application(
           operator: Name('fn'),
-          args: [
+          operands: [
             Name('a'),
             Name('b'),
             Name('c')
@@ -166,9 +166,9 @@ void main() {
     test('Parenthesized application operands', () => testParser(
       'fn((a), b)',
       [
-        Operation(
+        Application(
           operator: Name('fn'),
-          args: [
+          operands: [
             Name('a'),
             Name('b')
           ]
@@ -186,9 +186,9 @@ void main() {
     test('Soft terminators ignored in parenthesis', () => testParser(
       '(fn\n(a))',
       [
-        Operation(
+        Application(
           operator: Name('fn'),
-          args: [
+          operands: [
             Name('a')
           ]
         )
@@ -217,9 +217,9 @@ void main() {
       [
         Block(
           expressions: [
-            Operation(
+            Application(
               operator: Name('fn'),
-              args: [
+              operands: [
                 Name('x'),
                 Name('y')
               ]
@@ -234,27 +234,27 @@ void main() {
       [
         Block(
           expressions: [
-            Operation(
+            Application(
                 operator: Name('fn'),
-                args: [
+                operands: [
                   Name('a'),
                   Name('b'),
                   Name('c')
                 ]
             ),
 
-            Operation(
+            Application(
                 operator: Name('g'),
-                args: [
+                operands: [
                   Name('x')
                 ]
             ),
 
             Constant(123),
 
-            Operation(
+            Application(
                 operator: Name('u'),
-                args: [
+                operands: [
                   Name('arg1'),
                   Name('arg2')
                 ]
@@ -269,27 +269,27 @@ void main() {
         [
           Block(
               expressions: [
-                Operation(
+                Application(
                     operator: Name('fn'),
-                    args: [
+                    operands: [
                       Name('a'),
                       Name('b'),
                       Name('c')
                     ]
                 ),
 
-                Operation(
+                Application(
                     operator: Name('g'),
-                    args: [
+                    operands: [
                       Name('x')
                     ]
                 ),
 
                 Constant(123),
 
-                Operation(
+                Application(
                     operator: Name('u'),
-                    args: [
+                    operands: [
                       Name('arg1'),
                       Name('arg2')
                     ]
@@ -304,25 +304,25 @@ void main() {
         [
           Block(
               expressions: [
-                Operation(
+                Application(
                   operator: Name('f1'),
-                  args: [
+                  operands: [
                     Name('a1')
                   ]
                 ),
 
                 Block(
                   expressions: [
-                    Operation(
+                    Application(
                         operator: Name('f2'),
-                        args: [
+                        operands: [
                           Name('a1'),
                           Name('a2')
                         ]
                     ),
-                    Operation(
+                    Application(
                         operator: Name('add'),
-                        args: [
+                        operands: [
                           Name('x'),
                           Name('y')
                         ]
@@ -330,9 +330,9 @@ void main() {
                   ]
                 ),
 
-                Operation(
+                Application(
                     operator: Name('f3'),
-                    args: [
+                    operands: [
                       Constant("1"),
                       Name('x')
                     ]
@@ -360,9 +360,9 @@ void main() {
     test('Single operator', () => testParser(
       'a + b',
       [
-        Operation(
+        Application(
             operator: Name('+'),
-            args: [
+            operands: [
               Name('a'),
               Name('b')
             ]
@@ -382,19 +382,19 @@ void main() {
     test('Multiple operators with varying precedence', () => testParser(
         'a * b + c / d',
         [
-          Operation(
+          Application(
             operator: Name('+'),
-            args: [
-              Operation(
+            operands: [
+              Application(
                   operator: Name('*'),
-                  args: [
+                  operands: [
                     Name('a'),
                     Name('b')
                   ]
               ),
-              Operation(
+              Application(
                   operator: Name('/'),
-                  args: [
+                  operands: [
                     Name('c'),
                     Name('d')
                   ]
@@ -428,15 +428,15 @@ void main() {
     test('Left associativity', () => testParser(
         'a + b + c + d',
         [
-          Operation(
+          Application(
               operator: Name('+'),
-              args: [
-                Operation(
+              operands: [
+                Application(
                   operator: Name('+'),
-                  args: [
-                    Operation(
+                  operands: [
+                    Application(
                       operator: Name('+'),
-                      args: [
+                      operands: [
                         Name('a'),
                         Name('b')
                       ]
@@ -462,17 +462,17 @@ void main() {
     test('Right associativity', () => testParser(
         'a + b + c + d',
         [
-          Operation(
+          Application(
               operator: Name('+'),
-              args: [
+              operands: [
                 Name('a'),
-                Operation(
+                Application(
                     operator: Name('+'),
-                    args: [
+                    operands: [
                       Name('b'),
-                      Operation(
+                      Application(
                           operator: Name('+'),
-                          args: [
+                          operands: [
                             Name('c'),
                             Name('d')
                           ]
@@ -496,16 +496,16 @@ void main() {
     test('Controlling precedence with parenthesis', () => testParser(
         'a * (b + c) / d',
         [
-          Operation(
+          Application(
               operator: Name('/'),
-              args: [
-                Operation(
+              operands: [
+                Application(
                     operator: Name('*'),
-                    args: [
+                    operands: [
                       Name('a'),
-                      Operation(
+                      Application(
                           operator: Name('+'),
-                          args: [
+                          operands: [
                             Name('b'),
                             Name('c')
                           ]
@@ -542,16 +542,16 @@ void main() {
     test('Controlling associativity with parenthesis', () => testParser(
         'a + (b + c) + d',
         [
-          Operation(
+          Application(
               operator: Name('+'),
-              args: [
-                Operation(
+              operands: [
+                Application(
                     operator: Name('+'),
-                    args: [
+                    operands: [
                       Name('a'),
-                      Operation(
+                      Application(
                           operator: Name('+'),
-                          args: [
+                          operands: [
                             Name('b'),
                             Name('c')
                           ]
@@ -576,28 +576,28 @@ void main() {
     test('Application as infix operator operand', () => testParser(
         'a * b + f(c) / g(d, e)',
         [
-          Operation(
+          Application(
               operator: Name('+'),
-              args: [
-                Operation(
+              operands: [
+                Application(
                     operator: Name('*'),
-                    args: [
+                    operands: [
                       Name('a'),
                       Name('b')
                     ]
                 ),
-                Operation(
+                Application(
                     operator: Name('/'),
-                    args: [
-                      Operation(
+                    operands: [
+                      Application(
                           operator: Name('f'),
-                          args: [
+                          operands: [
                             Name('c')
                           ]
                       ),
-                      Operation(
+                      Application(
                           operator: Name('g'),
-                          args: [
+                          operands: [
                             Name('d'),
                             Name('e')
                           ]
@@ -633,9 +633,9 @@ void main() {
     test('Infix operator as operand', () => testParser(
         'a + +',
         [
-          Operation(
+          Application(
               operator: Name('+'),
-              args: [
+              operands: [
                 Name('a'),
                 Name('+')
               ]
@@ -654,19 +654,19 @@ void main() {
     test('Soft terminators ignored in parenthesis', () => testParser(
         '(a * b\n + c /\n\n d)',
         [
-          Operation(
+          Application(
               operator: Name('+'),
-              args: [
-                Operation(
+              operands: [
+                Application(
                     operator: Name('*'),
-                    args: [
+                    operands: [
                       Name('a'),
                       Name('b')
                     ]
                 ),
-                Operation(
+                Application(
                     operator: Name('/'),
-                    args: [
+                    operands: [
                       Name('c'),
                       Name('d')
                     ]
@@ -700,24 +700,24 @@ void main() {
     test('Blocks as operands', () => testParser(
         'inc(n) = { next = n + 1; next}',
         [
-          Operation(
+          Application(
             operator: Name('='),
-            args: [
-              Operation(
+            operands: [
+              Application(
                 operator: Name('inc'),
-                args: [
+                operands: [
                   Name('n')
                 ]
               ),
               Block(
                 expressions: [
-                  Operation(
+                  Application(
                       operator: Name('='),
-                      args: [
+                      operands: [
                         Name('next'),
-                        Operation(
+                        Application(
                           operator: Name('+'),
-                          args: [
+                          operands: [
                             Name('n'),
                             Constant(1)
                           ]

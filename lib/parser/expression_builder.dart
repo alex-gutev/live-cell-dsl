@@ -59,9 +59,9 @@ class ExpressionBuilder {
         final rhs = _popExpression();
         final lhs = _popExpression();
 
-        return Operation(
+        return Application(
             operator: Name(name),
-            args: [
+            operands: [
               lhs,
               rhs
             ],

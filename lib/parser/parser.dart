@@ -226,9 +226,9 @@ class _Parser {
     var op = await _parseSubExpression();
 
     while (_current is ParenOpen) {
-      op = Operation(
+      op = Application(
           operator: op,
-          args: await _parseArgList(),
+          operands: await _parseArgList(),
           line: op.line,
           column: op.column
       );
