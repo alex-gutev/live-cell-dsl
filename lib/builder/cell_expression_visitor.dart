@@ -3,7 +3,7 @@ part of 'cell_spec.dart';
 /// Visitor interface for [CellExpression]s.
 abstract interface class CellExpressionVisitor<R> {
   R visitStub(StubExpression expression);
-  R visitConstantValue<T>(ConstantValue<T> expression);
+  R visitConstant<T>(Constant<T> expression);
   R visitVariableValue(VariableValue expression);
   R visitRef(CellRef expression);
   R visitApplication(CellApplication expression);
@@ -23,7 +23,7 @@ abstract class CellExpressionTreeVisitor extends CellExpressionVisitor<void> {
   }
 
   @override
-  void visitConstantValue<T>(ConstantValue<T> expression) {
+  void visitConstant<T>(Constant<T> expression) {
   }
 
   @override

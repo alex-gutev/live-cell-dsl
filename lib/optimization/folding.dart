@@ -50,7 +50,7 @@ class CellFolder {
   /// Determine whether a given [expression] evaluates to a constant value.
   bool _isConstant(CellExpression expression) => switch (expression) {
     StubExpression() => false,
-    ConstantValue() => true,
+    Constant() => true,
     VariableValue() => false,
 
     CellRef(get: final cell) => 

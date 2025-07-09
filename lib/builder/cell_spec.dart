@@ -55,7 +55,7 @@ class AppliedCellId extends CellId {
 /// Identifies a constant value
 ///
 /// This isn't used to identify a cell, but represents constant values where
-/// a cell is expected.
+/// a [CellId] is expected.
 class ValueCellId extends CellId {
   final dynamic value;
 
@@ -78,7 +78,7 @@ class CellSpec {
   /// Cell identifier
   final CellId id;
 
-  /// The specified definition of the cell
+  /// Expression defining how the cell's value is computed
   final CellExpression definition;
 
   /// The scope in which this cell is defined
@@ -129,7 +129,7 @@ class ValueCellSpec extends CellSpec {
   /// Create a [ValueCellSpec] holding a given constant [value].
   static ValueCellSpec forValue<T>(T value) => ValueCellSpec(
       id: ValueCellId(value),
-      definition: ConstantValue(value)
+      definition: Constant(value)
   );
 }
 
@@ -151,15 +151,15 @@ class StubExpression extends CellExpression {
 }
 
 /// Represents a constant value
-class ConstantValue<T> extends CellExpression {
+class Constant<T> extends CellExpression {
   /// The value
   final T value;
 
-  const ConstantValue(this.value);
+  const Constant(this.value);
 
   @override
   R accept<R>(CellExpressionVisitor<R> visitor) =>
-      visitor.visitConstantValue(this);
+      visitor.visitConstant(this);
 }
 
 /// Represents a cell with a value that can be changed

@@ -326,7 +326,7 @@ class _ApplyExpressionTester extends ExpressionTester {
   }
 }
 
-/// [ConstantValue] expression tester
+/// [Constant] expression tester
 class _ValueExpressionTester extends ExpressionTester {
   final dynamic value;
 
@@ -337,8 +337,8 @@ class _ValueExpressionTester extends ExpressionTester {
     required CellTable scope,
     required CellExpression expression
   }) async {
-    expect(expression, isA<ConstantValue>());
-    expect((expression as ConstantValue).value, equals(value));
+    expect(expression, isA<Constant>());
+    expect((expression as Constant).value, equals(value));
   }
 }
 
