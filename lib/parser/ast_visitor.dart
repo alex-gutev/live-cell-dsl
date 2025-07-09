@@ -3,24 +3,24 @@ part of 'ast.dart';
 /// Visitor interface for [AstNode] objects
 abstract interface class AstVisitor<R> {
   R visitName(Name expression);
-  R visitConstant<T>(Constant<T> expression);
+  R visitValue<T>(Value<T> expression);
   R visitApplication(Application expression);
   R visitBlock(Block expression);
 }
 
-/// Visitor for [Constant] nodes.
+/// Visitor for [Value] nodes.
 ///
-/// The only method that needs to be implemented is [visitConstant]. The
+/// The only method that needs to be implemented is [visitValue]. The
 /// remaining methods throw [UnimplementedError] if called.
 ///
 /// Extend this class, instead of implementing [AstVisitor], when you're
-/// only interested in visiting [Constant] nodes.
+/// only interested in visiting [Value] nodes.
 abstract class ConstantVisitor<R> implements AstVisitor<R> {
-  /// Visit a [Constant] node.
+  /// Visit a [Value] node.
   ///
   /// Only this method needs to be implemented by subclasses.
   @override
-  R visitConstant<T>(Constant<T> expression);
+  R visitValue<T>(Value<T> expression);
 
   @override
   R visitName(Name expression) {

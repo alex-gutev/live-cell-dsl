@@ -61,7 +61,7 @@ class CellBuilder {
             definition: const StubExpression()
         ),
 
-    Constant() =>
+    Value() =>
         expression.accept(_ConstantCellVisitor()),
 
     // TODO: Match proper definition operator
@@ -506,9 +506,9 @@ class _NamedCellRef extends CellRef {
   CellSpec get get => table.get(id);
 }
 
-/// Converts a [Constant] expression to a [CellSpec].
+/// Converts a [Value] node to a [CellSpec].
 class _ConstantCellVisitor extends ConstantVisitor<CellSpec> {
   @override
-  CellSpec visitConstant<T>(Constant<T> expression) =>
+  CellSpec visitValue<T>(Value<T> expression) =>
       ValueCellSpec.forValue(expression.value);
 }

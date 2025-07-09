@@ -40,9 +40,9 @@ void main() {
     test('Literals', () => testParser(
         '123; 2.125\n "hello world"\n an-identifier',
         [
-          Constant(123),
-          Constant(2.125),
-          Constant('hello world'),
+          Value(123),
+          Value(2.125),
+          Value('hello world'),
           Name('an-identifier')
         ]
     ));
@@ -66,7 +66,7 @@ void main() {
             operator: Name('fn2'),
             operands: [
               Name('an-arg'),
-              Constant(234),
+              Value(234),
               Name('another-arg')
             ]
         )
@@ -84,10 +84,10 @@ void main() {
                 operator: Name('fn'),
                 operands: [
                   Name('arg2'),
-                  Constant(3)
+                  Value(3)
                 ]
             ),
-            Constant("x")
+            Value("x")
           ]
         )
       ]
@@ -108,7 +108,7 @@ void main() {
 
           operands: [
             Name('arg1'),
-            Constant("value"),
+            Value("value"),
             Name('arg2')
           ]
         )
@@ -145,7 +145,7 @@ void main() {
     test('Parenthesized literal', () => testParser(
         '(1234)',
         [
-          Constant(1234)
+          Value(1234)
         ]
       ));
 
@@ -250,7 +250,7 @@ void main() {
                 ]
             ),
 
-            Constant(123),
+            Value(123),
 
             Application(
                 operator: Name('u'),
@@ -285,7 +285,7 @@ void main() {
                     ]
                 ),
 
-                Constant(123),
+                Value(123),
 
                 Application(
                     operator: Name('u'),
@@ -333,7 +333,7 @@ void main() {
                 Application(
                     operator: Name('f3'),
                     operands: [
-                      Constant("1"),
+                      Value("1"),
                       Name('x')
                     ]
                 )
@@ -719,7 +719,7 @@ void main() {
                           operator: Name('+'),
                           operands: [
                             Name('n'),
-                            Constant(1)
+                            Value(1)
                           ]
                         )
                       ]

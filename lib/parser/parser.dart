@@ -353,13 +353,13 @@ class _Parser {
   }
 }
 
-/// Converts a [Literal] to a [Constant] holding the same value.
+/// Converts a [Literal] to a [Value] holding the same value.
 ///
 /// *NOTE*: This visitor is necessary to preserve the [Literal]'s type.
 class _LiteralToConstantVisitor extends LiteralVisitor<AstNode> {
   @override
   AstNode visitLiteral<T>(Literal<T> token) =>
-      Constant<T>(token.value,
+      Value<T>(token.value,
         line: token.line,
         column: token.column
       );

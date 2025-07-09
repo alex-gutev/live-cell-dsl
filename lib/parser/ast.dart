@@ -44,27 +44,27 @@ class Name extends AstNode {
   int get hashCode => _$NameHashCode(this);
 }
 
-/// Expression representing a literal constant value
+/// Represents a literal value
 @DataClass()
-class Constant<T> extends AstNode {
-  /// The constant value
+class Value<T> extends AstNode {
+  /// The value
   final T value;
 
-  const Constant(this.value, {
+  const Value(this.value, {
     super.line = 0,
     super.column = 0
   });
 
   @override
   R accept<R>(AstVisitor<R> visitor) =>
-      visitor.visitConstant<T>(this);
+      visitor.visitValue<T>(this);
 
   @override
   bool operator ==(Object other) =>
-      _$ConstantEquals(this, other);
+      _$ValueEquals(this, other);
 
   @override
-  int get hashCode => _$ConstantHashCode(this);
+  int get hashCode => _$ValueHashCode(this);
 }
 
 /// Represents the application of an [operator] to one or more [operands].
