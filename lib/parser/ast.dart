@@ -21,27 +21,27 @@ sealed class AstNode {
   R accept<R>(AstVisitor<R> visitor);
 }
 
-/// Expression representing a reference to a named cell
+/// Represents a reference by a named identifier
 @DataClass()
-class NamedCell extends AstNode {
-  /// The name of the cell
+class Name extends AstNode {
+  /// The identifier
   final String name;
 
-  const NamedCell(this.name, {
+  const Name(this.name, {
     super.line = 0,
     super.column = 0
   });
 
   @override
   R accept<R>(AstVisitor<R> visitor) =>
-      visitor.visitNamedCell(this);
+      visitor.visitName(this);
 
   @override
   bool operator ==(Object other) =>
-      _$NamedCellEquals(this, other);
+      _$NameEquals(this, other);
 
   @override
-  int get hashCode => _$NamedCellHashCode(this);
+  int get hashCode => _$NameHashCode(this);
 }
 
 /// Expression representing a literal constant value

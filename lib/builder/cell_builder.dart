@@ -54,7 +54,7 @@ class CellBuilder {
 
   /// Build a cell from a given [expression].
   CellSpec _buildCell(AstNode expression) => switch (expression) {
-    NamedCell(:final name) =>
+    Name(:final name) =>
         CellSpec(
             id: NamedCellId(name),
             scope: scope,
@@ -66,7 +66,7 @@ class CellBuilder {
 
     // TODO: Match proper definition operator
     Operation(
-      operator: NamedCell(name: '='),
+      operator: Name(name: '='),
       :final args,
       :final line,
       :final column
@@ -78,7 +78,7 @@ class CellBuilder {
 
     // TODO: Match proper var keyword
     Operation(
-      operator: NamedCell(name: 'var'),
+      operator: Name(name: 'var'),
       :final args,
       :final line,
       :final column
@@ -89,7 +89,7 @@ class CellBuilder {
     ),
 
     Operation(
-      operator: NamedCell(name: 'external'),
+      operator: Name(name: 'external'),
       :final args,
       :final line,
       :final column
@@ -173,7 +173,7 @@ class CellBuilder {
     required int line,
     required int column
   }) => switch (operands) {
-    [NamedCell(:final name), final definition] =>
+    [Name(:final name), final definition] =>
         _buildCellDefinition(
             name: name,
             definition: definition
@@ -181,7 +181,7 @@ class CellBuilder {
 
     [
       Operation(
-        operator: NamedCell(:final name),
+        operator: Name(:final name),
         args: final arguments,
       ),
       final definition
@@ -204,7 +204,7 @@ class CellBuilder {
     required int column
   }) => switch (operands) {
     [
-      NamedCell(
+      Name(
           :final name,
           :final line,
           :final column
@@ -310,7 +310,7 @@ class CellBuilder {
     required int column
   }) {
     final argCells = arguments.map((arg) => switch(arg) {
-      NamedCell(:final name) => NamedCellId(name),
+      Name(:final name) => NamedCellId(name),
 
       _ => throw MalformedFunctionArgumentListError(
           line: arg.line,
@@ -370,7 +370,7 @@ class CellBuilder {
     required int column
   }) => switch (args) {
     [
-      NamedCell(
+      Name(
         :final name,
         :final line,
         :final column
@@ -383,7 +383,7 @@ class CellBuilder {
 
     [
       Operation(
-        operator: NamedCell(:final name),
+        operator: Name(:final name),
         :final args,
         :final line,
         :final column

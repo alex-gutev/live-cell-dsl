@@ -242,7 +242,7 @@ class _Parser {
     switch (_current) {
       case IdToken(:final name, :final line, :final column):
         await _advance();
-        return NamedCell(name,
+        return Name(name,
           line: line,
           column: column
         );

@@ -29,10 +29,10 @@ void main() {
       await testParser(
           'a; bc; var1\nvar2',
         [
-          NamedCell('a'),
-          NamedCell('bc'),
-          NamedCell('var1'),
-          NamedCell('var2')
+          Name('a'),
+          Name('bc'),
+          Name('var1'),
+          Name('var2')
         ]
       );
     });
@@ -43,7 +43,7 @@ void main() {
           Constant(123),
           Constant(2.125),
           Constant('hello world'),
-          NamedCell('an-identifier')
+          Name('an-identifier')
         ]
     ));
   });
@@ -53,8 +53,8 @@ void main() {
       'fn(arg1)',
       [
         Operation(
-            operator: NamedCell('fn'),
-            args: [NamedCell('arg1')]
+            operator: Name('fn'),
+            args: [Name('arg1')]
         )
       ]
     ));
@@ -63,11 +63,11 @@ void main() {
       'fn2(\nan-arg,234\n, another-arg)',
       [
         Operation(
-            operator: NamedCell('fn2'),
+            operator: Name('fn2'),
             args: [
-              NamedCell('an-arg'),
+              Name('an-arg'),
               Constant(234),
-              NamedCell('another-arg')
+              Name('another-arg')
             ]
         )
       ]
@@ -77,13 +77,13 @@ void main() {
       'op(arg1, fn(arg2,\n3), "x")',
       [
         Operation(
-          operator: NamedCell('op'),
+          operator: Name('op'),
           args: [
-            NamedCell('arg1'),
+            Name('arg1'),
             Operation(
-                operator: NamedCell('fn'),
+                operator: Name('fn'),
                 args: [
-                  NamedCell('arg2'),
+                  Name('arg2'),
                   Constant(3)
                 ]
             ),
@@ -98,18 +98,18 @@ void main() {
       [
         Operation(
           operator: Operation(
-              operator: NamedCell('fn1'),
+              operator: Name('fn1'),
               args: [
-                NamedCell('a'),
-                NamedCell('b'),
-                NamedCell('c')
+                Name('a'),
+                Name('b'),
+                Name('c')
               ]
           ),
 
           args: [
-            NamedCell('arg1'),
+            Name('arg1'),
             Constant("value"),
-            NamedCell('arg2')
+            Name('arg2')
           ]
         )
       ]
@@ -138,7 +138,7 @@ void main() {
     test('Parenthesized identifier', () => testParser(
         '(an-id)',
         [
-          NamedCell('an-id')
+          Name('an-id')
         ]
       ));
 
@@ -153,11 +153,11 @@ void main() {
       '(fn(a, b, c))',
       [
         Operation(
-          operator: NamedCell('fn'),
+          operator: Name('fn'),
           args: [
-            NamedCell('a'),
-            NamedCell('b'),
-            NamedCell('c')
+            Name('a'),
+            Name('b'),
+            Name('c')
           ]
         )
       ]
@@ -167,10 +167,10 @@ void main() {
       'fn((a), b)',
       [
         Operation(
-          operator: NamedCell('fn'),
+          operator: Name('fn'),
           args: [
-            NamedCell('a'),
-            NamedCell('b')
+            Name('a'),
+            Name('b')
           ]
         )
       ]
@@ -179,7 +179,7 @@ void main() {
     test('Nested parenthesized expressions', () => testParser(
       '((a))',
       [
-        NamedCell('a')
+        Name('a')
       ]
     ));
 
@@ -187,9 +187,9 @@ void main() {
       '(fn\n(a))',
       [
         Operation(
-          operator: NamedCell('fn'),
+          operator: Name('fn'),
           args: [
-            NamedCell('a')
+            Name('a')
           ]
         )
       ]
@@ -218,10 +218,10 @@ void main() {
         Block(
           expressions: [
             Operation(
-              operator: NamedCell('fn'),
+              operator: Name('fn'),
               args: [
-                NamedCell('x'),
-                NamedCell('y')
+                Name('x'),
+                Name('y')
               ]
             )
           ]
@@ -235,28 +235,28 @@ void main() {
         Block(
           expressions: [
             Operation(
-                operator: NamedCell('fn'),
+                operator: Name('fn'),
                 args: [
-                  NamedCell('a'),
-                  NamedCell('b'),
-                  NamedCell('c')
+                  Name('a'),
+                  Name('b'),
+                  Name('c')
                 ]
             ),
 
             Operation(
-                operator: NamedCell('g'),
+                operator: Name('g'),
                 args: [
-                  NamedCell('x')
+                  Name('x')
                 ]
             ),
 
             Constant(123),
 
             Operation(
-                operator: NamedCell('u'),
+                operator: Name('u'),
                 args: [
-                  NamedCell('arg1'),
-                  NamedCell('arg2')
+                  Name('arg1'),
+                  Name('arg2')
                 ]
             )
           ]
@@ -270,28 +270,28 @@ void main() {
           Block(
               expressions: [
                 Operation(
-                    operator: NamedCell('fn'),
+                    operator: Name('fn'),
                     args: [
-                      NamedCell('a'),
-                      NamedCell('b'),
-                      NamedCell('c')
+                      Name('a'),
+                      Name('b'),
+                      Name('c')
                     ]
                 ),
 
                 Operation(
-                    operator: NamedCell('g'),
+                    operator: Name('g'),
                     args: [
-                      NamedCell('x')
+                      Name('x')
                     ]
                 ),
 
                 Constant(123),
 
                 Operation(
-                    operator: NamedCell('u'),
+                    operator: Name('u'),
                     args: [
-                      NamedCell('arg1'),
-                      NamedCell('arg2')
+                      Name('arg1'),
+                      Name('arg2')
                     ]
                 )
               ]
@@ -305,36 +305,36 @@ void main() {
           Block(
               expressions: [
                 Operation(
-                  operator: NamedCell('f1'),
+                  operator: Name('f1'),
                   args: [
-                    NamedCell('a1')
+                    Name('a1')
                   ]
                 ),
 
                 Block(
                   expressions: [
                     Operation(
-                        operator: NamedCell('f2'),
+                        operator: Name('f2'),
                         args: [
-                          NamedCell('a1'),
-                          NamedCell('a2')
+                          Name('a1'),
+                          Name('a2')
                         ]
                     ),
                     Operation(
-                        operator: NamedCell('add'),
+                        operator: Name('add'),
                         args: [
-                          NamedCell('x'),
-                          NamedCell('y')
+                          Name('x'),
+                          Name('y')
                         ]
                     )
                   ]
                 ),
 
                 Operation(
-                    operator: NamedCell('f3'),
+                    operator: Name('f3'),
                     args: [
                       Constant("1"),
-                      NamedCell('x')
+                      Name('x')
                     ]
                 )
               ]
@@ -361,10 +361,10 @@ void main() {
       'a + b',
       [
         Operation(
-            operator: NamedCell('+'),
+            operator: Name('+'),
             args: [
-              NamedCell('a'),
-              NamedCell('b')
+              Name('a'),
+              Name('b')
             ]
         )
       ],
@@ -383,20 +383,20 @@ void main() {
         'a * b + c / d',
         [
           Operation(
-            operator: NamedCell('+'),
+            operator: Name('+'),
             args: [
               Operation(
-                  operator: NamedCell('*'),
+                  operator: Name('*'),
                   args: [
-                    NamedCell('a'),
-                    NamedCell('b')
+                    Name('a'),
+                    Name('b')
                   ]
               ),
               Operation(
-                  operator: NamedCell('/'),
+                  operator: Name('/'),
                   args: [
-                    NamedCell('c'),
-                    NamedCell('d')
+                    Name('c'),
+                    Name('d')
                   ]
               )
             ]
@@ -429,22 +429,22 @@ void main() {
         'a + b + c + d',
         [
           Operation(
-              operator: NamedCell('+'),
+              operator: Name('+'),
               args: [
                 Operation(
-                  operator: NamedCell('+'),
+                  operator: Name('+'),
                   args: [
                     Operation(
-                      operator: NamedCell('+'),
+                      operator: Name('+'),
                       args: [
-                        NamedCell('a'),
-                        NamedCell('b')
+                        Name('a'),
+                        Name('b')
                       ]
                     ),
-                    NamedCell('c')
+                    Name('c')
                   ]
                 ),
-                NamedCell('d')
+                Name('d')
               ]
           )
         ],
@@ -463,18 +463,18 @@ void main() {
         'a + b + c + d',
         [
           Operation(
-              operator: NamedCell('+'),
+              operator: Name('+'),
               args: [
-                NamedCell('a'),
+                Name('a'),
                 Operation(
-                    operator: NamedCell('+'),
+                    operator: Name('+'),
                     args: [
-                      NamedCell('b'),
+                      Name('b'),
                       Operation(
-                          operator: NamedCell('+'),
+                          operator: Name('+'),
                           args: [
-                            NamedCell('c'),
-                            NamedCell('d')
+                            Name('c'),
+                            Name('d')
                           ]
                       ),
                     ]
@@ -497,22 +497,22 @@ void main() {
         'a * (b + c) / d',
         [
           Operation(
-              operator: NamedCell('/'),
+              operator: Name('/'),
               args: [
                 Operation(
-                    operator: NamedCell('*'),
+                    operator: Name('*'),
                     args: [
-                      NamedCell('a'),
+                      Name('a'),
                       Operation(
-                          operator: NamedCell('+'),
+                          operator: Name('+'),
                           args: [
-                            NamedCell('b'),
-                            NamedCell('c')
+                            Name('b'),
+                            Name('c')
                           ]
                       )
                     ]
                 ),
-                NamedCell('d')
+                Name('d')
               ]
           )
         ],
@@ -543,22 +543,22 @@ void main() {
         'a + (b + c) + d',
         [
           Operation(
-              operator: NamedCell('+'),
+              operator: Name('+'),
               args: [
                 Operation(
-                    operator: NamedCell('+'),
+                    operator: Name('+'),
                     args: [
-                      NamedCell('a'),
+                      Name('a'),
                       Operation(
-                          operator: NamedCell('+'),
+                          operator: Name('+'),
                           args: [
-                            NamedCell('b'),
-                            NamedCell('c')
+                            Name('b'),
+                            Name('c')
                           ]
                       ),
                     ]
                 ),
-                NamedCell('d')
+                Name('d')
               ]
           )
         ],
@@ -577,29 +577,29 @@ void main() {
         'a * b + f(c) / g(d, e)',
         [
           Operation(
-              operator: NamedCell('+'),
+              operator: Name('+'),
               args: [
                 Operation(
-                    operator: NamedCell('*'),
+                    operator: Name('*'),
                     args: [
-                      NamedCell('a'),
-                      NamedCell('b')
+                      Name('a'),
+                      Name('b')
                     ]
                 ),
                 Operation(
-                    operator: NamedCell('/'),
+                    operator: Name('/'),
                     args: [
                       Operation(
-                          operator: NamedCell('f'),
+                          operator: Name('f'),
                           args: [
-                            NamedCell('c')
+                            Name('c')
                           ]
                       ),
                       Operation(
-                          operator: NamedCell('g'),
+                          operator: Name('g'),
                           args: [
-                            NamedCell('d'),
-                            NamedCell('e')
+                            Name('d'),
+                            Name('e')
                           ]
                       ),
                     ]
@@ -634,10 +634,10 @@ void main() {
         'a + +',
         [
           Operation(
-              operator: NamedCell('+'),
+              operator: Name('+'),
               args: [
-                NamedCell('a'),
-                NamedCell('+')
+                Name('a'),
+                Name('+')
               ]
           )
         ],
@@ -655,20 +655,20 @@ void main() {
         '(a * b\n + c /\n\n d)',
         [
           Operation(
-              operator: NamedCell('+'),
+              operator: Name('+'),
               args: [
                 Operation(
-                    operator: NamedCell('*'),
+                    operator: Name('*'),
                     args: [
-                      NamedCell('a'),
-                      NamedCell('b')
+                      Name('a'),
+                      Name('b')
                     ]
                 ),
                 Operation(
-                    operator: NamedCell('/'),
+                    operator: Name('/'),
                     args: [
-                      NamedCell('c'),
-                      NamedCell('d')
+                      Name('c'),
+                      Name('d')
                     ]
                 )
               ]
@@ -701,30 +701,30 @@ void main() {
         'inc(n) = { next = n + 1; next}',
         [
           Operation(
-            operator: NamedCell('='),
+            operator: Name('='),
             args: [
               Operation(
-                operator: NamedCell('inc'),
+                operator: Name('inc'),
                 args: [
-                  NamedCell('n')
+                  Name('n')
                 ]
               ),
               Block(
                 expressions: [
                   Operation(
-                      operator: NamedCell('='),
+                      operator: Name('='),
                       args: [
-                        NamedCell('next'),
+                        Name('next'),
                         Operation(
-                          operator: NamedCell('+'),
+                          operator: Name('+'),
                           args: [
-                            NamedCell('n'),
+                            Name('n'),
                             Constant(1)
                           ]
                         )
                       ]
                   ),
-                  NamedCell('next')
+                  Name('next')
                 ]
               )
             ]

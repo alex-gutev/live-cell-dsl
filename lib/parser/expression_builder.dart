@@ -60,7 +60,7 @@ class ExpressionBuilder {
         final lhs = _popExpression();
 
         return Operation(
-            operator: NamedCell(name),
+            operator: Name(name),
             args: [
               lhs,
               rhs

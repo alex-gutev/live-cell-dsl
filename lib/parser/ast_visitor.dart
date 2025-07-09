@@ -2,7 +2,7 @@ part of 'ast.dart';
 
 /// Visitor interface for [AstNode] objects
 abstract interface class AstVisitor<R> {
-  R visitNamedCell(NamedCell expression);
+  R visitName(Name expression);
   R visitConstant<T>(Constant<T> expression);
   R visitOperation(Operation expression);
   R visitBlock(Block expression);
@@ -23,7 +23,7 @@ abstract class ConstantVisitor<R> implements AstVisitor<R> {
   R visitConstant<T>(Constant<T> expression);
 
   @override
-  R visitNamedCell(NamedCell expression) {
+  R visitName(Name expression) {
     throw UnimplementedError();
   }
 
