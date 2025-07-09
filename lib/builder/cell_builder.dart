@@ -44,7 +44,7 @@ class CellBuilder {
   void finalize() {
     for (final spec in scope.cells) {
       // TODO: Walk through definition and build nested deferred expressions
-      if (spec.definition case final DeferredExpression deferred) {
+      if (spec.definition case final DeferredSpec deferred) {
         deferred.build();
       }
     }

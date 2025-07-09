@@ -62,7 +62,7 @@ class CellFolder {
     ) => _isConstant(operator) &&
         operands.every(_isConstant),
 
-    DeferredExpression() => 
+    DeferredSpec() => 
         _isConstant(spec.build()),
   
     FunctionExpression() => true,

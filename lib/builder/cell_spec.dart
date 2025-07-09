@@ -207,13 +207,15 @@ class ApplySpec extends ValueSpec {
       visitor.visitApply(this);
 }
 
-/// An expression that is built at a later stage
-abstract class DeferredExpression extends ValueSpec {
-  const DeferredExpression();
+/// A [ValueSpec] that is built at a later stage.
+///
+/// The building of the spec is deferred to when [build] is called.
+abstract class DeferredSpec extends ValueSpec {
+  const DeferredSpec();
 
-  /// Build the expression
+  /// Build the specification
   ///
-  /// *NOTE*: This method should cache the expression after it is built for
+  /// *NOTE*: This method should cache the specification after it is built for
   /// the first time, rather than building it every time this method called.
   ValueSpec build();
 

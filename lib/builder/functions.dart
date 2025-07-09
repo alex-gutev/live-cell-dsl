@@ -1,7 +1,7 @@
 part of 'cell_builder.dart';
 
-/// A deferred expression defining a function.
-class DeferredFunctionDefinition extends DeferredExpression {
+/// A deferred [ValueSpec] defining a function.
+class DeferredFunctionDefinition extends DeferredSpec {
   /// List of argument cell identifiers
   final List<CellId> arguments;
 

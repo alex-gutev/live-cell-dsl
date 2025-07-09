@@ -242,12 +242,12 @@ sealed class SpecTester {
   /// Run the test on a given cell definition [spec].
   ///
   /// The difference between this method and [run] is that this method builds
-  /// [DeferredExpression]s before calling [run].
+  /// [DeferredSpec]s before calling [run].
   Future<void> test({
     required CellTable scope,
     required ValueSpec spec
   }) => switch (spec) {
-    final DeferredExpression deferred =>
+    final DeferredSpec deferred =>
       run(
           scope: scope,
           spec: deferred.build()
