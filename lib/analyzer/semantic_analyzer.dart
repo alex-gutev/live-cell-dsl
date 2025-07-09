@@ -110,8 +110,8 @@ class _AnalysisVisitor extends ValueSpecTreeVisitor {
 /// Performs semantic analysis in [FunctionSpec]s
 class _FunctionAnalysisVisitor extends ValueSpecTreeVisitor {
   @override
-  void visitFunction(FunctionSpec expression) {
-    final analyzer = SemanticAnalyzer(scope: expression.scope);
+  void visitFunction(FunctionSpec spec) {
+    final analyzer = SemanticAnalyzer(scope: spec.scope);
     analyzer.analyze();
   }
 }

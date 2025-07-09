@@ -283,8 +283,8 @@ class _ExternalCellVisitor extends ValueSpecTreeVisitor {
   });
 
   @override
-  void visitRef(CellRef expression) {
-    final cell = expression.get;
+  void visitRef(CellRef spec) {
+    final cell = spec.get;
 
     if (cell.scope != scope) {
       external.add(cell);
@@ -292,9 +292,9 @@ class _ExternalCellVisitor extends ValueSpecTreeVisitor {
   }
 
   @override
-  void visitFunction(FunctionSpec expression) {
+  void visitFunction(FunctionSpec spec) {
     external.addAll(
-        expression.referencedCells
+        spec.referencedCells
             .where((c) => c.scope != scope)
     );
   }

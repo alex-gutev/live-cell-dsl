@@ -78,9 +78,9 @@ class CellFolder {
 /// Visitor that performs cell folding analysis in the local scope of a [FunctionSpec].
 class _FunctionAnalysisVisitor extends ValueSpecTreeVisitor {
   @override
-  void visitFunction(FunctionSpec expression) {
+  void visitFunction(FunctionSpec spec) {
     final folder = CellFolder(
-        scope: expression.scope
+        scope: spec.scope
     );
 
     folder.run();

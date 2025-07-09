@@ -2,49 +2,49 @@ part of 'cell_spec.dart';
 
 /// Visitor interface for [ValueSpec]s.
 abstract interface class ValueSpecVisitor<R> {
-  R visitStub(Stub expression);
-  R visitConstant<T>(Constant<T> expression);
-  R visitVariable(Variable expression);
-  R visitRef(CellRef expression);
-  R visitApply(ApplySpec expression);
-  R visitDeferred(DeferredSpec expression);
+  R visitStub(Stub spec);
+  R visitConstant<T>(Constant<T> spec);
+  R visitVariable(Variable spec);
+  R visitRef(CellRef spec);
+  R visitApply(ApplySpec spec);
+  R visitDeferred(DeferredSpec spec);
   R visitFunction(FunctionSpec expression);
 }
 
 /// A visitor that visits every node of a [ValueSpec] tree.
 abstract class ValueSpecTreeVisitor extends ValueSpecVisitor<void> {
   @override
-  void visitApply(ApplySpec expression) {
-    expression.operator.accept(this);
+  void visitApply(ApplySpec spec) {
+    spec.operator.accept(this);
     
-    for (final operand in expression.operands) {
+    for (final operand in spec.operands) {
       operand.accept(this);
     }
   }
 
   @override
-  void visitConstant<T>(Constant<T> expression) {
+  void visitConstant<T>(Constant<T> spec) {
   }
 
   @override
-  void visitDeferred(DeferredSpec expression) {
-    expression.build().accept(this);
+  void visitDeferred(DeferredSpec spec) {
+    spec.build().accept(this);
   }
 
   @override
-  void visitFunction(FunctionSpec expression) {
-    expression.definition.accept(this);
+  void visitFunction(FunctionSpec spec) {
+    spec.definition.accept(this);
   }
 
   @override
-  void visitRef(CellRef expression) {
+  void visitRef(CellRef spec) {
   }
 
   @override
-  void visitStub(Stub expression) {
+  void visitStub(Stub spec) {
   }
 
   @override
-  void visitVariable(Variable expression) {
+  void visitVariable(Variable spec) {
   }
 }
