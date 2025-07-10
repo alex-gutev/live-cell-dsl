@@ -1,5 +1,6 @@
 import 'package:live_cell/analyzer/index.dart';
 import 'package:live_cell/builder/index.dart';
+import 'package:live_cell/common/pipeline.dart';
 import 'package:live_cell/lexer/index.dart';
 import 'package:live_cell/parser/index.dart';
 import 'package:test/test.dart';
@@ -16,7 +17,10 @@ class BuildTester {
   final Stream<AstNode> expressions;
 
   /// Test output function
-  late RunTest _runTest = () => builder.build(expressions);
+  late RunTest _runTest = () async {
+    await builder.build(expressions);
+    _pipeline.run(builder.scope);
+  };
 
   /// The scope in which the cells are built
   CellTable get scope => builder.scope;
@@ -134,6 +138,16 @@ class BuildTester {
 
     analyzer.run(scope);
   }
+
+  /// Add an [operation] to the build pipeline.
+  BuildTester addOperation(Operation operation) {
+    _pipeline.add(operation);
+    return this;
+  }
+
+  // Private
+
+  final _pipeline = Pipeline();
 }
 
 /// A [BuildTester] for testing function local cells
