@@ -1,4 +1,5 @@
-import 'package:live_cell/lexer/tokens.dart';
+import '../lexer/exceptions.dart';
+import '../lexer/tokens.dart';
 
 /// Identifies the form that was expected while parsing
 enum ExpectedFormType {
@@ -22,13 +23,19 @@ enum ExpectedFormType {
 abstract class ParseError implements Exception {
   /// The token at which parsing failed
   final Token token;
-  
+
+  /// String describing the error
+  String get description;
+
   const ParseError({
     required this.token
   });
   
   @override
-  String toString() => 'Parse error at ${token.line}:${token.column}';
+  String toString() => token.location.errorString(
+    prefix: 'Parse error',
+    description: description
+  );
 }
 
 /// Thrown when an unexpected token is encountered while parsing
@@ -42,7 +49,7 @@ class UnexpectedTokenParseError extends ParseError {
   });
   
   @override
-  String toString() => '${super.toString()}: Expected $expected, '
+  String get description => 'Expected $expected, '
       'found ${_describeToken(token)}';
   
   static String _describeToken(Token token) => switch (token) {

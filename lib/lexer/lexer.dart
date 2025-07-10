@@ -9,6 +9,13 @@ import 'tokens.dart';
 /// This transformer reads a strings from a source stream and emits
 /// the [Token]s that were parsed from the strings.
 class Lexer extends StreamTransformerBase<String, Token> {
+  /// Path to the source file being tokenized
+  final String? path;
+
+  const Lexer({
+    this.path
+  });
+
   @override
   Stream<Token> bind(Stream<String> stream) => Stream<Token>.eventTransformed(
       stream.transform(LineSplitter()),
@@ -40,6 +47,9 @@ class TokenEventSink implements EventSink<String> {
   /// Regex matching characters which do not form part of identifiers
   static const _nonIdChars = r'\s;,(){}#"';
 
+  /// Path to the source file being tokenized
+  final String? path;
+
   /// Identifies the token currently being parsed
   _LexState? _state;
 
@@ -52,10 +62,19 @@ class TokenEventSink implements EventSink<String> {
   var _line = 0;
   var _column = 0;
 
+  /// The location of the current character being processed
+  Location get _location => Location(
+      path: path,
+      line: _line,
+      column: _column
+  );
+
   /// The output [Token] stream
   final EventSink<Token> _output;
 
-  TokenEventSink(this._output);
+  TokenEventSink(this._output, {
+    this.path
+  });
 
   @override
   void add(String event) {
@@ -71,8 +90,7 @@ class TokenEventSink implements EventSink<String> {
       if (_column == start) {
         _emitError(
             InvalidTokenError(
-                line: _line,
-                column: _column,
+                location: _location,
                 data: event.substring(start)
             )
         );
@@ -88,8 +106,7 @@ class TokenEventSink implements EventSink<String> {
         _emitToken(
             Terminator(
                 soft: true,
-                line: _line,
-                column: _column
+                location: _location,
             )
         );
 
@@ -114,8 +131,7 @@ class TokenEventSink implements EventSink<String> {
     if (_state == _LexState.string) {
       _emitError(
           UnclosedStringError(
-              line: _line,
-              column: _column
+              location: _location,
           )
       );
     }
@@ -159,8 +175,11 @@ class TokenEventSink implements EventSink<String> {
       _emitToken(
         IdToken(
           name: match.group(0)!,
-          line: _line,
-          column: start
+          location: Location(
+              path: path,
+              line: _line,
+              column: start
+          ),
         )
       );
 
@@ -179,8 +198,11 @@ class TokenEventSink implements EventSink<String> {
       _emitToken(
           Terminator(
               soft: false,
-              line: _line,
-              column: start
+              location: Location(
+                  path: path,
+                  line: _line,
+                  column: start
+              ),
           )
       );
 
@@ -202,8 +224,11 @@ class TokenEventSink implements EventSink<String> {
         _emitToken(
             Literal(
                 value: num.parse(match.group(0)!),
-                line: _line,
-                column: start
+                location: Location(
+                    path: path,
+                    line: _line,
+                    column: start
+                ),
             )
         );
       }
@@ -211,8 +236,11 @@ class TokenEventSink implements EventSink<String> {
         _emitToken(
             Literal(
                 value: int.parse(match.group(0)!),
-                line: _line,
-                column: start
+                location: Location(
+                    path: path,
+                    line: _line,
+                    column: start
+                ),
             )
         );
       }
@@ -246,8 +274,11 @@ class TokenEventSink implements EventSink<String> {
         _emitToken(
             Literal(
                 value: _data,
-                line: _line,
-                column: start
+                location: Location(
+                    path: path,
+                    line: _line,
+                    column: start
+                ),
             )
         );
 
@@ -264,8 +295,11 @@ class TokenEventSink implements EventSink<String> {
     if (data[start] == '(') {
       _emitToken(
           ParenOpen(
-            line: _line,
-            column: start
+            location: Location(
+                path: path,
+                line: _line,
+                column: start
+            ),
           )
       );
 
@@ -274,8 +308,11 @@ class TokenEventSink implements EventSink<String> {
     else if (data[start] == ')') {
       _emitToken(
           ParenClose(
-            line: _line,
-            column: start
+            location: Location(
+                path: path,
+                line: _line,
+                column: start
+            ),
           )
       );
 
@@ -290,8 +327,11 @@ class TokenEventSink implements EventSink<String> {
     if (data[start] == '{') {
       _emitToken(
           BraceOpen(
-            line: _line,
-            column: start
+            location: Location(
+                path: path,
+                line: _line,
+                column: start
+            ),
           )
       );
 
@@ -300,8 +340,11 @@ class TokenEventSink implements EventSink<String> {
     else if (data[start] == '}') {
       _emitToken(
           BraceClose(
-            line: _line,
-            column: start
+            location: Location(
+                path: path,
+                line: _line,
+                column: start
+            ),
           )
       );
 
@@ -337,8 +380,7 @@ class TokenEventSink implements EventSink<String> {
     if (data[start] == ',') {
       _emitToken(
           Separator(
-            line: _line,
-            column: _column
+            location: _location
           )
       );
       return start + 1;

@@ -3,17 +3,37 @@ import 'package:live_cells_core/live_cells_core.dart';
 part 'token_visitor.dart';
 part 'tokens.g.dart';
 
-/// Base token class
-sealed class Token {
-  /// The line at which the token starts
+/// Information about a location in a source file
+class Location {
+  /// Path to the file
+  final String? path;
+
+  /// The line within the file
   final int line;
 
-  /// The column at which the token starts
+  /// The column within the line
   final int column;
 
-  const Token({
+  const Location({
+    required this.line,
+    required this.column,
+    this.path
+  });
+
+  const Location.blank({
     this.line = 0,
-    this.column = 0
+    this.column = 0,
+    this.path
+  });
+}
+
+/// Base token class
+sealed class Token {
+  /// The location of the token in the source
+  final Location location;
+
+  const Token({
+    this.location = const Location.blank()
   });
 
   /// Visit this token with [visitor].
@@ -34,8 +54,7 @@ class IdToken extends Token {
 
   const IdToken({
     required this.name,
-    super.line,
-    super.column
+    super.location,
   });
 
   @override
@@ -60,8 +79,7 @@ class Literal<T> extends Token {
 
   const Literal({
     required this.value,
-    super.line,
-    super.column
+    super.location,
   });
 
   @override
@@ -91,8 +109,7 @@ class Terminator extends Token {
 
   const Terminator({
     required this.soft,
-    super.line,
-    super.column
+    super.location,
   });
 
   @override
@@ -112,8 +129,7 @@ class Terminator extends Token {
 /// Argument separator ','
 class Separator extends Token {
   const Separator({
-    super.line,
-    super.column
+    super.location,
   });
 
   @override
@@ -124,8 +140,7 @@ class Separator extends Token {
 /// Represents the end of the input
 class EndOfInput extends Token {
   const EndOfInput({
-    super.line,
-    super.column
+    super.location,
   });
 
   @override
@@ -136,8 +151,7 @@ class EndOfInput extends Token {
 /// Opening parenthesis '('
 class ParenOpen extends Token {
   const ParenOpen({
-    super.line,
-    super.column
+    super.location,
   });
 
   @override
@@ -148,8 +162,7 @@ class ParenOpen extends Token {
 /// Closing parenthesis ')'
 class ParenClose extends Token {
   const ParenClose({
-    super.line,
-    super.column
+    super.location,
   });
 
   @override
@@ -160,8 +173,7 @@ class ParenClose extends Token {
 /// Opening brace '{'
 class BraceOpen extends Token {
   const BraceOpen({
-    super.line,
-    super.column
+    super.location,
   });
 
   @override
@@ -172,8 +184,7 @@ class BraceOpen extends Token {
 /// Closing brace '}'
 class BraceClose extends Token {
   const BraceClose({
-    super.line,
-    super.column
+    super.location,
   });
 
   @override

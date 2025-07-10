@@ -1,26 +1,23 @@
+import '../lexer/index.dart';
 import 'cell_spec.dart';
 
 /// Represents an error occurring while processing a declaration
 abstract class BuildError implements Exception {
-  // TODO: Add source file information
-
-  /// The line where the declaration is located
-  final int line;
-
-  /// The column where the declaration is located
-  final int column;
+  /// The location where the error occurred
+  final Location location;
 
   /// Description of the error
   String get description;
 
   const BuildError({
-    required this.line,
-    required this.column
+    required this.location
   });
 
   @override
-  String toString() =>
-      'Error processing declaration at $line:$column: $description';
+  String toString() => location.errorString(
+      prefix: 'Error processing declaration',
+      description: description
+  );
 }
 
 /// Thrown when an empty block is encountered
@@ -29,8 +26,7 @@ class EmptyBlockError extends BuildError {
   String get description => 'Empty block.';
 
   const EmptyBlockError({
-    required super.line,
-    required super.column
+    required super.location
   });
 }
 
@@ -40,8 +36,7 @@ class MalformedDefinitionError extends BuildError {
   String get description => 'Malformed cell definition.';
 
   const MalformedDefinitionError({
-    required super.line,
-    required super.column
+    required super.location
   });
 }
 
@@ -51,8 +46,7 @@ class MalformedFunctionArgumentListError extends BuildError {
   String get description => 'Malformed argument list in function definition.';
 
   const MalformedFunctionArgumentListError({
-    required super.line,
-    required super.column
+    required super.location
   });
 }
 
@@ -60,10 +54,9 @@ class MalformedFunctionArgumentListError extends BuildError {
 class MultipleDefinitionError extends BuildError {
   final CellId id;
 
-  MultipleDefinitionError({
+  const MultipleDefinitionError({
     required this.id,
-    required super.line,
-    required super.column
+    required super.location
   });
 
   @override
@@ -76,8 +69,7 @@ class MalformedVarDeclarationError extends BuildError {
   String get description => 'Malformed variable cell declaration.';
 
   const MalformedVarDeclarationError({
-    required super.line,
-    required super.column
+    required super.location
   });
 }
 
@@ -89,8 +81,7 @@ class IncompatibleVarDeclarationError extends BuildError {
   String get description => 'Variable cell declaration incompatible with existing cell definition.';
 
   const IncompatibleVarDeclarationError({
-    required super.line,
-    required super.column
+    required super.location
   });
 }
 
@@ -100,7 +91,6 @@ class MalformedExternalDeclarationError extends BuildError {
   String get description => 'Malformed external cell declaration.';
 
   const MalformedExternalDeclarationError({
-    required super.line,
-    required super.column
+    required super.location
   });
 }

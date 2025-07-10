@@ -66,8 +66,7 @@ class ExpressionBuilder {
               rhs
             ],
 
-            line: lhs.line,
-            column: lhs.column
+            location: lhs.location,
         );
     }
   }

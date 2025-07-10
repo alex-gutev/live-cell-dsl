@@ -229,8 +229,7 @@ class _Parser {
       op = Application(
           operator: op,
           operands: await _parseArgList(),
-          line: op.line,
-          column: op.column
+          location: op.location,
       );
     }
 
@@ -240,11 +239,10 @@ class _Parser {
   /// Parse an expression that is not a function application
   Future<AstNode> _parseSubExpression() async {
     switch (_current) {
-      case IdToken(:final name, :final line, :final column):
+      case IdToken(:final name, :final location):
         await _advance();
         return Name(name,
-          line: line,
-          column: column
+          location: location,
         );
 
       case Literal literal:
@@ -315,8 +313,7 @@ class _Parser {
 
   /// Parse a block of expressions delimited by {...}
   Future<Block> _parseBlock() async {
-    final line = _current.line;
-    final column = _current.column;
+    final location = _current.location;
 
     await _advance();
 
@@ -347,8 +344,7 @@ class _Parser {
 
     return Block(
         expressions: expressions,
-        line: line,
-        column: column
+        location: location,
     );
   }
 }
@@ -360,7 +356,6 @@ class _LiteralToConstantVisitor extends LiteralVisitor<AstNode> {
   @override
   AstNode visitLiteral<T>(Literal<T> token) =>
       Value<T>(token.value,
-        line: token.line,
-        column: token.column
+        location: token.location,
       );
 }

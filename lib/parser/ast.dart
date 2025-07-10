@@ -1,20 +1,18 @@
-import 'package:live_cell/util/equality.dart';
 import 'package:live_cells_core/live_cells_core.dart';
+
+import '../lexer/index.dart';
+import '../util/equality.dart';
 
 part 'ast_visitor.dart';
 part 'ast.g.dart';
 
 /// Base class representing a node in the abstract syntax tree
 sealed class AstNode {
-  /// The line in the source where the node is located
-  final int line;
-
-  /// The column in the source where the node is located
-  final int column;
+  /// The location of the node in the source
+  final Location location;
 
   const AstNode({
-    required this.line,
-    required this.column
+    required this.location,
   });
 
   /// Visit this expression with [visitor].
@@ -28,8 +26,7 @@ class Name extends AstNode {
   final String name;
 
   const Name(this.name, {
-    super.line = 0,
-    super.column = 0
+    super.location = const Location.blank()
   });
 
   @override
@@ -51,8 +48,7 @@ class Value<T> extends AstNode {
   final T value;
 
   const Value(this.value, {
-    super.line = 0,
-    super.column = 0
+    super.location = const Location.blank()
   });
 
   @override
@@ -80,8 +76,7 @@ class Application extends AstNode {
   const Application({
     required this.operator,
     required this.operands,
-    super.line = 0,
-    super.column = 0
+    super.location = const Location.blank()
   });
 
   @override
@@ -105,8 +100,7 @@ class Block extends AstNode {
 
   const Block({
     required this.expressions,
-    super.line = 0,
-    super.column = 0
+    super.location = const Location.blank()
   });
 
   @override

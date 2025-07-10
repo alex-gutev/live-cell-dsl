@@ -1,6 +1,7 @@
 import 'package:live_cells_core/live_cells_core.dart';
 
 import 'cell_table.dart';
+import '../lexer/index.dart';
 import '../util/equality.dart';
 
 part 'cell_expression_visitor.dart';
@@ -84,11 +85,8 @@ class CellSpec {
   /// The scope in which this cell is defined
   final CellTable? scope;
 
-  /// The line in the source where the cell is defined?
-  final int? line;
-
-  /// The column in the source where the cell is defined?
-  final int? column;
+  /// The location where the cell is defined
+  final Location? location;
 
   /// Has this cell been defined?
   ///
@@ -99,8 +97,7 @@ class CellSpec {
     required this.id,
     required this.definition,
     required this.scope,
-    this.line,
-    this.column,
+    this.location,
     this.defined = false
   });
 

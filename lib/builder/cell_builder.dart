@@ -2,6 +2,7 @@ import 'attributes.dart';
 import 'exceptions.dart';
 import 'cell_spec.dart';
 import 'cell_table.dart';
+import '../lexer/index.dart';
 import '../parser/index.dart';
 
 part 'functions.dart';
@@ -68,35 +69,29 @@ class CellBuilder {
     Application(
       operator: Name(name: '='),
       :final operands,
-      :final line,
-      :final column
+      :final location,
     ) => _addCell(_buildDefinition(
         operands: operands,
-        line: line,
-        column: column
+        location: location,
     )),
 
     // TODO: Match proper var keyword
     Application(
       operator: Name(name: 'var'),
       :final operands,
-      :final line,
-      :final column
+      :final location,
     ) => _addVarCell(
       operands: operands,
-      line: line,
-      column: column
+      location: location,
     ),
 
     Application(
       operator: Name(name: 'external'),
       :final operands,
-      :final line,
-      :final column
+      :final location,
     ) => _markExternalCell(
       args: operands,
-      line: line,
-      column: column
+      location: location,
     ),
 
     Application(:final operator, :final operands) =>
@@ -155,8 +150,7 @@ class CellBuilder {
 
     if (cell == null) {
       throw EmptyBlockError(
-          line: block.line,
-          column: block.column
+        location: block.location,
       );
     }
 
@@ -170,8 +164,7 @@ class CellBuilder {
   /// [operands] is the list of operands given to the definition operator.
   CellSpec _buildDefinition({
     required List<AstNode> operands,
-    required int line,
-    required int column
+    required Location location,
   }) => switch (operands) {
     [Name(:final name), final definition] =>
         _buildCellDefinition(
@@ -192,39 +185,33 @@ class CellBuilder {
     ),
 
     _ => throw MalformedDefinitionError(
-        line: line,
-        column: column
+      location: location,
     )
   };
 
   /// Process a `var` declaration
   CellSpec _addVarCell({
     required List<AstNode> operands,
-    required int line,
-    required int column
+    required Location location,
   }) => switch (operands) {
     [
       Name(
           :final name,
-          :final line,
-          :final column
+          :final location,
       )
     ] => _makeVarCell(
         name: name,
-        line: line,
-        column: column
+        location: location,
     ),
 
     _ => throw MalformedVarDeclarationError(
-      line: line,
-      column: column
+      location: location,
     )
   };
 
   CellSpec _makeVarCell({
     required String name,
-    required int line,
-    required int column
+    required Location location,
   }) {
     final id = NamedCellId(name);
 
@@ -240,8 +227,7 @@ class CellBuilder {
 
         default:
           throw IncompatibleVarDeclarationError(
-              line: line,
-              column: column
+            location: location,
           );
       }
     }
@@ -265,9 +251,7 @@ class CellBuilder {
       scope: scope,
       defined: true,
       definition: _refCell(buildExpression(definition)),
-
-      line: definition.line,
-      column: definition.column
+      location: definition.location,
   );
 
   /// Build a specification for a function cell identified by [name].
@@ -285,9 +269,7 @@ class CellBuilder {
       name: name,
       arguments: arguments,
       scope: scope,
-
-      line: definition.line,
-      column: definition.column,
+      location: definition.location,
 
       definition: (arguments) => DeferredFunctionDefinition(
           arguments: arguments,
@@ -306,15 +288,13 @@ class CellBuilder {
     required List<AstNode> arguments,
     required CellTable scope,
     required ValueSpec Function(List<CellId> args) definition,
-    required int line,
-    required int column
+    required Location location,
   }) {
     final argCells = arguments.map((arg) => switch(arg) {
       Name(:final name) => NamedCellId(name),
 
       _ => throw MalformedFunctionArgumentListError(
-          line: arg.line,
-          column: arg.column
+        location: arg.location,
       )
     }).toList();
 
@@ -334,8 +314,7 @@ class CellBuilder {
       scope: this.scope,
 
       defined: true,
-      line: line,
-      column: column,
+      location: location,
 
       definition: definition(argCells),
     );
@@ -349,8 +328,7 @@ class CellBuilder {
       if (existing.definition is! Stub || existing.defined) {
         throw MultipleDefinitionError(
             id: spec.id,
-            line: spec.line ?? 0,
-            column: spec.column ?? 0
+            location: spec.location ?? Location.blank(),
         );
       }
     }
@@ -366,46 +344,39 @@ class CellBuilder {
   /// [args] is the list of arguments provided to the external declaration.
   CellSpec _markExternalCell({
     required List<AstNode> args,
-    required int line,
-    required int column
+    required Location location
   }) => switch (args) {
     [
       Name(
         :final name,
-        :final line,
-        :final column
+        :final location,
       )
     ] => _addExternalCell(
       name: name,
-      line: line,
-      column: column
+      location: location,
     ),
 
     [
       Application(
         operator: Name(:final name),
         :final operands,
-        :final line,
-        :final column
+        :final location,
       )
     ] => _addExternalFunction(
       name: name,
       arguments: operands,
-      line: line,
-      column: column
+      location: location,
     ),
 
     [...] => throw MalformedExternalDeclarationError(
-        line: line,
-        column: column
+      location: location,
     ),
   };
 
   /// Add a named external cell
   CellSpec _addExternalCell({
     required String name,
-    required int line,
-    required int column
+    required Location location,
   }) {
     final id = NamedCellId(name);
     final existing = scope.lookup(id);
@@ -414,8 +385,7 @@ class CellBuilder {
       if (existing.definition is! Stub) {
         throw MultipleDefinitionError(
             id: id,
-            line: line,
-            column: column
+            location: location,
         );
       }
 
@@ -438,8 +408,7 @@ class CellBuilder {
   CellSpec _addExternalFunction({
     required String name,
     required List<AstNode> arguments,
-    required int line,
-    required int column
+    required Location location,
   }) {
     final id = NamedCellId(name);
     final existing = scope.lookup(id);
@@ -448,8 +417,7 @@ class CellBuilder {
       if (existing.definition is! Stub) {
         throw MultipleDefinitionError(
             id: id,
-            line: line,
-            column: column
+            location: location,
         );
       }
 
@@ -470,8 +438,7 @@ class CellBuilder {
                 scope: fnScope,
                 definition: const Stub()
             ),
-            line: line,
-            column: column
+            location: location,
         )
     )..setAttribute(Attributes.external, true);
   }

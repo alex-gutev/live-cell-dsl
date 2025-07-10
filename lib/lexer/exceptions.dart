@@ -1,21 +1,22 @@
+import 'index.dart';
+
 /// Represents an error that occurred during lexical analysis
 abstract class TokenizationError implements Exception {
-  /// The line in the source where the error occurred
-  final int line;
-
-  /// The column at which the error occurred
-  final int column;
+  /// The location where the error occurred
+  final Location location;
 
   /// A string describing the error
   String get description;
 
   const TokenizationError({
-    required this.line,
-    required this.column
+    required this.location
   });
 
   @override
-  String toString() => 'Error during lexical analysis at $line:$column: $description';
+  String toString() => location.errorString(
+      prefix: 'Lexical analysis error',
+      description: description
+  );
 }
 
 /// Exception thrown when an invalid character is encountered
@@ -24,8 +25,7 @@ class InvalidTokenError extends TokenizationError {
   final String data;
 
   const InvalidTokenError({
-    required super.line,
-    required super.column,
+    required super.location,
     required this.data
   });
 
@@ -38,10 +38,25 @@ class UnclosedStringError extends TokenizationError {
   // TODO: Add details of where string was opened
 
   const UnclosedStringError({
-    required super.line,
-    required super.column
+    required super.location,
   });
 
   @override
   String get description => 'Unclosed string';
+}
+
+/// Provides the [errorString] extension method
+extension DescribeLocationExtension on Location {
+  /// Create an error description referencing a given location
+  ///
+  /// [prefix] is concatenated into the string prior to the location reference,
+  /// while [description] is concatenated after the location reference.
+  String errorString({
+    required String prefix,
+    required String description
+  }) {
+    final input = path ?? 'input';
+
+    return '$prefix in $input at $line:$column: $description';
+  }
 }
