@@ -15,10 +15,15 @@ sealed class CellId {
 /// A cell identified by a string name
 @DataClass()
 class NamedCellId extends CellId {
+  /// The module containing the identifier
+  final String? module;
+
   /// The name identifying the cell
   final String name;
 
-  const NamedCellId(this.name);
+  const NamedCellId(this.name, {
+    this.module
+  });
 
   @override
   bool operator ==(Object other) => _$NamedCellIdEquals(this, other);

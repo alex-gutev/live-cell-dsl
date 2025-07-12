@@ -1,7 +1,11 @@
+import 'dart:collection';
+
 import 'attributes.dart';
 import 'exceptions.dart';
 import 'cell_spec.dart';
 import 'cell_table.dart';
+import 'modules.dart';
+import 'special_operators.dart';
 import '../lexer/index.dart';
 import '../parser/index.dart';
 
@@ -9,23 +13,71 @@ part 'functions.dart';
 
 /// Builds cell specifications from parsed cell [AstNode]s
 class CellBuilder {
+  /// Specification of the module being built
+  /// 
+  /// The identifiers of cells created by this builder, are contained
+  /// in this module. Similarly, all cells declared in this module are added
+  /// to the module's exports.
+  final ModuleSpec module;
+
   /// The scope in which the cells are built
   final CellTable scope;
+
+  /// Load module function.
+  /// 
+  /// This function is called when an `import` declaration is processed.
+  final LoadModule? loadModule;
 
   /// Create a [CellBuilder] that builds cells in a given [scope].
   /// 
   /// If [scope] is null, a new scope is created.
+  /// 
+  /// If [module] is null, a new [ModuleSpec] with a [null] path is created.
   CellBuilder({
-    CellTable? scope
-  }) : scope = scope ?? CellTable();
+    CellTable? scope,
+    ModuleSpec? module,
+    this.loadModule
+  }) : scope = scope ?? CellTable(),
+        module = module ?? ModuleSpec(null);
 
   /// Build the cell specifications from the given [declarations].
   Future<void> build(Stream<AstNode> declarations) async {
-    await for (final declaration in declarations) {
-      buildExpression(declaration);
-    }
-
+    await processSource(declarations);
     finalize();
+  }
+
+  // TODO: Ensure that top-level special operators do not appear nested in other nodes
+  // TODO: Ensure that functions cannot be declared with the same name as a special operator
+
+  /// Process all declarations in the source file.
+  /// 
+  /// This method does not run any post-processing steps
+  Future<void> processSource(Stream<AstNode> declarations) async {
+    /// Import language core
+    module.importAll(kCoreModule);
+
+    await for (final declaration in declarations) {
+      await processTopLevel(declaration);
+    }
+  }
+
+  /// Process a top level declaration.
+  Future<void> processTopLevel(AstNode node) async {
+    switch (node) {
+      case Application(
+        operator: Name(:final name),
+        :final operands
+      ) when Operators.isTopLevelOperator(module.namedId(name)):
+
+        await Operators.processTopLevel(
+            id: module.namedId(name),
+            builder: this,
+            operands: operands
+        );
+
+      default:
+        buildExpression(node);
+    }
   }
 
   /// Build a cell specification from a single [expression].
@@ -36,6 +88,7 @@ class CellBuilder {
 
     if (scope.lookup(spec.id) == null) {
       scope.add(spec);
+      _addExportedId(spec.id);
     }
 
     return spec;
@@ -57,7 +110,7 @@ class CellBuilder {
   CellSpec _buildCell(AstNode expression) => switch (expression) {
     Name(:final name) =>
         CellSpec(
-            id: NamedCellId(name),
+            id: module.namedId(name),
             scope: scope,
             definition: const Stub()
         ),
@@ -213,8 +266,7 @@ class CellBuilder {
     required String name,
     required Location location,
   }) {
-    final id = NamedCellId(name);
-
+    final id = module.namedId(name);
     final existing = scope.lookup(id);
 
     if (existing != null && existing.scope == scope) {
@@ -247,7 +299,7 @@ class CellBuilder {
     required String name,
     required AstNode definition,
   }) => CellSpec(
-      id: NamedCellId(name),
+      id: module.namedId(name),
       scope: scope,
       defined: true,
       definition: _refCell(buildExpression(definition)),
@@ -274,6 +326,7 @@ class CellBuilder {
       definition: (arguments) => DeferredFunctionDefinition(
           arguments: arguments,
           scope: scope,
+          module: module,
           definition: definition
       ),
     );
@@ -291,7 +344,7 @@ class CellBuilder {
     required Location location,
   }) {
     final argCells = arguments.map((arg) => switch(arg) {
-      Name(:final name) => NamedCellId(name),
+      Name(:final name) => module.namedId(name),
 
       _ => throw MalformedFunctionArgumentListError(
         location: arg.location,
@@ -310,12 +363,10 @@ class CellBuilder {
     }
 
     return CellSpec(
-      id: NamedCellId(name),
+      id: module.namedId(name),
       scope: this.scope,
-
       defined: true,
       location: location,
-
       definition: definition(argCells),
     );
   }
@@ -334,7 +385,18 @@ class CellBuilder {
     }
 
     scope.add(spec);
+    _addExportedId(spec.id);
+
     return spec;
+  }
+
+  /// Add a cell [id] to the current [module]s exported identifiers.
+  void _addExportedId(CellId id) {
+    if (id case NamedCellId(
+      module: final moduleName
+    ) when moduleName == module.path) {
+      module.exports.add(id);
+    }
   }
 
   // External Cells
@@ -378,7 +440,7 @@ class CellBuilder {
     required String name,
     required Location location,
   }) {
-    final id = NamedCellId(name);
+    final id = module.namedId(name);
     final existing = scope.lookup(id);
 
     if (existing != null && existing.scope == scope) {
@@ -410,7 +472,7 @@ class CellBuilder {
     required List<AstNode> arguments,
     required Location location,
   }) {
-    final id = NamedCellId(name);
+    final id = module.namedId(name);
     final existing = scope.lookup(id);
 
     if (existing != null && existing.scope == scope) {

@@ -8,12 +8,16 @@ class DeferredFunctionDefinition extends DeferredSpec {
   /// The function's scope
   final CellTable scope;
 
+  /// The module containing the function definition
+  final ModuleSpec module;
+
   /// The parsed expression defining the function
   final AstNode definition;
 
   DeferredFunctionDefinition({
     required this.arguments,
     required this.scope,
+    required this.module,
     required this.definition
   });
 
@@ -21,7 +25,12 @@ class DeferredFunctionDefinition extends DeferredSpec {
   ValueSpec build() {
     if (_builtDefinition == null) {
       final builder = CellBuilder(
-        scope: scope
+        scope: scope,
+
+        // TODO: Consider adding aliases for all cells defined in [module]
+        module: ModuleSpec(module.path,
+          aliases: UnmodifiableMapView(module.aliases)
+        )
       );
 
       final valueCell = builder.buildExpression(definition);
