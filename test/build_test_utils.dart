@@ -10,8 +10,13 @@ typedef RunTest = Future<void> Function();
 
 /// Helper for testing the result of [CellBuilder].
 class BuildTester {
+  /// List of operators to register
+  final List<Operator>? operators;
+
   /// The builder
-  final builder = CellBuilder();
+  late final builder = CellBuilder(
+    loadModule: _lookupModule
+  );
 
   /// Input expression stream
   final Stream<AstNode> expressions;
@@ -27,7 +32,7 @@ class BuildTester {
 
   /// Create a tester using a given input string
   BuildTester(String src, {
-    List<Operator>? operators
+    this.operators
   }) : expressions = Stream.fromIterable([src])
       .transform(Lexer())
       .transform(Parser(OperatorTable(operators ?? [])));
@@ -77,7 +82,7 @@ class BuildTester {
     return this;
   }
 
-  /// Add a test that checks that a cell named [name] has been built.
+  /// Add a test that checks that a cell named [name] in [module] has been built.
   ///
   /// If [tester] is not null, it used to test the definition of the cell.
   ///
@@ -88,10 +93,11 @@ class BuildTester {
   /// If [attributes] is not null, the cell is tested that it has each
   /// attribute in this map and with the expected value.
   BuildTester hasNamed(String name, {
+    String? module,
     SpecTester? tester,
     bool local = true,
     Map<String, dynamic>? attributes
-  }) => hasCell(NamedCellId(name),
+  }) => hasCell(NamedCellId(name, module: module),
       tester: tester,
       local: local,
       attributes: attributes
@@ -145,9 +151,42 @@ class BuildTester {
     return this;
   }
 
+  /// Add a module identified by [name].
+  ///
+  /// The module consists of the declarations in [source]. This module is built
+  /// when an [import] declaration for [name] is processed.
+  BuildTester addModule({
+    required String name,
+    required String source
+  }) {
+    _modules[name] = source;
+    return this;
+  }
+
   // Private
 
+  /// Compilation pipeline
   final _pipeline = Pipeline();
+
+  /// Map from module names to the corresponding [ModuleSource].
+  final _modules = <String, String>{};
+
+  /// Retrieve the source of the module identified by [name].
+  ModuleSource _lookupModule(String name) {
+    final source = _modules[name];
+
+    if (source != null) {
+      return ModuleSource(
+          name: name,
+          nodes: Stream.fromIterable([source])
+              .transform(Lexer())
+              .transform(Parser(OperatorTable(operators ?? [])))
+      );
+    }
+
+    // TODO: Proper exception type
+    throw Exception('Module not found $name');
+  }
 }
 
 /// A [BuildTester] for testing function local cells
@@ -179,11 +218,13 @@ class FunctionTester extends BuildTester {
 
   @override
   FunctionTester hasNamed(String name, {
+    String? module,
     SpecTester? tester,
     bool local = true,
     Map<String, dynamic>? attributes
   }) {
     super.hasNamed(name,
+        module: module,
         tester: tester,
         local: local,
         attributes: attributes
