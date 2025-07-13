@@ -88,3 +88,11 @@ class MalformedExternalDeclarationError implements Exception {
   @override
   String toString() => 'Malformed external cell declaration.';
 }
+
+/// Thrown when a malformed import declaration is encountered
+class MalformedImportError implements Exception {
+  const MalformedImportError();
+
+  @override
+  String toString() => 'Malformed import declaration.';
+}

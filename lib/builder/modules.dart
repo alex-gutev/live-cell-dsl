@@ -63,6 +63,31 @@ class ModuleSpec {
   }
 }
 
+/// Exception representing that the requested module was not found
+class ModuleNotFound implements Exception {
+  /// The name of the requested module
+  final String name;
+
+  const ModuleNotFound(this.name);
+
+  @override
+  String toString() => 'Module `$name` not found';
+}
+
+/// Exception representing a circular import chain
+class CircularImportError implements Exception {
+  /// The name of the module being imported
+  final String name;
+
+  const CircularImportError({
+    required this.name,
+  });
+  
+  @override
+  String toString() => 
+      'Circular import of `$name` detected.';
+}
+
 /// The core module containing the special operators.
 final kCoreModule = ModuleSpec('live_cell.core',
   exports: Operators.operatorIds

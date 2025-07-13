@@ -183,8 +183,7 @@ class BuildTester {
       );
     }
 
-    // TODO: Proper exception type
-    throw Exception('Module not found $name');
+    throw ModuleNotFound(name);
   }
 }
 
@@ -457,5 +456,5 @@ class _TestModuleSource extends ModuleSource {
   @override
   Stream<AstNode> get nodes => Stream.fromIterable([source])
       .transform(Lexer())
-      .transform(Parser(OperatorTable(operators ?? [])));
+      .transform(Parser(OperatorTable(operators)));
 }

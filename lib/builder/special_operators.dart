@@ -1,7 +1,12 @@
 import 'cell_builder.dart';
 import 'cell_spec.dart';
+import 'exceptions.dart';
 import 'modules.dart';
 import '../parser/index.dart';
+
+/// Signature of top-level special declaration processor.
+typedef TopLevelProcessor = 
+  Future<void> Function(CellBuilder, List<AstNode>);
 
 /// Contains the special operators in the core module
 class Operators {
@@ -21,8 +26,8 @@ class Operators {
   );
 
   /// Map from top-level special operator identifiers to the processor functions.
-  static final topLevelOperators = {
-    import: importModule
+  static final topLevelOperators = <NamedCellId, TopLevelProcessor>{
+    import: _ModuleImporter().call
   };
 
   /// Set of all special operator ids
@@ -42,11 +47,17 @@ class Operators {
     required CellBuilder builder,
     required List<AstNode> operands
   }) => topLevelOperators[id]!(builder, operands);
+}
 
-  // Special operator definitions
+// Special Operator Processor Functions
 
-  /// Import special operator processor function.
-  static Future<void> importModule(CellBuilder builder, List<AstNode> args) async {
+class _ModuleImporter {
+  /// Set of modules currently being imported
+  /// 
+  /// This is used to detect circular imports
+  final _importingModules = <String>{};
+
+  Future<void> call(CellBuilder builder, List<AstNode> args) async {
     if (args case [Name(:final name)]) {
       if (builder.loadModule == null) {
         // TODO: Proper exception type
@@ -55,6 +66,10 @@ class Operators {
 
       final src = builder.loadModule!(name);
 
+      if (_importingModules.contains(src.name)) {
+        throw CircularImportError(name: src.name);
+      }
+      
       var module = builder.scope.getModuleSpec(src.name);
 
       if (module == null) {
@@ -68,13 +83,19 @@ class Operators {
             loadModule: builder.loadModule
         );
 
-        await moduleBuilder.processSource(src.nodes);
+        try {
+          _importingModules.add(src.name);
+          await moduleBuilder.processSource(src.nodes);
+        }
+        finally {
+          _importingModules.remove(src.name);
+        }
       }
 
       builder.module.importAll(module);
     }
     else {
-      throw Exception('Malformed import declaration');
+      throw MalformedImportError();
     }
   }
 }
