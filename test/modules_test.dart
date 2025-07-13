@@ -1,7 +1,8 @@
 import 'package:live_cell/analyzer/index.dart';
-import 'package:live_cell/builder/cell_spec.dart';
+import 'package:live_cell/builder/index.dart';
 import 'package:live_cell/optimization/folding.dart';
 import 'package:live_cell/parser/operators.dart';
+import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 import 'build_test_utils.dart';
@@ -261,5 +262,44 @@ void main() {
     ).addOperation(SemanticAnalyzer())
         .addOperation(CellFolder())
         .run());
+
+    test('Malformed declaration', () {
+      final tester1 = BuildTester('import(1234)');
+      final tester2 = BuildTester('import("hello")');
+      final tester3 = BuildTester('import(f(x))');
+      final tester4 = BuildTester('import(a, b, c)');
+      final tester5 = BuildTester('import({a; b; c})');
+
+      expect(tester1.run, throwsA(isA<BuildError>()
+          .having((e) => e.error, 'Malformed Import Error', isA<MalformedImportError>())));
+
+      expect(tester2.run, throwsA(isA<BuildError>()
+          .having((e) => e.error, 'Malformed Import Error', isA<MalformedImportError>())));
+
+      expect(tester3.run, throwsA(isA<BuildError>()
+          .having((e) => e.error, 'Malformed Import Error', isA<MalformedImportError>())));
+
+      expect(tester4.run, throwsA(isA<BuildError>()
+          .having((e) => e.error, 'Malformed Import Error', isA<MalformedImportError>())));
+
+      expect(tester5.run, throwsA(isA<BuildError>()
+          .having((e) => e.error, 'Malformed Import Error', isA<MalformedImportError>())));
+    });
+
+    test('Malformed: Module not found', () {
+      final tester = BuildTester('import(a-module)');
+
+      expect(tester.run, throwsA(isA<BuildError>()
+          .having((e) => e.error, 'Module Not Found Error', isA<ModuleNotFound>())));
+    });
+    
+    test('Malformed: Circular Import', () {
+      final tester = BuildTester('import(mod1)')
+        .addModule(name: 'mod1', source: 'import(mod2)')
+        .addModule(name: 'mod2', source: 'import(mod1)');
+
+      expect(tester.run, throwsA(isA<BuildError>()
+          .having((e) => e.error, 'Circular Import Error', isA<CircularImportError>())));
+    });
   });
 }
