@@ -2,95 +2,89 @@ import '../lexer/index.dart';
 import 'cell_spec.dart';
 
 /// Represents an error occurring while processing a declaration
-abstract class BuildError implements Exception {
+class BuildError implements Exception {
   /// The location where the error occurred
   final Location location;
 
-  /// Description of the error
-  String get description;
+  /// The exception that was thrown
+  final Exception error;
 
   const BuildError({
-    required this.location
+    required this.location,
+    required this.error
   });
 
   @override
   String toString() => location.errorString(
       prefix: 'Error processing declaration',
-      description: description
+      description: error.toString()
   );
 }
 
 /// Thrown when an empty block is encountered
-class EmptyBlockError extends BuildError {
-  @override
-  String get description => 'Empty block.';
+class EmptyBlockError implements Exception {
+  const EmptyBlockError();
 
-  const EmptyBlockError({
-    required super.location
-  });
+  @override
+  String toString() => 'Empty block.';
 }
 
 /// Thrown when a malformed cell definition declaration is encountered
-class MalformedDefinitionError extends BuildError {
-  @override
-  String get description => 'Malformed cell definition.';
+class MalformedDefinitionError implements Exception {
+  const MalformedDefinitionError();
 
-  const MalformedDefinitionError({
-    required super.location
-  });
+  @override
+  String toString() => 'Malformed cell definition.';
 }
 
 /// Thrown when a function definition with a malformed argument list is encountered
-class MalformedFunctionArgumentListError extends BuildError {
-  @override
-  String get description => 'Malformed argument list in function definition.';
+class MalformedFunctionArgumentListError implements Exception {
+  final Location location;
 
   const MalformedFunctionArgumentListError({
-    required super.location
+    required this.location
   });
+
+  @override
+  String toString() => 'Malformed argument cell identifier in'
+      ' function definition at ${location.line}:${location.column}.';
 }
 
 /// Thrown when multiple definitions for the same cell are encountered
-class MultipleDefinitionError extends BuildError {
+class MultipleDefinitionError implements Exception {
   final CellId id;
 
   const MultipleDefinitionError({
     required this.id,
-    required super.location
   });
 
   @override
-  String get description => 'Multiple definitions for cell `$id`';
+  String toString() => 'Multiple definitions for cell `$id`';
 }
 
 /// Thrown when a malformed variable cell declaration is encountered
-class MalformedVarDeclarationError extends BuildError {
-  @override
-  String get description => 'Malformed variable cell declaration.';
+class MalformedVarDeclarationError implements Exception {
+  const MalformedVarDeclarationError();
 
-  const MalformedVarDeclarationError({
-    required super.location
-  });
+  @override
+  String toString() => 'Malformed variable cell declaration.';
 }
 
 /// Thrown when a variable declaration is incompatible with the cell's definition.
-class IncompatibleVarDeclarationError extends BuildError {
+class IncompatibleVarDeclarationError implements Exception {
   // TODO: Add reference to where cell is already defined
 
-  @override
-  String get description => 'Variable cell declaration incompatible with existing cell definition.';
+  const IncompatibleVarDeclarationError();
 
-  const IncompatibleVarDeclarationError({
-    required super.location
-  });
+  @override
+  String toString() =>
+      'Variable cell declaration incompatible with existing cell definition.';
 }
 
 /// Thrown when a malformed `external` cell declaration is encountered.
-class MalformedExternalDeclarationError extends BuildError {
-  @override
-  String get description => 'Malformed external cell declaration.';
+class MalformedExternalDeclarationError implements Exception {
+  const MalformedExternalDeclarationError();
 
-  const MalformedExternalDeclarationError({
-    required super.location
-  });
+  @override
+  String toString() => 'Malformed external cell declaration.';
 }

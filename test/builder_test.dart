@@ -978,7 +978,7 @@ void main() {
             )
           ]
       );
-      expect(tester.run, throwsA(isA<MultipleDefinitionError>()));
+      expect(tester.run, throwsA(isA<BuildError>()));
     });
 
     test('Malformed: Redefining external cell', () {
@@ -1000,7 +1000,7 @@ void main() {
             )
           ]
       );
-      expect(tester.run, throwsA(isA<MultipleDefinitionError>()));
+      expect(tester.run, throwsA(isA<BuildError>()));
     });
 
     test('Malformed: External declaration on defined function cell', () {
@@ -1022,7 +1022,7 @@ void main() {
             )
           ]
       );
-      expect(tester.run, throwsA(isA<MultipleDefinitionError>()));
+      expect(tester.run, throwsA(isA<BuildError>()));
     });
 
     test('Malformed: Redefining external function cell', () {
@@ -1044,27 +1044,27 @@ void main() {
             )
           ]
       );
-      expect(tester.run, throwsA(isA<MultipleDefinitionError>()));
+      expect(tester.run, throwsA(isA<BuildError>()));
     });
 
     test('Malformed: literals in external declaration', () {
       final tester = BuildTester('external(123)');
-      expect(tester.run, throwsA(isA<MalformedExternalDeclarationError>()));
+      expect(tester.run, throwsA(isA<BuildError>()));
     });
 
     test('Malformed: Multiple cells in external declaration', () {
       final tester = BuildTester('external(a, b, c)');
-      expect(tester.run, throwsA(isA<MalformedExternalDeclarationError>()));
+      expect(tester.run, throwsA(isA<BuildError>()));
     });
 
     test('Malformed: Literals in function argument list', () {
       final tester = BuildTester('external(f(a, 1, b))');
-      expect(tester.run, throwsA(isA<MalformedFunctionArgumentListError>()));
+      expect(tester.run, throwsA(isA<BuildError>()));
     });
 
     test('Malformed: Expressions in function argument list', () {
       final tester = BuildTester('external(f(a, g(x), b))');
-      expect(tester.run, throwsA(isA<MalformedFunctionArgumentListError>()));
+      expect(tester.run, throwsA(isA<BuildError>()));
     });
   });
 
@@ -1083,7 +1083,7 @@ void main() {
           ]
       );
 
-      expect(builder.run, throwsA(isA<MalformedDefinitionError>()));
+      expect(builder.run, throwsA(isA<BuildError>()));
     });
 
     test('Function with literal as identifier', () {
@@ -1100,7 +1100,7 @@ void main() {
           ]
       );
 
-      expect(builder.run, throwsA(isA<MalformedDefinitionError>()));
+      expect(builder.run, throwsA(isA<BuildError>()));
     });
 
     test('Literals as argument names', () {
@@ -1117,7 +1117,7 @@ void main() {
           ]
       );
 
-      expect(builder.run, throwsA(isA<MalformedFunctionArgumentListError>()));
+      expect(builder.run, throwsA(isA<BuildError>()));
     });
 
     test('Expressions as argument names', () {
@@ -1134,7 +1134,7 @@ void main() {
           ]
       );
 
-      expect(builder.run, throwsA(isA<MalformedFunctionArgumentListError>()));
+      expect(builder.run, throwsA(isA<BuildError>()));
     });
 
     test('Empty block definition', () {
@@ -1151,7 +1151,7 @@ void main() {
           ]
       );
 
-      expect(builder.run, throwsA(isA<EmptyBlockError>()));
+      expect(builder.run, throwsA(isA<BuildError>()));
     });
 
     test('Multiple definitions for named cell', () {
@@ -1168,7 +1168,7 @@ void main() {
           ]
       );
 
-      expect(builder.run, throwsA(isA<MultipleDefinitionError>()));
+      expect(builder.run, throwsA(isA<BuildError>()));
     });
 
     test('Multiple definitions for function cell', () {
@@ -1185,7 +1185,7 @@ void main() {
           ]
       );
 
-      expect(builder.run, throwsA(isA<MultipleDefinitionError>()));
+      expect(builder.run, throwsA(isA<BuildError>()));
     });
 
     test('Redefining function argument cells', () {
@@ -1211,7 +1211,7 @@ void main() {
           ]
       );
 
-      expect(builder.run, throwsA(isA<MultipleDefinitionError>()));
+      expect(builder.run, throwsA(isA<BuildError>()));
     });
   });
 
@@ -1219,19 +1219,19 @@ void main() {
     test('Literals', () {
       final tester = BuildTester('var(123)');
 
-      expect(tester.run(), throwsA(isA<MalformedVarDeclarationError>()));
+      expect(tester.run(), throwsA(isA<BuildError>()));
     });
 
     test('Expressions', () {
       final tester = BuildTester('var(f(x,y))');
 
-      expect(tester.run(), throwsA(isA<MalformedVarDeclarationError>()));
+      expect(tester.run(), throwsA(isA<BuildError>()));
     });
 
     test('Empty cell list', () {
       final tester = BuildTester('var()');
 
-      expect(tester.run(), throwsA(isA<MalformedVarDeclarationError>()));
+      expect(tester.run(), throwsA(isA<BuildError>()));
     });
 
     test('Incompatible var declaration with cell definition', () {
@@ -1248,7 +1248,7 @@ void main() {
           ]
       );
 
-      expect(tester.run(), throwsA(isA<IncompatibleVarDeclarationError>()));
+      expect(tester.run(), throwsA(isA<BuildError>()));
     });
   });
 }
