@@ -12,17 +12,16 @@ import 'special_operators.dart';
 /// should be thrown.
 typedef LoadModule = ModuleSource Function(String name);
 
-/// The source code of a module
-class ModuleSource {
+/// Base class representing the source code of a module
+abstract class ModuleSource {
   /// The name of the module
   final String name;
 
   /// The [AstNode]s of the declarations in the module
-  final Stream<AstNode> nodes;
+  Stream<AstNode> get nodes;
 
   const ModuleSource({
     required this.name,
-    required this.nodes
   });
 }
 

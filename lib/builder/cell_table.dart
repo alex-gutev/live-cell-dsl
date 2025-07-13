@@ -1,4 +1,5 @@
 import 'cell_spec.dart';
+import 'modules.dart';
 
 /// Table containing cells defined in a given module/scope
 class CellTable {
@@ -55,6 +56,21 @@ class CellTable {
     _meta[(id, attribute)] = value;
   }
 
+  // Modules
+
+  /// Get the spec of a module identified by [name].
+  ///
+  /// If there is no module identified by [name] or it has not been built
+  /// yet, [null] is returned.
+  ModuleSpec? getModuleSpec(String name) => _modules[name];
+
+  /// Add a module [spec].
+  void addModuleSpec(ModuleSpec spec) {
+    if (spec.path != null) {
+      _modules[spec.path!] = spec;
+    }
+  }
+  
   // Private
 
   /// Map of cells indexed by cell specifications identifiers
@@ -62,6 +78,9 @@ class CellTable {
 
   /// Map storing attributes applying to cells
   final _meta = <(CellId, String), dynamic>{};
+
+  /// Map from module names to module specs.
+  final _modules = <String, ModuleSpec>{};
 }
 
 /// Exception indicating that a referenced cell was not found.

@@ -55,15 +55,23 @@ class Operators {
 
       final src = builder.loadModule!(name);
 
-      final moduleBuilder = CellBuilder(
-        scope: builder.scope,
-        module: ModuleSpec(src.name),
-        loadModule: builder.loadModule
-      );
+      var module = builder.scope.getModuleSpec(src.name);
 
-      await moduleBuilder.processSource(src.nodes);
+      if (module == null) {
+        module = ModuleSpec(src.name);
 
-      builder.module.importAll(moduleBuilder.module);
+        builder.scope.addModuleSpec(module);
+
+        final moduleBuilder = CellBuilder(
+            scope: builder.scope,
+            module: module,
+            loadModule: builder.loadModule
+        );
+
+        await moduleBuilder.processSource(src.nodes);
+      }
+
+      builder.module.importAll(module);
     }
     else {
       throw Exception('Malformed import declaration');

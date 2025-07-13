@@ -176,11 +176,10 @@ class BuildTester {
     final source = _modules[name];
 
     if (source != null) {
-      return ModuleSource(
+      return _TestModuleSource(
           name: name,
-          nodes: Stream.fromIterable([source])
-              .transform(Lexer())
-              .transform(Parser(OperatorTable(operators ?? [])))
+          source: source,
+          operators: operators ?? [],
       );
     }
 
@@ -440,4 +439,23 @@ class _FunctionTester extends SpecTester {
 
     await tester.run();
   }
+}
+
+class _TestModuleSource extends ModuleSource {
+  /// List of operators to register
+  final List<Operator> operators;
+
+  /// The source code of the module
+  final String source;
+
+  const _TestModuleSource({
+    required super.name,
+    required this.source,
+    required this.operators
+  });
+
+  @override
+  Stream<AstNode> get nodes => Stream.fromIterable([source])
+      .transform(Lexer())
+      .transform(Parser(OperatorTable(operators ?? [])));
 }
