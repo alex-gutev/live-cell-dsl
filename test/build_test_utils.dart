@@ -11,15 +11,21 @@ typedef RunTest = Future<void> Function();
 /// Helper for testing the result of [CellBuilder].
 class BuildTester {
   /// List of operators to register
-  final List<Operator>? operators;
+  final OperatorTable operatorTable;
+
+  /// The test source code
+  final String source;
 
   /// The builder
   late final builder = CellBuilder(
+    operatorTable: operatorTable,
     loadModule: _lookupModule
   );
 
   /// Input expression stream
-  final Stream<AstNode> expressions;
+  late final Stream<AstNode> expressions = Stream.fromIterable([source])
+      .transform(Lexer())
+      .transform(Parser(operatorTable));
 
   /// Test output function
   late RunTest _runTest = () async {
@@ -31,11 +37,9 @@ class BuildTester {
   CellTable get scope => builder.scope;
 
   /// Create a tester using a given input string
-  BuildTester(String src, {
-    this.operators
-  }) : expressions = Stream.fromIterable([src])
-      .transform(Lexer())
-      .transform(Parser(OperatorTable(operators ?? [])));
+  BuildTester(this.source, {
+    List<Operator> operators = const []
+  }) : operatorTable = OperatorTable(operators);
 
   /// Add a test that checks that a cell with a given [id] has been built.
   ///
@@ -179,7 +183,7 @@ class BuildTester {
       return _TestModuleSource(
           name: name,
           source: source,
-          operators: operators ?? [],
+          operators: operatorTable,
       );
     }
 
@@ -441,8 +445,8 @@ class _FunctionTester extends SpecTester {
 }
 
 class _TestModuleSource extends ModuleSource {
-  /// List of operators to register
-  final List<Operator> operators;
+  /// Infix operator table
+  final OperatorTable operators;
 
   /// The source code of the module
   final String source;
@@ -456,5 +460,5 @@ class _TestModuleSource extends ModuleSource {
   @override
   Stream<AstNode> get nodes => Stream.fromIterable([source])
       .transform(Lexer())
-      .transform(Parser(OperatorTable(operators)));
+      .transform(Parser(operators));
 }

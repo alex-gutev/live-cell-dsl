@@ -13,6 +13,12 @@ part 'functions.dart';
 
 /// Builds cell specifications from parsed cell [AstNode]s
 class CellBuilder {
+  /// Infix operator table
+  ///
+  /// Infix, prefix and postfix operators declared in the source are registered
+  /// in this table.
+  final OperatorTable operatorTable;
+
   /// Specification of the module being built
   /// 
   /// The identifiers of cells created by this builder, are contained
@@ -34,6 +40,7 @@ class CellBuilder {
   /// 
   /// If [module] is null, a new [ModuleSpec] with a [null] path is created.
   CellBuilder({
+    required this.operatorTable,
     CellTable? scope,
     ModuleSpec? module,
     this.loadModule

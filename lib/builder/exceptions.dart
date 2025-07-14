@@ -96,3 +96,11 @@ class MalformedImportError implements Exception {
   @override
   String toString() => 'Malformed import declaration.';
 }
+
+/// Thrown when a malformed operator declaration is encountered.
+class MalformedOperatorDeclarationError implements Exception {
+  const MalformedOperatorDeclarationError();
+
+  @override
+  String toString() => 'Malformed operator declaration';
+}

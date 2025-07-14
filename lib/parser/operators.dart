@@ -7,7 +7,14 @@ enum OperatorType {
   infix,
 
   /// A unary operator following its operand
-  postfix
+  postfix;
+
+  factory OperatorType.fromName(String name) => switch(name) {
+    'prefix' => OperatorType.prefix,
+    'infix' => OperatorType.infix,
+    'postfix' => OperatorType.postfix,
+    _ => throw Exception('Unknown operator type "$name"')
+  };
 }
 
 /// Information about an prefix/infix/postfix operator
@@ -64,6 +71,20 @@ class OperatorTable {
     return null;
   }
 
+  /// Add a new [operator] to the table
+  void add(Operator operator) {
+    final table = _opTable(operator.type);
+
+    if (table.containsKey(operator.name)) {
+      throw DuplicateOperatorError(
+          name: operator.name,
+          type: operator.type
+      );
+    }
+
+    table[operator.name] = operator;
+  }
+
   // Private
 
   /// Map of infix operators
@@ -81,4 +102,18 @@ class OperatorTable {
     OperatorType.infix => _infix,
     OperatorType.postfix => _postfix,
   };
+}
+
+/// Thrown when attempting to register an operator that has already been registered.
+class DuplicateOperatorError implements Exception {
+  final String name;
+  final OperatorType type;
+
+  const DuplicateOperatorError({
+    required this.name,
+    required this.type
+  });
+
+  @override
+  String toString() => '${type.name} operator `$name` already registered.';
 }

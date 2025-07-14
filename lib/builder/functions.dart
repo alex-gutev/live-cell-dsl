@@ -26,6 +26,7 @@ class DeferredFunctionDefinition extends DeferredSpec {
     if (_builtDefinition == null) {
       final builder = CellBuilder(
         scope: scope,
+        operatorTable: OperatorTable([]),
 
         // TODO: Consider adding aliases for all cells defined in [module]
         module: ModuleSpec(module.path,

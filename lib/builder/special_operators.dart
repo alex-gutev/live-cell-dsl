@@ -15,6 +15,11 @@ class Operators {
     module: 'live_cell.core'
   );
 
+  /// Declare infix/prefix/postfix operator
+  static const operator = NamedCellId('operator',
+    module: 'live_cell.core'
+  );
+
   /// Define cell operator
   static const define = NamedCellId('=',
     module: 'live_cell.core'
@@ -27,7 +32,8 @@ class Operators {
 
   /// Map from top-level special operator identifiers to the processor functions.
   static final topLevelOperators = <NamedCellId, TopLevelProcessor>{
-    import: _ModuleImporter().call
+    import: _ModuleImporter().call,
+    operator: _registerOperator
   };
 
   /// Set of all special operator ids
@@ -47,6 +53,50 @@ class Operators {
     required CellBuilder builder,
     required List<AstNode> operands
   }) => topLevelOperators[id]!(builder, operands);
+
+
+  /// Special operator processors
+
+  /// Process operator declaration
+  static Future<void> _registerOperator(
+      CellBuilder builder,
+      List<AstNode> args
+      ) async {
+    switch (args) {
+      case [
+        Name(:final name),
+        Name(name: 'infix' && final type),
+        Value<int>(value: final precedence),
+        Name(name: ('left' || 'right') && final associativity)
+      ]:
+
+        builder.operatorTable.add(
+          Operator(
+              name: name,
+              type: OperatorType.fromName(type),
+              precedence: precedence,
+              leftAssoc: associativity == 'left'
+          )
+        );
+
+      case [
+        Name(:final name),
+        Name(name: 'infix' && final type),
+        Value<int>(value: final precedence),
+      ]:
+        builder.operatorTable.add(
+            Operator(
+                name: name,
+                type: OperatorType.fromName(type),
+                precedence: precedence,
+                leftAssoc: true
+            )
+        );
+
+      default:
+        throw MalformedOperatorDeclarationError();
+    }
+  }
 }
 
 // Special Operator Processor Functions
@@ -80,7 +130,8 @@ class _ModuleImporter {
         final moduleBuilder = CellBuilder(
             scope: builder.scope,
             module: module,
-            loadModule: builder.loadModule
+            loadModule: builder.loadModule,
+            operatorTable: builder.operatorTable
         );
 
         try {
