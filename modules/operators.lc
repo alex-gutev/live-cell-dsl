@@ -1,0 +1,16 @@
+operator(=, infix, 1, right)
+
+operator(==, infix, 5, left)
+operator(!=, infix, 5, left)
+
+operator(<, infix, 10)
+operator(>, infix, 10)
+operator(<=, infix, 10)
+operator(>=, infix, 10)
+
+operator(+, infix, 50)
+operator(-, infix, 50)
+
+operator(*, infix, 100)
+operator(/, infix, 100)
+operator(%, infix, 100)

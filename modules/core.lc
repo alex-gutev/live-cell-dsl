@@ -1,0 +1,22 @@
+import(operators)
+
+## Arithmetic
+
+external(+(a,b))
+external(-(a,b))
+external(*(a,b))
+external(/(a,b))
+external(%(a,b))
+
+## Equality
+
+external(==(a,b))
+external(!=(a,b))
+external(not(a,b))
+
+## Comparison
+
+external(<(a,b))
+external(>(a,b))
+external(<=(a,b))
+external(>=(a,b))
