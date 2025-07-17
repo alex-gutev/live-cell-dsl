@@ -12,7 +12,6 @@ external(%(a,b))
 
 external(==(a,b))
 external(!=(a,b))
-external(not(a,b))
 
 ## Comparison
 
@@ -20,3 +19,9 @@ external(<(a,b))
 external(>(a,b))
 external(<=(a,b))
 external(>=(a,b))
+
+## Boolean
+
+external(not(a))
+external(and(a,b))
+external(or(a,b))
