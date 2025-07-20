@@ -2,6 +2,9 @@ part of 'cell_builder.dart';
 
 /// A deferred [ValueSpec] defining a function.
 class DeferredFunctionDefinition extends DeferredSpec {
+  /// The name of the function
+  final CellId name;
+
   /// List of argument cell identifiers
   final List<CellId> arguments;
 
@@ -15,6 +18,7 @@ class DeferredFunctionDefinition extends DeferredSpec {
   final AstNode definition;
 
   DeferredFunctionDefinition({
+    required this.name,
     required this.arguments,
     required this.scope,
     required this.module,
@@ -38,6 +42,7 @@ class DeferredFunctionDefinition extends DeferredSpec {
       builder.finalize();
 
       _builtDefinition = FunctionSpec(
+          name: name,
           arguments: arguments,
           scope: scope,
           definition: _NamedCellRef(

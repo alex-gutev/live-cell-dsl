@@ -332,6 +332,7 @@ class CellBuilder {
       location: definition.location,
 
       definition: (arguments) => DeferredFunctionDefinition(
+          name: module.namedId(name),
           arguments: arguments,
           scope: scope,
           module: module,
@@ -495,6 +496,7 @@ class CellBuilder {
             arguments: arguments,
             scope: fnScope,
             definition: (args) => FunctionSpec(
+                name: id,
                 arguments: args,
                 scope: fnScope,
                 definition: const Stub()

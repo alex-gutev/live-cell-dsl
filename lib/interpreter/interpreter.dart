@@ -170,7 +170,7 @@ class Interpreter {
     )));
 
     return Evaluator.function(
-        name: NamedCellId(''),
+        name: spec.name,
         arguments: spec.arguments,
         external: external,
         definition: result

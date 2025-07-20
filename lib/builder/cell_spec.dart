@@ -228,6 +228,9 @@ abstract class DeferredSpec extends ValueSpec {
 
 /// Represents a function definition
 class FunctionSpec extends ValueSpec {
+  /// The name of the function
+  final CellId name;
+
   /// List of argument cell identifiers
   final List<CellId> arguments;
 
@@ -256,6 +259,7 @@ class FunctionSpec extends ValueSpec {
   }
 
   FunctionSpec({
+    required this.name,
     required this.arguments,
     required this.scope,
     required this.definition
