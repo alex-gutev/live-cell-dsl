@@ -150,11 +150,11 @@ void main() {
       await tester.build([
         'import(core);',
         'frob(a, b) = {',
-        ' result = c + d;'
+        ' result = c + d;',
         ' c = a * a;',
         ' d = b * b;',
-        ' result'
-        '};'
+        ' result',
+        '};',
         'out = frob(var(x), var(y));'
       ]);
 
@@ -177,7 +177,7 @@ void main() {
       expect(values, equals([5, 13, 34, 52]));
     });
 
-    test('Outer cell references', () async {
+    test('Function Closure', () async {
       final tester = InterpreterTester();
 
       await tester.build([
@@ -240,6 +240,40 @@ void main() {
       expect(values, equals([6, 8, 9, 15]));
     });
 
+    test('Nested Function Closure', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'out = inc(x);',
+        'inc(n) = {',
+        ' delta = 5;'
+            ' _inc(m) = m + delta;',
+        ' _inc(n)',
+        '};',
+        'var(delta);',
+        'var(x);'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+      final delta = tester.getVar(NamedCellId('delta'));
+
+      x.value = 5;
+      delta.value = 1;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 7;
+      delta.value = 2;
+
+      MutableCell.batch(() {
+        x.value = 10;
+        delta.value = 3;
+      });
+
+      expect(values, equals([10, 12, 15]));
+    });
+
     test('Lexical Scope', () async {
       // This tests shadowing and ensures that cells are lexically scoped
       // rather than dynamically scoped.
@@ -252,9 +286,45 @@ void main() {
         ' delta = 5;',
         ' g(x + delta)',
         '};',
-        'var(delta);'
-        'g(x) = x + delta;'
+        'var(delta);',
+        'g(x) = x + delta;',
         'out = f(x);',
+        'var(x);'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+      final delta = tester.getVar(NamedCellId('delta'));
+
+      x.value = 5;
+      delta.value = 1;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 7;
+      delta.value = 2;
+
+      MutableCell.batch(() {
+        x.value = 10;
+        delta.value = 8;
+      });
+
+      expect(values, equals([11, 13, 14, 23]));
+    });
+
+    test('Lexical Scope Function Arguments', () async {
+      // This tests shadowing and ensures that argument cells do not dynamically
+      // shadow global cells with the same name
+
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'f(x, delta) = {',
+        ' g(x + delta)',
+        '};',
+        'var(delta);',
+        'g(x) = x + delta;',
+        'out = f(x, 5);',
         'var(x);'
       ]);
 
