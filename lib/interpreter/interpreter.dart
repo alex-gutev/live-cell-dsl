@@ -152,13 +152,18 @@ class Interpreter {
   /// calls to this method, simply return the cached evaluator, rather than
   /// creating a new evaluator.
   Evaluator _makeFunctionEvaluator(FunctionSpec spec) => _functions.putIfAbsent(spec, () {
+    final localIds = <CellId, CellId>{};
+    final locals = <CellId, Evaluator>{};
+
     Evaluator makeRef(CellSpec cell) {
       if (spec.referencedCells.contains(cell) || cell.isArgument()) {
         return Evaluator.ref(cell.id);
       }
 
-      // TODO: Add memoization
-      return _makeEvaluator(cell.definition);
+      final id = localIds.putIfAbsent(cell.id, _newLocalId);
+      locals.putIfAbsent(id, () => _makeEvaluator(cell.definition));
+
+      return Evaluator.ref(id);
     }
 
     final result =
@@ -173,6 +178,7 @@ class Interpreter {
         name: spec.name,
         arguments: spec.arguments,
         external: external,
+        locals: locals,
         definition: result
     );
   });
@@ -208,6 +214,12 @@ class Interpreter {
       return Function.apply(spec.fn, args);
     };
   }
+
+  /// Counter for generating local cell identifiers
+  var _localIdCounter = 0;
+
+  /// Get a new local cell identifier that is not used by any other cell
+  CellId _newLocalId() => _LocalCellId(_localIdCounter++);
 }
 
 /// Determines the set of [arguments] reference by a given [ValueSpec].
@@ -243,4 +255,22 @@ class _ArgumentCellVisitor extends ValueSpecTreeVisitor {
       );
     }
   }
+}
+
+/// Identifies a cell that is local to a function
+///
+/// Each local cell should be given a [_LocalCellId] with a unique [index].
+/// This ensures that local cells do not dynamically shadow global cells with
+/// the same name.
+class _LocalCellId extends CellId {
+  final int index;
+
+  const _LocalCellId(this.index);
+
+  @override
+  bool operator ==(Object other) => other is _LocalCellId &&
+      other.index == index;
+
+  @override
+  int get hashCode => index.hashCode;
 }

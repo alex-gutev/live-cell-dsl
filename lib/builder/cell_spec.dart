@@ -8,7 +8,7 @@ part 'cell_expression_visitor.dart';
 part 'cell_spec.g.dart';
 
 /// Base class representing a cell identifier
-sealed class CellId {
+abstract class CellId {
   const CellId();
 }
 

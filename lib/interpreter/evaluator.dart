@@ -40,6 +40,7 @@ sealed class Evaluator {
     required CellId name,
     required List<CellId> arguments,
     required Map<CellId, Evaluator> external,
+    required Map<CellId, Evaluator> locals,
     required Evaluator definition
   }) = FunctionEvaluator;
 
@@ -98,6 +99,9 @@ class FunctionEvaluator extends Evaluator {
   /// Map from external cell identifiers to their corresponding [Evaluator]s.
   final Map<CellId, Evaluator> external;
 
+  /// Map of evaluators for cells local to the function
+  final Map<CellId, Evaluator> locals;
+
   /// Evaluator for the expression defining the result of the cell
   final Evaluator definition;
 
@@ -105,6 +109,7 @@ class FunctionEvaluator extends Evaluator {
     required this.name,
     required this.arguments,
     required this.external,
+    required this.locals,
     required this.definition
   });
 
@@ -123,7 +128,8 @@ class FunctionEvaluator extends Evaluator {
         FunctionContext(
             parent: context,
             arguments: Map.fromIterables(arguments, args),
-            closure: closure
+            closure: closure,
+            locals: locals
         )
     );
   };

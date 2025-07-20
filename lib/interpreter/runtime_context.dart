@@ -34,24 +34,37 @@ class FunctionContext extends RuntimeContext {
   /// The context in which the function is defined.
   final RuntimeContext parent;
 
-  /// Map from argument cell identifiers to the corresponding values as [Thunk]s.
+  /// Map of [Thunk]s for the function's argument cells.
   final Map<CellId, Thunk> arguments;
 
-  /// Map from referenced cell identifiers to the corresponding values as [Thunk]s.
+  /// Map of [Thunk]s for the cells referenced by the function.
   final Map<CellId, Thunk> closure;
+
+  /// Map of [Evaluator] for cells local to the function.
+  final Map<CellId, Evaluator> locals;
 
   FunctionContext({
     required this.parent,
     required this.arguments,
-    required this.closure
+    required this.closure,
+    required this.locals
   });
 
   @override
-  refCell(CellId id) {
+  refCell(CellId id) => _values.putIfAbsent(id, () {
+    final local = locals[id];
+
+    if (local != null) {
+      return local.eval(this);
+    }
+
     final arg = arguments[id] ?? closure[id];
 
     return arg != null
         ? arg()
         : parent.refCell(id);
-  }
+  });
+
+  /// Map of cached cell values
+  final _values = <CellId, dynamic>{};
 }
