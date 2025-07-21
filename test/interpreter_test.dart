@@ -453,5 +453,93 @@ void main() {
 
       expect(values, equals([17, 19, 20, 29]));
     });
+
+    test('Recursive Function (Factorial)', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'factorial(n) = select(',
+        '  n > 1,',
+        '  n * factorial(n - 1),',
+        '  1',
+        ');',
+        'out = factorial(var(x));'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+
+      x.value = 2;
+      
+      final values = tester.observe(NamedCellId('out'));
+      
+      x.value = 0;
+      x.value = 5;
+      x.value = 7;
+      
+      expect(values, equals([2, 1, 120, 5040]));
+    });
+
+    test('Tail-Recursive Function (Factorial)', () async {
+      // NOTE: This test doesn't test tail call optimization. It only tests
+      // that tail recursive functions are executed correctly.
+
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'factorial(n) = {',
+        '  calc(n, acc) = '
+        '    select(',
+        '      n > 1,',
+        '      calc(n - 1, acc * n),',
+        '      acc',
+        '    );',
+        '  calc(n, 1);'
+        '};'
+        'out = factorial(var(x));'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+
+      x.value = 2;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 0;
+      x.value = 5;
+      x.value = 7;
+
+      expect(values, equals([2, 1, 120, 5040]));
+    });
+
+    test('Recursive Function (Fibonacci)', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'fib(n) = select(',
+        '  n < 2,',
+        '  1,',
+        '  fib(n - 1) + fib(n - 2)',
+        ');',
+        'out = fib(var(x));'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+
+      x.value = 0;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 1;
+      x.value = 2;
+      x.value = 3;
+      x.value = 4;
+      x.value = 5;
+      x.value = 6;
+
+      expect(values, equals([1, 1, 2, 3, 5, 8, 13]));
+    });
   });
 }
