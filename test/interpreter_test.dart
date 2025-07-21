@@ -541,5 +541,40 @@ void main() {
 
       expect(values, equals([1, 1, 2, 3, 5, 8, 13]));
     });
+
+    test('Mutually Recursive Functions', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'fib(n) = {',
+        '  calc(n) = '
+        '    select(',
+        '    n < 2,',
+        '    1,',
+        '    fib1(n) + fib2(n)',
+        '  );',
+        '  fib1(n) = calc(n - 1);'
+        '  fib2(n) = calc(n - 2);'
+        '  calc(n);'
+        '};'
+        'out = fib(var(x));'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+
+      x.value = 0;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 1;
+      x.value = 2;
+      x.value = 3;
+      x.value = 4;
+      x.value = 5;
+      x.value = 6;
+
+      expect(values, equals([1, 1, 2, 3, 5, 8, 13]));
+    });
   });
 }
