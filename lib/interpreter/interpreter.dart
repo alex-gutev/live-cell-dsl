@@ -75,7 +75,11 @@ class Interpreter {
             return _makeCell(spec);
 
           default:
-            final visitor = _ArgumentCellVisitor(this);
+            final visitor = _ArgumentCellVisitor(
+              interpreter: this,
+              cell: spec
+            );
+
             spec.definition.accept(visitor);
 
             final evaluator = _compiler.makeEvaluator(spec.definition);
@@ -95,7 +99,15 @@ class _ArgumentCellVisitor extends ValueSpecTreeVisitor {
   /// Set of arguments referenced by the visited [ValueSpec].
   final arguments = <ValueCell>{};
 
-  _ArgumentCellVisitor(this.interpreter);
+  /// Set of all cells that were visited
+  final _visited = <CellSpec>{};
+
+  _ArgumentCellVisitor({
+    required this.interpreter,
+    required CellSpec cell
+  }) {
+    _visited.add(cell);
+  }
 
   @override
   void visitRef(CellRef spec) {
@@ -109,13 +121,17 @@ class _ArgumentCellVisitor extends ValueSpecTreeVisitor {
 
   /// Add [cell] to the [arguments] set.
   void _addArgument(CellSpec cell) {
-    if (cell is ValueCellSpec || cell.foldable()) {
-      cell.definition.accept(this);
-    }
-    else {
-      arguments.add(
-          interpreter._makeCell(cell)
-      );
+    if (!_visited.contains(cell)) {
+      _visited.add(cell);
+
+      if (cell is ValueCellSpec || cell.foldable()) {
+        cell.definition.accept(this);
+      }
+      else {
+        arguments.add(
+            interpreter._makeCell(cell)
+        );
+      }
     }
   }
 }

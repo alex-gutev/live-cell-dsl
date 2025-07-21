@@ -88,6 +88,7 @@ class ApplyEvaluator extends Evaluator {
     required this.operands
   });
 
+  // TODO: Check that [operator] is a [CellFunc]
   @override
   eval(RuntimeContext context) =>
       operator.eval(context)
@@ -155,6 +156,7 @@ class ContextEvaluator extends Evaluator {
   /// thrown.
   T get<T>() => switch (eval(context)) {
     final T value => value,
+    // TODO: Exception type with more details
     _ => throw TypeError()
   };
 }

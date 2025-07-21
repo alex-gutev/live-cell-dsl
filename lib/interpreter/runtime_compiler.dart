@@ -41,7 +41,6 @@ class RuntimeCompiler {
       return refExternalCell(spec.id);
     }
 
-    // TODO: Handle external cells
     if (spec is ValueCellSpec || spec.foldable()) {
       return makeEvaluator(spec.definition);
     }
@@ -51,24 +50,20 @@ class RuntimeCompiler {
 
   /// Create an evaluator for the function defined by [spec].
   ///
-  /// **NOTE**: This method cases the [Evaluator] for a given [spec]. Future
-  /// calls to the same method for the same [spec] will return the same
-  /// [Evaluator].
+  /// **NOTE**: This method creates a deferred evaluator to prevent an
+  /// infinite loop if there is a recursive call to the function.
   Evaluator makeFunctionEvaluator(FunctionSpec spec) =>
-      _functions.putIfAbsent(spec, () {
-        final compiler = FunctionRuntimeCompiler(
-            parent: this,
-            functionSpec: spec
-        );
-
-        return compiler.makeFunction();
-      });
+      _DeferredFunctionEvaluator(
+          compiler: this,
+          spec: spec
+      );
 
   /// Create an evaluator that references an externally defined cell.
   Evaluator refExternalCell(CellId id) {
     final spec = Builtins.fns[id];
 
     if (spec == null) {
+      // TODO: Proper exception type
       throw ArgumentError('Undefined external cell $id.');
     }
 
@@ -159,4 +154,32 @@ class FunctionRuntimeCompiler extends RuntimeCompiler {
 
   /// Map holding the [Evaluator]s for local cells indexed by runtime identifier.
   final _localCells = <RuntimeCellId, Evaluator>{};
+}
+
+/// An [Evaluator] that builds a function when it is first called
+class _DeferredFunctionEvaluator extends Evaluator {
+  /// The compiler to use when building the function
+  final RuntimeCompiler compiler;
+
+  /// The function specification to build
+  final FunctionSpec spec;
+
+  _DeferredFunctionEvaluator({
+    required this.compiler,
+    required this.spec
+  });
+
+  @override
+  eval(RuntimeContext context) => _build().eval(context);
+
+  /// Build the function
+  Evaluator _build() =>
+      compiler._functions.putIfAbsent(spec, () {
+        final compiler = FunctionRuntimeCompiler(
+            parent: this.compiler,
+            functionSpec: spec
+        );
+
+        return compiler.makeFunction();
+      });
 }
