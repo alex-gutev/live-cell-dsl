@@ -25,3 +25,13 @@ external(>=(a,b))
 external(not(a))
 external(and(a,b))
 external(or(a,b))
+
+## Branching
+
+external(
+    select(
+        condition,
+        if-true,
+        if-false
+    )
+)

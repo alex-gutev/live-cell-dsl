@@ -119,6 +119,12 @@ class Builtins {
         arity: 2,
         fn: or
     ),
+
+    BuiltinSpec(
+      name: NamedCellId('select', module: kCoreModel),
+      arity: 3,
+      fn: select
+    )
   };
 
   // Arithmetic
@@ -184,6 +190,16 @@ class Builtins {
   /// The `or` function
   static bool or(ContextEvaluator a, ContextEvaluator b) =>
       a.get<bool>() || b.get<bool>();
+
+  // Branching
+
+  static dynamic select(
+      ContextEvaluator condition,
+      ContextEvaluator ifTrue,
+      ContextEvaluator ifFalse
+  ) => condition.get<bool>()
+      ? ifTrue.get()
+      : ifFalse.get();
 }
 
 /// An evaluator that returns a function for calling a builtin function.
