@@ -247,8 +247,8 @@ void main() {
         'import(core);',
         'out = inc(x);',
         'inc(n) = {',
-        ' delta = 5;'
-            ' _inc(m) = m + delta;',
+        ' delta = 5;',
+        ' _inc(m) = m + delta;',
         ' _inc(n)',
         '};',
         'var(delta);',
@@ -345,6 +345,113 @@ void main() {
       });
 
       expect(values, equals([11, 13, 14, 23]));
+    });
+    
+    test('Higher order function with local closure', () async {
+      final tester = InterpreterTester();
+      
+      await tester.build([
+        'import(core);',
+        'make-inc(n) = {',
+        ' delta = n + 1;',
+        ' inc(m) = m + delta;',
+        ' inc',
+        '};',
+        'var(x);',
+        'var(delta);',
+        'f = make-inc(1);',
+        'out = f(x);'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+      final delta = tester.getVar(NamedCellId('delta'));
+
+      x.value = 5;
+      delta.value = 1;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 7;
+      delta.value = 2;
+
+      MutableCell.batch(() {
+        x.value = 10;
+        delta.value = 8;
+      });
+
+      expect(values, equals([7, 9, 12]));
+    });
+
+    test('Higher order function with local and global closure', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'make-inc(n) = {',
+        ' inc(m) = m + n + delta;',
+        ' inc',
+        '};',
+        'var(x);',
+        'var(delta);',
+        'f = make-inc(1);',
+        'out = f(x);'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+      final delta = tester.getVar(NamedCellId('delta'));
+
+      x.value = 5;
+      delta.value = 1;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 7;
+      delta.value = 2;
+
+      MutableCell.batch(() {
+        x.value = 10;
+        delta.value = 8;
+      });
+
+      expect(values, equals([7, 9, 10, 19]));
+    });
+
+    test('Higher order function with local + global closure and shadowing', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'make-inc(n) = {',
+        ' inc(m) = m + n + delta;',
+        ' inc',
+        '};',
+        'g(x) = {',
+        ' delta = 10;'
+        ' x + delta;',
+        '};',
+        'var(x);',
+        'var(delta);',
+        'f = make-inc(1);',
+        'out = g(f(x));'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+      final delta = tester.getVar(NamedCellId('delta'));
+
+      x.value = 5;
+      delta.value = 1;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 7;
+      delta.value = 2;
+
+      MutableCell.batch(() {
+        x.value = 10;
+        delta.value = 8;
+      });
+
+      expect(values, equals([17, 19, 20, 29]));
     });
   });
 }
