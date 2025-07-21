@@ -1,20 +1,8 @@
 import 'package:live_cells_core/live_cells_core.dart';
 
 import '../builder/index.dart';
-import 'builtins.dart';
 import 'evaluator.dart';
-import 'thunk.dart';
-
-/// Signature of function defined by a cell.
-///
-/// [arguments] is a list of [Thunks]s holding values of the function arguments.
-typedef CellFunc = Function(List<Thunk> arguments);
-
-/// Signature of the make cell reference function.
-///
-/// This function should return an [Evaluator] that references the value of the
-/// given [cell].
-typedef MakeRef = Evaluator Function(CellSpec cell);
+import 'runtime_compiler.dart';
 
 /// Builds [ValueCell]s from source code loaded at run time.
 /// 
@@ -38,7 +26,7 @@ class Interpreter {
   /// **NOTE**: [ValueCell]s are not generated for foldable cells. An exception
   /// is thrown if [id] identifies a foldable cell or does not identify any
   /// cell.
-  ValueCell get(CellId id) => _context.getCell(id);
+  ValueCell get(CellId id) => _cells[id]!;
   
   /// Get the [MutableCell] identified by [id].
   /// 
@@ -47,179 +35,57 @@ class Interpreter {
 
   // Private
 
+  /// The cell definition compiler
+  final _compiler = RuntimeCompiler();
+
   /// The global cell context
   final _context = GlobalContext();
 
-  /// Maps identifiers to [MutableCell] objects.
+  /// Map of [ValueCell]s objects indexed by [CellId]s.
+  final _cells = <CellId, ValueCell>{};
+
+  /// Map of [MutableCell] objects indexed by [CellId]s.
   final _mutable = <CellId, MutableCell>{};
 
-  /// Maps function specifications to actual [Evaluator]s that return the functions.
-  final _functions = <FunctionSpec, Evaluator>{};
-  
-  /// Function for creating a reference to a cell.
-  /// 
-  /// If this is not null, it is called to create a reference to a cell.
-  MakeRef? _ref;
-  
   /// Build a [ValueCell] for a given [spec].
   ///
   /// This does not create a [ValueCell] for specs representing foldable or
   /// external cells.
   void _compileCell(CellSpec spec) {
     if (spec is! ValueCellSpec && !spec.foldable() && !spec.isExternal()) {
-      _makeCell(spec.id, spec.definition);
+      _cells[spec.id] = _makeCell(spec);
     }
   }
 
-  /// Build a [ValueCell] for the cell identified by [id] and defined by [definition].
-  ValueCell _makeCell(CellId id, ValueSpec definition) => _context.addCell(id, () {
-    switch (definition) {
-      case Stub():
-        // TODO: Proper exception type
-        throw UnimplementedError();
+  /// Build a [ValueCell] for a given [spec].
+  ValueCell _makeCell(CellSpec spec) =>
+      _context.addCell(_compiler.idForCell(spec), () {
+        switch (spec.definition) {
+          case Stub():
+            // TODO: Proper exception type
+            throw UnimplementedError();
 
-      case Constant(:final value):
-        return ValueCell.value(value);
+          case Constant(:final value):
+            return ValueCell.value(value);
 
-      case Variable():
-        return _mutable[id] = MutableCell(null);
+          case Variable():
+            return _mutable[spec.id] = MutableCell(null);
 
-      case DeferredSpec():
-        return _makeCell(id, definition.build());
+          case DeferredSpec():
+            return _makeCell(spec);
 
-      default:
-        final visitor = _ArgumentCellVisitor(this);
-        definition.accept(visitor);
+          default:
+            final visitor = _ArgumentCellVisitor(this);
+            spec.definition.accept(visitor);
 
-        final evaluator = _makeEvaluator(definition);
+            final evaluator = _compiler.makeEvaluator(spec.definition);
 
-        return ComputeCell(
-          arguments: visitor.arguments,
-          compute: () => evaluator.eval(_context),
-        ).store();
-    }
-  });
-
-  /// Create an [Evaluator] for the computation represented by [spec].
-  Evaluator _makeEvaluator(ValueSpec spec) => switch (spec) {
-    // TODO: Proper exception type
-    Stub() => throw UnimplementedError(),
-    Variable() => throw UnimplementedError(),
-
-    Constant(:final value) => Evaluator.constant(value),
-    CellRef(get: final cell) => _makeRef(cell),
-
-    ApplySpec(
-        :final operator,
-        :final operands
-    ) => Evaluator.apply(
-        operator: _makeEvaluator(operator),
-        operands: operands.map(_makeEvaluator).toList()
-    ),
-
-    DeferredSpec() => _makeEvaluator(spec.build()),
-    FunctionSpec() => _makeFunctionEvaluator(spec),
-  };
-
-  /// Create an [Evaluator] that returns the value of the cell represented by [spec].
-  ///
-  /// If [_ref] is not null it is called, otherwise an evaluator that references
-  /// the value of the cell is returned.
-  Evaluator _makeRef(CellSpec spec) {
-    if (spec.isExternal()) {
-      return Evaluator.constant(_externalFunc(spec.id));
-    }
-
-    if (_ref != null) {
-      return _ref!(spec);
-    }
-
-    return _cellValue(spec);
-  }
-
-  /// Create an [Evaluator] that references the value of the cell represented by [spec].
-  Evaluator _cellValue(CellSpec spec) {
-    if (spec is ValueCellSpec || spec.foldable()) {
-      return _makeEvaluator(spec.definition);
-    }
-
-    return Evaluator.ref(spec.id);
-  }
-
-  /// Create an [Evaluator] that returns the function represented by [spec].
-  ///
-  /// This method caches the [Evaluator] for a given in [_functions]. Subsequent
-  /// calls to this method, simply return the cached evaluator, rather than
-  /// creating a new evaluator.
-  Evaluator _makeFunctionEvaluator(FunctionSpec spec) => _functions.putIfAbsent(spec, () {
-    final localIds = <CellId, CellId>{};
-    final locals = <CellId, Evaluator>{};
-
-    Evaluator makeRef(CellSpec cell) {
-      if (spec.referencedCells.contains(cell) || cell.isArgument()) {
-        return Evaluator.ref(cell.id);
-      }
-
-      final id = localIds.putIfAbsent(cell.id, _newLocalId);
-      locals.putIfAbsent(id, () => _makeEvaluator(cell.definition));
-
-      return Evaluator.ref(id);
-    }
-
-    final result =
-      _withMakeRef(makeRef, () => _makeEvaluator(spec.definition));
-
-    final external = Map.fromEntries(spec.referencedCells.map((spec) => MapEntry(
-      spec.id,
-      _makeRef(spec)
-    )));
-
-    return Evaluator.function(
-        name: spec.name,
-        arguments: spec.arguments,
-        external: external,
-        locals: locals,
-        definition: result
-    );
-  });
-
-  /// Call [fn] with [_ref] set to [ref].
-  T _withMakeRef<T>(MakeRef ref, T Function() fn) {
-    final prev = _ref;
-
-    try {
-      _ref = ref;
-      return fn();
-    }
-    finally {
-      _ref = prev;
-    }
-  }
-
-  /// Retrieve the external function identified by [name].
-  CellFunc? _externalFunc(CellId name) {
-    final spec = Builtins.fns[name];
-
-    if (spec == null) {
-      throw ArgumentError('Undefined external cell $name.');
-    }
-
-    return (List<Thunk> args) {
-      checkArity(
-          name: name,
-          arity: spec.arity,
-          arguments: args
-      );
-
-      return Function.apply(spec.fn, args);
-    };
-  }
-
-  /// Counter for generating local cell identifiers
-  var _localIdCounter = 0;
-
-  /// Get a new local cell identifier that is not used by any other cell
-  CellId _newLocalId() => _LocalCellId(_localIdCounter++);
+            return ComputeCell(
+              arguments: visitor.arguments,
+              compute: () => evaluator.eval(_context),
+            ).store();
+        }
+      });
 }
 
 /// Determines the set of [arguments] reference by a given [ValueSpec].
@@ -248,29 +114,8 @@ class _ArgumentCellVisitor extends ValueSpecTreeVisitor {
     }
     else {
       arguments.add(
-          interpreter._makeCell(
-              cell.id, 
-              cell.definition
-          )
+          interpreter._makeCell(cell)
       );
     }
   }
-}
-
-/// Identifies a cell that is local to a function
-///
-/// Each local cell should be given a [_LocalCellId] with a unique [index].
-/// This ensures that local cells do not dynamically shadow global cells with
-/// the same name.
-class _LocalCellId extends CellId {
-  final int index;
-
-  const _LocalCellId(this.index);
-
-  @override
-  bool operator ==(Object other) => other is _LocalCellId &&
-      other.index == index;
-
-  @override
-  int get hashCode => index.hashCode;
 }
