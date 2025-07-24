@@ -33,3 +33,14 @@ class ArityError extends Error {
   String toString() => '$name expected $expected arguments '
       'but was given $got.';
 }
+
+/// Thrown when an external cell is declared without a definition
+class MissingExternalCellError extends Error {
+  /// The name of the cell
+  final CellId name;
+
+  MissingExternalCellError(this.name);
+
+  @override
+  String toString() => 'Missing implementation for external cell $name.';
+}

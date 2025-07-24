@@ -1,5 +1,5 @@
 import 'package:live_cell/builder/index.dart';
-import 'package:live_cell/interpreter/exceptions.dart';
+import 'package:live_cell/interpreter/index.dart';
 import 'package:live_cells_core/live_cells_core.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
@@ -665,6 +665,16 @@ void main() {
       expect(() => tooMany.value, throwsA(isA<ArityError>()));
 
       expect(correct.value, equals(3));
+    });
+
+    test('Undefined external function', () async {
+      final tester = InterpreterTester();
+
+      expect(() => tester.build([
+        'import(core);',
+        'external(foo(a));',
+        'out = foo(var(x));'
+      ]), throwsA(isA<MissingExternalCellError>()));
     });
   });
 }

@@ -1,6 +1,7 @@
 import '../builder/index.dart';
 import 'builtins.dart';
 import 'evaluator.dart';
+import 'exceptions.dart';
 
 /// Compiles [ValueSpec]s to [Evaluator] objects.
 class RuntimeCompiler {
@@ -63,8 +64,7 @@ class RuntimeCompiler {
     final spec = Builtins.fns[id];
 
     if (spec == null) {
-      // TODO: Proper exception type
-      throw ArgumentError('Undefined external cell $id.');
+      throw MissingExternalCellError(id);
     }
 
     return spec.evaluator;
