@@ -79,9 +79,19 @@ class FunctionContext extends RuntimeContext {
 
   @override
   refCell(RuntimeCellId id) => _values.putIfAbsent(id, () {
-    return arguments[id]?.eval(this) ??
-        locals[id]?.eval(this) ??
-        parent.refCell(id);
+    final argument = arguments[id];
+
+    if (argument != null) {
+      return argument.eval(this);
+    }
+
+    final local = locals[id];
+
+    if (local != null) {
+      return local.eval(this);
+    }
+
+    return parent.refCell(id);
   });
 
   /// Map of cached cell values
