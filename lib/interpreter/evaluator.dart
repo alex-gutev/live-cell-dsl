@@ -1,6 +1,7 @@
 import 'package:live_cells_core/live_cells_core.dart';
 
 import '../builder/index.dart';
+import 'exceptions.dart';
 
 part 'runtime_context.dart';
 
@@ -88,11 +89,16 @@ class ApplyEvaluator extends Evaluator {
     required this.operands
   });
 
-  // TODO: Check that [operator] is a [CellFunc]
   @override
-  eval(RuntimeContext context) =>
-      operator.eval(context)
-        .call(operands.map((o) => o.inContext(context)).toList());
+  eval(RuntimeContext context) {
+    final op = operator.eval(context);
+
+    if (op is! CellFunc) {
+      throw InvalidOperatorError(op);
+    }
+
+    return op.call(operands.map((o) => o.inContext(context)).toList());
+  }
 }
 
 /// Evaluator that returns a function
@@ -172,9 +178,10 @@ void checkArity({
   required List<Evaluator> arguments
 }) {
   if (arguments.length != arity) {
-    throw ArgumentError(
-        '$name expected $arity arguments '
-            'but was given ${arguments.length}.'
+    throw ArityError(
+      name: name,
+      expected: arity,
+      got: arguments.length
     );
   }
 }
