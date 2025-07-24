@@ -1,4 +1,5 @@
 import 'package:live_cell/builder/index.dart';
+import 'package:live_cell/interpreter/exceptions.dart';
 import 'package:live_cells_core/live_cells_core.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
@@ -346,7 +347,42 @@ void main() {
 
       expect(values, equals([11, 13, 14, 23]));
     });
-    
+
+    test('Higher order function in global scope', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);'
+        'inc(n) = n + 1;'
+        'dec(n) = n - 1;'
+        'var(op);'
+        'var(x);'
+        'fn = select(op == "inc", inc, dec);'
+        'out = fn(x);'
+      ]);
+
+      final op = tester.getVar(NamedCellId('op'));
+      final x = tester.getVar(NamedCellId('x'));
+
+      op.value = 'inc';
+      x.value = 1;
+
+      final values = tester.observe(NamedCellId('out'));
+
+      x.value = 2;
+      x.value = 3;
+
+      op.value = 'dec';
+      x.value = 10;
+
+      MutableCell.batch(() {
+        x.value = 20;
+        op.value = 'inc';
+      });
+
+      expect(values, equals([2, 3, 4, 2, 9, 21]));
+    });
+
     test('Higher order function with local closure', () async {
       final tester = InterpreterTester();
       
@@ -575,6 +611,60 @@ void main() {
       x.value = 6;
 
       expect(values, equals([1, 1, 2, 3, 5, 8, 13]));
+    });
+  });
+
+  group('Errors', () {
+    test('Operator is not a function', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'inc(n) = n + 1;',
+        'var(f);',
+        'var(x);',
+        'out = f(x);'
+      ]);
+
+      final f = tester.getVar(NamedCellId('f'));
+      final x = tester.getVar(NamedCellId('x'));
+      final out = tester.get(NamedCellId('out'));
+
+      x.value = 1;
+      expect(() => out.value, throwsA(isA<InvalidOperatorError>()));
+
+      f.value = 'inc';
+      expect(() => out.value, throwsA(isA<InvalidOperatorError>()));
+    });
+
+    test('Incorrect number of arguments', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'add(x, y) = x + y;',
+        'var(a); var(b); var(c);'
+        'too-few = add(a);'
+        'too-many = add(a, b, c);'
+        'correct = add(a, b);'
+      ]);
+
+      final a = tester.getVar(NamedCellId('a'));
+      final b = tester.getVar(NamedCellId('b'));
+      final c = tester.getVar(NamedCellId('c'));
+
+      a.value = 1;
+      b.value = 2;
+      c.value = 3;
+
+      final tooFew = tester.get(NamedCellId('too-few'));
+      final tooMany = tester.get(NamedCellId('too-many'));
+      final correct = tester.get(NamedCellId('correct'));
+
+      expect(() => tooFew.value, throwsA(isA<ArityError>()));
+      expect(() => tooMany.value, throwsA(isA<ArityError>()));
+
+      expect(correct.value, equals(3));
     });
   });
 }
