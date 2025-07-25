@@ -1,12 +1,15 @@
 operator(=, infix, 1, right)
 
-operator(==, infix, 5, left)
-operator(!=, infix, 5, left)
+operator(or, infix, 5, left)
+operator(and, infix, 7, left)
 
-operator(<, infix, 10)
-operator(>, infix, 10)
-operator(<=, infix, 10)
-operator(>=, infix, 10)
+operator(==, infix, 15, left)
+operator(!=, infix, 15, left)
+
+operator(<, infix, 20)
+operator(>, infix, 20)
+operator(<=, infix, 20)
+operator(>=, infix, 20)
 
 operator(+, infix, 50)
 operator(-, infix, 50)
