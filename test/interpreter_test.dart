@@ -677,4 +677,419 @@ void main() {
       ]), throwsA(isA<MissingExternalCellError>()));
     });
   });
+
+  group('Built in functions', () {
+    group('Arithmetic', () {
+      test('+ adds numbers', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) + var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 2.5;
+        y.value = 3.25;
+
+        expect(values, equals([3, 4.5, 5.75]));
+      });
+
+      test('- subtracts numbers', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) - var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 3.25;
+        y.value = 2.5;
+
+        expect(values, equals([-1, 1.25, 0.75]));
+      });
+
+      test('* multiplies numbers', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) * var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 2.5;
+        y.value = 4.5;
+
+        expect(values, equals([2, 5, 11.25]));
+      });
+
+      test('/ divides numbers', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) / var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 2;
+        y.value = 1;
+
+        y.value = 0.5;
+        x.value = 2.5;
+
+        expect(values, equals([0.5, 1, 2, 4, 5]));
+      });
+
+      test('% computes remainder', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) % var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 8;
+        y.value = 3;
+
+        expect(values, equals([1, 0, 2]));
+      });
+    });
+
+    group('Equality', () {
+      test('== compares for equality', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) == var(y)'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 5;
+        y.value = 5;
+        y.value = 6;
+
+        x.value = 'hello';
+        y.value = 'hello';
+        x.value = 'bye';
+        x.value = 0;
+
+        expect(values, equals([
+          true,  // null == null
+          false, // 5 == null
+          true,  // 5 == 5
+          false, // 5 == 6
+          false, // 'hello' == 6
+          true,  // 'hello' == 'hello'
+          false, // 'bye' == 'hello'
+          false, // 0 == 'hello'
+        ]));
+      });
+
+      test('!= compares for inequality', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) != var(y)'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 5;
+        y.value = 5;
+        y.value = 6;
+
+        x.value = 'hello';
+        y.value = 'hello';
+        x.value = 'bye';
+        x.value = 0;
+
+        expect(values, equals([
+          false, // null != null
+          true,  // 5 != null
+          false, // 5 != 5
+          true,  // 5 != 6
+          true,  // 'hello' != 6
+          false, // 'hello' != 'hello'
+          true,  // 'bye' != 'hello'
+          true,  // 0 != 'hello'
+        ]));
+      });
+    });
+
+    group('Comparison', () {
+      test('< compares numbers less than', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) < var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 2;
+        x.value = 3;
+        y.value = 4.5;
+        x.value = 8.125;
+
+        expect(values, equals([
+          true,  // 1 < 2
+          false, // 2 < 2
+          false, // 3 < 2
+          true,  // 3 < 4.5
+          false, // 8.125 < 4.5
+        ]));
+      });
+      test('<= compares numbers less than or equal to', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) <= var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 2;
+        x.value = 3;
+        y.value = 4.5;
+        x.value = 8.125;
+
+        expect(values, equals([
+          true,  // 1 <= 2
+          true,  // 2 <= 2
+          false, // 3 <= 2
+          true,  // 3 <= 4.5
+          false, // 8.125 <= 4.5
+        ]));
+      });
+      test('> compares numbers greater than', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) > var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 2;
+        x.value = 3;
+        y.value = 4.5;
+        x.value = 8.125;
+
+        expect(values, equals([
+          false,  // 1 > 2
+          false, // 2 > 2
+          true, // 3 > 2
+          false,  // 3 > 4.5
+          true, // 8.125 > 4.5
+        ]));
+      });
+      test('>= compares numbers greater than or equal to', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) >= var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = 1;
+        y.value = 2;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = 2;
+        x.value = 3;
+        y.value = 4.5;
+        x.value = 8.125;
+
+        expect(values, equals([
+          false,  // 1 >= 2
+          true,  // 2 >= 2
+          true, // 3 >= 2
+          false,  // 3 >= 4.5
+          true, // 8.125 >= 4.5
+        ]));
+      });
+    });
+
+    group('Boolean', () {
+      test('not() returns logical negation of argument', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = not(var(x));'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+
+        x.value = true;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        x.value = false;
+        x.value = true;
+
+        expect(values, equals([false, true, false]));
+      });
+
+      test('and() returns logical AND of arguments', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) and var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = false;
+        y.value = false;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        y.value = true;
+        x.value = true;
+        y.value = false;
+
+        expect(values, equals([
+          false, // false and false
+          false, // false and true
+          true,  // true and true
+          false, // true and false
+        ]));
+      });
+
+      test('or() returns logical OR of arguments', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = var(x) or var(y);'
+        ]);
+
+        final x = tester.getVar(NamedCellId('x'));
+        final y = tester.getVar(NamedCellId('y'));
+
+        x.value = false;
+        y.value = false;
+
+        final values = tester.observe(NamedCellId('out'));
+
+        y.value = true;
+        x.value = true;
+        y.value = false;
+
+        expect(values, equals([
+          false, // false or false
+          true, // false or true
+          true,  // true or true
+          true, // true or false
+        ]));
+      });
+    });
+
+    group('Branching', () {
+      test('select()', () async {
+        final tester = InterpreterTester();
+
+        await tester.build([
+          'import(core);',
+          'out = select(cond, a, b);',
+          'var(cond); var(a); var(b);'
+        ]);
+
+        final cond = tester.getVar(NamedCellId('cond'));
+        final a = tester.getVar(NamedCellId('a'));
+        final b = tester.getVar(NamedCellId('b'));
+
+        cond.value = true;
+        a.value = 'x';
+
+        final values = tester.observe(NamedCellId('out'));
+
+        b.value = 'y';
+        cond.value = false;
+
+        b.value = 'z';
+        a.value = 'w';
+        cond.value = true;
+        a.value = 'v';
+
+        expect(values, ['x', 'x', 'y', 'z', 'z', 'w', 'v']);
+      });
+    });
+  });
 }
