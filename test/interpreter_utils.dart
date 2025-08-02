@@ -6,6 +6,7 @@ import 'package:live_cell/builder/index.dart';
 import 'package:live_cell/common/pipeline.dart';
 import 'package:live_cell/interpreter/index.dart';
 import 'package:live_cell/lexer/lexer.dart';
+import 'package:live_cell/modules/index.dart';
 import 'package:live_cell/optimization/folding.dart';
 import 'package:live_cell/parser/index.dart';
 import 'package:live_cells_core/live_cells_core.dart';
@@ -63,46 +64,11 @@ class InterpreterTester {
 
   late final _builder = CellBuilder(
       operatorTable: operators,
-      loadModule: _findModule
+      loadModule: ModuleLoader(
+          modulePath: _modulePath,
+          operators: operators
+      )
   );
 
   late final _interpreter = Interpreter(_builder.scope);
-
-  /// Find the module identified by [name].
-  ModuleSource _findModule(String name) {
-    final dir = Directory(_modulePath);
-
-    for (final entity in dir.listSync()) {
-      if (entity is File && entity.path.endsWith('/${name}.lc')) {
-        return FileModuleSource(
-            name: name,
-            source: entity,
-            operators: operators
-        );
-      }
-    }
-
-    throw ModuleNotFound(name);
-  }
-}
-
-/// Loads a module from a given [source] file.
-class FileModuleSource extends ModuleSource {
-  /// The operator table which should be used while parsing [source].
-  final OperatorTable operators;
-
-  /// File containing the source code.
-  final File source;
-
-  @override
-  Stream<AstNode> get nodes => source.openRead()
-      .transform(utf8.decoder)
-      .transform(Lexer())
-      .transform(Parser(operators));
-
-  const FileModuleSource({
-    required super.name,
-    required this.source,
-    required this.operators
-  });
 }
