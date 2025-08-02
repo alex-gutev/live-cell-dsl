@@ -1,4 +1,5 @@
 import '../builder/index.dart';
+import '../runtime/builtins.dart';
 import '../runtime/thunk.dart';
 import 'evaluator.dart';
 
@@ -6,6 +7,9 @@ import 'evaluator.dart';
 class BuiltinSpec {
   /// The name of the function
   final CellId name;
+
+  /// The name of the Dart function
+  final String functionName;
 
   /// Number of arguments
   final int arity;
@@ -22,6 +26,7 @@ class BuiltinSpec {
 
   BuiltinSpec({
     required this.name,
+    required this.functionName,
     required this.arity,
     required this.fn
   });
@@ -40,167 +45,108 @@ class Builtins {
     BuiltinSpec(
       name: NamedCellId('+', module: kCoreModel),
       arity: 2,
-      fn: add
+      fn: add,
+      functionName: 'add'
     ),
 
     BuiltinSpec(
         name: NamedCellId('-', module: kCoreModel),
         arity: 2,
-        fn: sub
+        fn: sub,
+        functionName: 'sub'
     ),
 
     BuiltinSpec(
         name: NamedCellId('*', module: kCoreModel),
         arity: 2,
-        fn: mul
+        fn: mul,
+        functionName: 'mul'
     ),
 
     BuiltinSpec(
         name: NamedCellId('/', module: kCoreModel),
         arity: 2,
-        fn: div
+        fn: div,
+        functionName: 'div'
     ),
 
     BuiltinSpec(
         name: NamedCellId('%', module: kCoreModel),
         arity: 2,
-        fn: mod
+        fn: mod,
+        functionName: 'mod'
     ),
 
     BuiltinSpec(
         name: NamedCellId('==', module: kCoreModel),
         arity: 2,
-        fn: eq
+        fn: eq,
+        functionName: 'eq'
     ),
 
     BuiltinSpec(
         name: NamedCellId('!=', module: kCoreModel),
         arity: 2,
-        fn: neq
+        fn: neq,
+        functionName: 'neq'
     ),
 
     BuiltinSpec(
         name: NamedCellId('<', module: kCoreModel),
         arity: 2,
-        fn: lt
+        fn: lt,
+        functionName: 'lt'
     ),
 
     BuiltinSpec(
         name: NamedCellId('>', module: kCoreModel),
         arity: 2,
-        fn: gt
+        fn: gt,
+        functionName: 'gt'
     ),
 
     BuiltinSpec(
         name: NamedCellId('<=', module: kCoreModel),
         arity: 2,
-        fn: lte
+        fn: lte,
+        functionName: 'lte'
     ),
 
     BuiltinSpec(
         name: NamedCellId('>=', module: kCoreModel),
         arity: 2,
-        fn: gte
+        fn: gte,
+        functionName: 'gte'
     ),
 
     BuiltinSpec(
         name: NamedCellId('not', module: kCoreModel),
         arity: 1,
-        fn: not
+        fn: not,
+        functionName: 'not'
     ),
 
     BuiltinSpec(
         name: NamedCellId('and', module: kCoreModel),
         arity: 2,
-        fn: and
+        fn: and,
+        functionName: 'and'
     ),
 
     BuiltinSpec(
         name: NamedCellId('or', module: kCoreModel),
         arity: 2,
-        fn: or
+        fn: or,
+        functionName: 'or'
     ),
 
     BuiltinSpec(
-      name: NamedCellId('select', module: kCoreModel),
-      arity: 3,
-      fn: select
+        name: NamedCellId('select', module: kCoreModel),
+        arity: 3,
+        fn: select,
+        functionName: 'select'
     )
   };
-
-  // Arithmetic
-
-  /// The `+` function
-  static num add(Argument a, Argument b) =>
-      a.get<num>() + b.get<num>();
-
-  /// The `-` function
-  static num sub(Argument a, Argument b) =>
-      a.get<num>() - b.get<num>();
-
-  /// The `*` function
-  static num mul(Argument a, Argument b) =>
-      a.get<num>() * b.get<num>();
-
-  /// The `/` function
-  static num div(Argument a, Argument b) =>
-      a.get<num>() / b.get<num>();
-
-  /// The `%` function
-  static num mod(Argument a, Argument b) =>
-      a.get<num>() % b.get<num>();
-
-  // Equality
-
-  /// The `==` comparison function
-  static bool eq(Argument a, Argument b) =>
-      a.get() == b.get();
-
-  /// The `!=` comparison function
-  static bool neq(Argument a, Argument b) =>
-      a.get() != b.get();
-
-  // Comparison
-
-  /// The `<` comparison function
-  static bool lt(Argument a, Argument b) =>
-      a.get<num>() < b.get<num>();
-
-  /// The `>` comparison function
-  static bool gt(Argument a, Argument b) =>
-      a.get<num>() > b.get<num>();
-
-  /// The `<=` comparison function
-  static bool lte(Argument a, Argument b) =>
-      a.get<num>() <= b.get<num>();
-
-  /// The `>=` comparison function
-  static bool gte(Argument a, Argument b) =>
-      a.get<num>() >= b.get<num>();
-
-  // Boolean
-
-  /// The `!` negation function
-  static bool not(Argument a) =>
-      !a.get<bool>();
-
-  /// The `and` function
-  static bool and(Argument a, Argument b) =>
-      a.get<bool>() && b.get<bool>();
-
-  /// The `or` function
-  static bool or(Argument a, Argument b) =>
-      a.get<bool>() || b.get<bool>();
-
-  // Branching
-
-  static dynamic select(
-      Argument condition,
-      Argument ifTrue,
-      Argument ifFalse
-  ) => condition.get<bool>()
-      ? ifTrue.get()
-      : ifFalse.get();
 }
 
 /// An evaluator that returns a function for calling a builtin function.
