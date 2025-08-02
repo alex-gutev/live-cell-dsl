@@ -2,6 +2,7 @@ import 'package:live_cells_core/live_cells_core.dart';
 
 import '../builder/index.dart';
 import 'exceptions.dart';
+import '../runtime/thunk.dart';
 
 part 'runtime_context.dart';
 
@@ -141,7 +142,7 @@ class FunctionEvaluator extends Evaluator {
 }
 
 // An [Evaluator] that evaluates another [evaluator] in a given [context]
-class ContextEvaluator extends Evaluator {
+class ContextEvaluator extends Evaluator implements Argument {
   /// The original evaluator
   final Evaluator evaluator;
 
@@ -160,6 +161,7 @@ class ContextEvaluator extends Evaluator {
   ///
   /// If the [evaluator] does not produce a value of type [T] a [TypeError] is
   /// thrown.
+  @override
   T get<T>() => switch (eval(context)) {
     final T value => value,
     // TODO: Exception type with more details
@@ -175,7 +177,7 @@ class ContextEvaluator extends Evaluator {
 void checkArity({
   required CellId name,
   required int arity,
-  required List<Evaluator> arguments
+  required List arguments
 }) {
   if (arguments.length != arity) {
     throw ArityError(

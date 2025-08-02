@@ -1,4 +1,5 @@
 import '../builder/index.dart';
+import '../runtime/thunk.dart';
 import 'evaluator.dart';
 
 /// Specification for a builtin function
@@ -130,73 +131,73 @@ class Builtins {
   // Arithmetic
 
   /// The `+` function
-  static num add(ContextEvaluator a, ContextEvaluator b) =>
+  static num add(Argument a, Argument b) =>
       a.get<num>() + b.get<num>();
 
   /// The `-` function
-  static num sub(ContextEvaluator a, ContextEvaluator b) =>
+  static num sub(Argument a, Argument b) =>
       a.get<num>() - b.get<num>();
 
   /// The `*` function
-  static num mul(ContextEvaluator a, ContextEvaluator b) =>
+  static num mul(Argument a, Argument b) =>
       a.get<num>() * b.get<num>();
 
   /// The `/` function
-  static num div(ContextEvaluator a, ContextEvaluator b) =>
+  static num div(Argument a, Argument b) =>
       a.get<num>() / b.get<num>();
 
   /// The `%` function
-  static num mod(ContextEvaluator a, ContextEvaluator b) =>
+  static num mod(Argument a, Argument b) =>
       a.get<num>() % b.get<num>();
 
   // Equality
 
   /// The `==` comparison function
-  static bool eq(ContextEvaluator a, ContextEvaluator b) =>
+  static bool eq(Argument a, Argument b) =>
       a.get() == b.get();
 
   /// The `!=` comparison function
-  static bool neq(ContextEvaluator a, ContextEvaluator b) =>
+  static bool neq(Argument a, Argument b) =>
       a.get() != b.get();
 
   // Comparison
 
   /// The `<` comparison function
-  static bool lt(ContextEvaluator a, ContextEvaluator b) =>
+  static bool lt(Argument a, Argument b) =>
       a.get<num>() < b.get<num>();
 
   /// The `>` comparison function
-  static bool gt(ContextEvaluator a, ContextEvaluator b) =>
+  static bool gt(Argument a, Argument b) =>
       a.get<num>() > b.get<num>();
 
   /// The `<=` comparison function
-  static bool lte(ContextEvaluator a, ContextEvaluator b) =>
+  static bool lte(Argument a, Argument b) =>
       a.get<num>() <= b.get<num>();
 
   /// The `>=` comparison function
-  static bool gte(ContextEvaluator a, ContextEvaluator b) =>
+  static bool gte(Argument a, Argument b) =>
       a.get<num>() >= b.get<num>();
 
   // Boolean
 
   /// The `!` negation function
-  static bool not(ContextEvaluator a) =>
+  static bool not(Argument a) =>
       !a.get<bool>();
 
   /// The `and` function
-  static bool and(ContextEvaluator a, ContextEvaluator b) =>
+  static bool and(Argument a, Argument b) =>
       a.get<bool>() && b.get<bool>();
 
   /// The `or` function
-  static bool or(ContextEvaluator a, ContextEvaluator b) =>
+  static bool or(Argument a, Argument b) =>
       a.get<bool>() || b.get<bool>();
 
   // Branching
 
   static dynamic select(
-      ContextEvaluator condition,
-      ContextEvaluator ifTrue,
-      ContextEvaluator ifFalse
+      Argument condition,
+      Argument ifTrue,
+      Argument ifFalse
   ) => condition.get<bool>()
       ? ifTrue.get()
       : ifFalse.get();
@@ -227,6 +228,6 @@ class _BuiltinEvaluator implements Evaluator {
         arguments: args
     );
 
-    return Function.apply(fn, args.cast<ContextEvaluator>());
+    return Function.apply(fn, args.cast<Argument>());
   };
 }
