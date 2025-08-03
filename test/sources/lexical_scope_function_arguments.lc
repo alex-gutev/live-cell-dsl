@@ -1,0 +1,21 @@
+## Test that lexical scoping applies to function arguments
+
+import(core)
+
+var(delta)
+
+# The argument `delta` shadows the global `delta` cell
+# within the lexical scope of `f`
+
+f(x, delta) = {
+    g(x + delta)
+}
+
+# `g` references the global `delta` cell due to lexical scoping.
+# If instead cells used dynamic scoping, the `delta` in `f` would
+# be referenced when `g` is called within `f`.
+
+g(x) = x + delta
+
+out = f(x, 5)
+var(x)

@@ -1,0 +1,18 @@
+## Test a tail recursive function
+##
+## NOTE: This test doesn't test tail call optimization. It only tests
+## that tail recursive functions are executed correctly.
+
+import(core)
+
+factorial(n) = {
+    calc(n, acc) = select(
+        n > 1,
+        calc(n - 1, acc * n),
+        acc
+    )
+
+    calc(n, 1)
+}
+
+out = factorial(var(x))

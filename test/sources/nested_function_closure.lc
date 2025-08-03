@@ -1,0 +1,15 @@
+## Test nested functions that reference cells defined in an
+## enclosing function
+
+import(core)
+
+out = inc(x)
+
+inc(n) = {
+    delta = 5
+    _inc(m) = m + delta
+    _inc(n)
+}
+
+var(delta)
+var(x)

@@ -1,0 +1,18 @@
+## Test mutually recursive functions
+
+import(core)
+
+fib(n) = {
+    calc(n) = select(
+        n < 2,
+        1,
+        fib1(n) + fib2(n)
+    )
+
+    fib1(n) = calc(n - 1)
+    fib2(n) = calc(n - 2)
+
+    calc(n)
+}
+
+out = fib(var(x))

@@ -1,0 +1,17 @@
+## Test using functions with a closure, that is local
+## to another function, as values in global scope.
+
+import(core)
+
+make-inc(n) = {
+    delta = n + 1
+    inc(m) = m + delta
+    inc
+}
+
+var(op)
+var(delta)
+var(x)
+
+f = make-inc(1)
+out = f(x)

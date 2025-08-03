@@ -1,0 +1,12 @@
+## Test a function that computes the Fibonacci sequence.
+## This provides further recursion tests
+
+import(core)
+
+fib(n) = select(
+    n < 2,
+    1,
+    fib(n - 1) + fib(n - 2)
+)
+
+out = fib(var(x))

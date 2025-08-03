@@ -1,0 +1,26 @@
+## Test that shadowing works and that cells use lexical
+## scoping and not dynamic scoping
+
+import(core)
+
+var(delta)
+
+f(x) = {
+    # This delta shadows the global `delta` cell within the
+    # lexical scope of `f`
+
+    delta = 5
+    g(x + delta)
+}
+
+# `g` references the global `delta` cell due to lexical scoping.
+# If instead cells used dynamic scoping, the `delta` in `f` would
+# be referenced when `g` is called within `f`.
+
+g(x) = x + delta
+
+# `out` should recompute itself whenever the value of
+# `x` or `delta` changes
+
+out = f(x)
+var(x)

@@ -1,0 +1,10 @@
+## Test computed cells with a more complex expression
+
+import(core)
+
+var(x)
+var(y)
+var(z)
+
+sum = x + y
+out = sum * z

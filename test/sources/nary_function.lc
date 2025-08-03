@@ -1,0 +1,6 @@
+## Test functions with multiple arguments
+
+import(core)
+
+out = add(var(x), var(y))
+add(a, b) = a + b

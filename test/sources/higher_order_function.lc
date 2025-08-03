@@ -1,0 +1,12 @@
+## Test using functions as values in global scope
+
+import(core)
+
+inc(n) = n + 1
+dec(n) = n - 1
+
+var(op)
+var(x)
+
+fn = select(op == "inc", inc, dec)
+out = fn(x)

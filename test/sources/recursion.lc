@@ -1,0 +1,11 @@
+## Test a simple recursive function
+
+import(core)
+
+factorial(n) = select(
+    n > 1,
+    n * factorial(n - 1),
+    1
+)
+
+out = factorial(var(x))

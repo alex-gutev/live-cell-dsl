@@ -1,0 +1,11 @@
+## Test functions with closures 
+## (references to cells defined outside the function)
+
+import(core)
+
+out = inc(x)
+inc(n) = n + delta
+
+var(delta)
+var(x)
+

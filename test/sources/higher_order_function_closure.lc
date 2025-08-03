@@ -1,0 +1,15 @@
+## Test using functions with a closure, reference
+## both local and global cells.
+
+import(core)
+
+make-inc(n) = {
+    inc(m) = m + n + delta
+    inc
+}
+
+var(x)
+var(delta)
+
+f = make-inc(1)
+out = f(x)

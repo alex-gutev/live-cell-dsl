@@ -1,0 +1,6 @@
+## Test a simple function with one argument and no closure
+
+import(core)
+
+inc(n) = n + 1
+out = inc(var(x))

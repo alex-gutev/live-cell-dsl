@@ -1,0 +1,13 @@
+## Test functions nested in other functions
+
+import(core)
+
+out = inc(x)
+
+inc(n) = {
+    _inc(m) = m + delta
+    _inc(n)
+}
+
+var(delta)
+var(x)

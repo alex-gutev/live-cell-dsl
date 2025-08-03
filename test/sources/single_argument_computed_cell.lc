@@ -1,0 +1,5 @@
+## Test computed cells with one argument cell
+
+import(core)
+
+out = var(x) + 1

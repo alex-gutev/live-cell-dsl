@@ -1,0 +1,8 @@
+import(core)
+
+out = inc(x)
+
+inc(n) = n + delta
+
+var(x)
+var(delta)
