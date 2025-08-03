@@ -21,6 +21,10 @@ class DartBackend implements Operation {
     }
 
     final library = Library((b) => b
+      ..directives.addAll([
+        Directive.import('package:live_cell/runtime/index.dart'),
+        Directive.import('package:live_cells_core/live_cells_core.dart')
+      ])
       ..body.addAll(_compiler.functions.values)
       ..body.addAll(_cellFields.values)
       ..body.add(Field((b) => b..name = 'cells'
