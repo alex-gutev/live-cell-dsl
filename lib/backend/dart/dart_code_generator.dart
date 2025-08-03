@@ -1,7 +1,7 @@
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
-import 'dart_compiler.dart';
 
+import 'dart_compiler.dart';
 import '../../builder/attributes.dart';
 import '../../builder/cell_spec.dart';
 import '../../builder/cell_table.dart';
@@ -91,7 +91,10 @@ class DartBackend implements Operation {
         final arguments = visitor.arguments
             .map((arg) => refer(_cellFields[arg.id]!.name));
 
-        final valueFn = _compiler.compile(spec.definition);
+        final valueFn = Method((b) => b
+            ..lambda = true
+            ..body = _compiler.compile(spec.definition).code
+        );
 
         return Field((b) => b
             ..name = _compiler.cellVar(spec)
@@ -99,7 +102,7 @@ class DartBackend implements Operation {
             ..assignment = refer('ComputeCell')
                 .call([], {
                   'arguments': literalSet(arguments),
-                  'compute': valueFn
+                  'compute': valueFn.closure
                 })
                 .property('store')
                 .call([])
