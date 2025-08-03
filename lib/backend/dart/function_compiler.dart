@@ -36,9 +36,11 @@ class FunctionCompiler extends DartCompiler {
       
       final name = cellVar(cell);
       
-      _localCells[name] = refer(argsVar)
+      final def = _localCells[name] = refer(argsVar)
           .index(literal(i++))
           .call([]);
+
+      _statements.add(_varDeclaration(name, def));
     }
     
     final result = compile(functionSpec.definition);
@@ -60,7 +62,13 @@ class FunctionCompiler extends DartCompiler {
     else if (spec.scope == functionSpec.scope) {
       final name = cellVar(spec);
       
-      _localCells.putIfAbsent(name, () => compile(spec.definition));
+      _localCells.putIfAbsent(name, () {
+        final def = compile(spec.definition);
+        _statements.add(_varDeclaration(name, def));
+
+        return def;
+      });
+
       return refer(name);
     }
     
@@ -69,11 +77,14 @@ class FunctionCompiler extends DartCompiler {
 
   @override
   String compileFunction(FunctionSpec spec) {
-    if (spec.scope == functionSpec.scope) {
-      return super.compileFunction(spec);
+    final added = functions.containsKey(spec);
+    final name = super.compileFunction(spec);
+
+    if (!added && functions.containsKey(spec)) {
+      _statements.add(functions[spec]!.closure.code);
     }
 
-    return parent.compileFunction(spec);
+    return name;
   }
 
   @override
@@ -83,30 +94,32 @@ class FunctionCompiler extends DartCompiler {
   Map<FunctionSpec, int> get functionIds => parent.functionIds;
 
   @override
-  Map<FunctionSpec, Method> get functions => parent.functions;
+  String cellVar(CellSpec spec) => spec.scope == functionSpec.scope
+      ? 'cell${cellId(spec)}'
+      : parent.cellVar(spec);
+
+  @override
+  String functionName(FunctionSpec spec) => spec.scope.parent == functionSpec.scope
+      ? 'fn${functionId(spec)}'
+      : parent.functionName(spec);
 
   // Private
 
   /// Map of cells local to the function indexed by variable name
   final _localCells = <String, Expression>{};
 
+  /// List of statements comprising the function body
+  final _statements = <Code>[];
+
   /// Generate the [Block] forming the body of the function.
-  Block _makeBody(Expression result) => Block((b) {
-    // TODO: Add Arity Check
+  Block _makeBody(Expression result) => Block((b) => b
+    ..statements.addAll(_statements)
+    ..statements.add(result.returned.statement)
+  );
 
-    for (final entry in functions.entries) {
-      if (entry.key.scope == functionSpec.scope) {
-        b.statements.add(entry.value.closure.statement);
-      }
-    }
-
-    for (final entry in _localCells.entries) {
-      b.statements.add(
-          declareFinal(entry.key, late: true)
-              .assign(entry.value).statement
-      );
-    }
-
-    b.statements.add(result.returned.statement);
-  });
+  /// Generate a local variable statement.
+  Code _varDeclaration(String name, Expression expression) =>
+      declareFinal(name, late: true)
+          .assign(expression)
+          .statement;
 }
