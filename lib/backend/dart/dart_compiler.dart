@@ -22,7 +22,7 @@ class DartCompiler {
       :final operator,
       :final operands
     ) => compile(operator)
-        .call(operands.map(_makeThunk)),
+        .call([literalList(operands.map(_makeThunk))]),
 
     DeferredSpec() => compile(spec.build()),
     FunctionSpec() => refer(compileFunction(spec)),
@@ -83,7 +83,7 @@ class DartCompiler {
 
   /// Get the name of the function implementing the given function [spec].
   String functionName(FunctionSpec spec) =>
-      'fn${functionId(spec)}';
+      '_fn${functionId(spec)}';
 
 
   /// External references
@@ -100,8 +100,7 @@ class DartCompiler {
     final name = functionName(fn);
 
     final argList = List.generate(spec.arity, (i) => refer('args')
-        .index(literal(i))
-        .call([]));
+        .index(literal(i)));
 
     functions.putIfAbsent(fn, () => Method((b) => b
         ..name = name

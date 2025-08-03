@@ -94,9 +94,10 @@ class FunctionCompiler extends DartCompiler {
   Block _makeBody(Expression result) => Block((b) {
     // TODO: Add Arity Check
 
-    for (final fn in functions.values) {
-      final code = fn.accept(DartEmitter(useNullSafetySyntax: true));
-      b.statements.add(Code(code.toString()));
+    for (final entry in functions.entries) {
+      if (entry.key.scope == functionSpec.scope) {
+        b.statements.add(entry.value.closure.statement);
+      }
     }
 
     for (final entry in _localCells.entries) {
