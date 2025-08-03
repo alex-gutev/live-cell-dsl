@@ -35,8 +35,8 @@ class FunctionCompiler extends DartCompiler {
       assert(cell.scope == functionSpec.scope);
       
       final name = cellVar(cell);
-      
-      final def = _localCells[name] = refer(argsVar)
+
+      final def = refer(argsVar)
           .index(literal(i++))
           .call([]);
 
@@ -61,13 +61,11 @@ class FunctionCompiler extends DartCompiler {
     }
     else if (spec.scope == functionSpec.scope) {
       final name = cellVar(spec);
-      
-      _localCells.putIfAbsent(name, () {
+
+      if (_builtCells.add(spec)) {
         final def = compile(spec.definition);
         _statements.add(_varDeclaration(name, def));
-
-        return def;
-      });
+      }
 
       return refer(name);
     }
@@ -105,8 +103,8 @@ class FunctionCompiler extends DartCompiler {
 
   // Private
 
-  /// Map of cells local to the function indexed by variable name
-  final _localCells = <String, Expression>{};
+  /// Set of cells for which a definition has been generated
+  final _builtCells = <CellSpec>{};
 
   /// List of statements comprising the function body
   final _statements = <Code>[];
