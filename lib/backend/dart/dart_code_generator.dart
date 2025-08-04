@@ -89,7 +89,11 @@ class DartBackend implements Operation {
         );
 
       default:
-        final visitor = _ArgumentCellVisitor(this);
+        final visitor = _ArgumentCellVisitor(
+            generator: this,
+            cell: spec
+        );
+
         spec.definition.accept(visitor);
 
         final arguments = visitor.arguments
@@ -123,7 +127,15 @@ class _ArgumentCellVisitor extends ValueSpecTreeVisitor {
   /// Set of arguments referenced by the visited [ValueSpec].
   final arguments = <CellSpec>{};
 
-  _ArgumentCellVisitor(this.generator);
+  /// Set of all cells that were visited
+  final _visited = <CellSpec>{};
+
+  _ArgumentCellVisitor({
+    required this.generator,
+    required CellSpec cell
+  }) {
+    _visited.add(cell);
+  }
 
   @override
   void visitRef(CellRef spec) {
@@ -137,12 +149,16 @@ class _ArgumentCellVisitor extends ValueSpecTreeVisitor {
 
   /// Add [cell] to the [arguments] set.
   void _addArgument(CellSpec cell) {
-    if (cell is ValueCellSpec || cell.foldable()) {
-      cell.definition.accept(this);
-    }
-    else {
-      generator._makeCell(cell);
-      arguments.add(cell);
+    if (!_visited.contains(cell)) {
+      _visited.add(cell);
+
+      if (cell is ValueCellSpec || cell.foldable()) {
+        cell.definition.accept(this);
+      }
+      else {
+        generator._makeCell(cell);
+        arguments.add(cell);
+      }
     }
   }
 }

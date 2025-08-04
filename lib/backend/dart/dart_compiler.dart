@@ -24,7 +24,6 @@ class DartCompiler {
     ) => compile(operator)
         .call([literalList(operands.map(_makeThunk))]),
 
-    DeferredSpec() => compile(spec.build()),
     FunctionSpec() => refer(compileFunction(spec)),
   };
 
@@ -48,19 +47,23 @@ class DartCompiler {
   ///
   /// **NOTE**: Only one method is generated per [spec].
   String compileFunction(FunctionSpec spec) {
-    final name = functionName(spec);
+    if (!functionIds.containsKey(spec)) {
+      final name = functionName(spec);
 
-    if (!functions.containsKey(spec)) {
-      final compiler = FunctionCompiler(
-          name: name,
-          parent: this,
-          functionSpec: spec
-      );
+      if (!functions.containsKey(spec)) {
+        final compiler = FunctionCompiler(
+            name: name,
+            parent: this,
+            functionSpec: spec
+        );
 
-      functions[spec] = compiler.makeMethod();
+        functions[spec] = compiler.makeMethod();
+      }
+
+      return name;
     }
 
-    return name;
+    return functionName(spec);
   }
 
   /// Get the integer identifier for a given cell [spec].

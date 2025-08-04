@@ -60,6 +60,10 @@ class FunctionCompiler extends DartCompiler {
       return refer(cellVar(spec));
     }
     else if (spec.scope == functionSpec.scope) {
+      if (spec.foldable() && spec.definition is FunctionSpec) {
+        return compile(spec.definition);
+      }
+
       final name = cellVar(spec);
 
       if (_builtCells.add(spec)) {
