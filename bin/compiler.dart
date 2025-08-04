@@ -39,7 +39,7 @@ class Compiler {
         module: ModuleSpec(source)
     );
 
-    await builder.build(module.nodes);
+    await builder.processSource(module.nodes);
 
     final outSink = File(output).openWrite();
 

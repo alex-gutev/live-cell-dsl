@@ -47,12 +47,6 @@ class CellBuilder {
   }) : scope = scope ?? CellTable(),
         module = module ?? ModuleSpec(null);
 
-  /// Build the cell specifications from the given [declarations].
-  Future<void> build(Stream<AstNode> declarations) async {
-    await processSource(declarations);
-    finalize();
-  }
-
   // TODO: Ensure that top-level special operators do not appear nested in other nodes
   // TODO: Ensure that functions cannot be declared with the same name as a special operator
 
@@ -118,16 +112,6 @@ class CellBuilder {
           location: expression.location,
           error: error
       );
-    }
-  }
-
-  /// Build all deferred definitions
-  void finalize() {
-    for (final spec in scope.cells) {
-      if (spec.definition case final FunctionSpec fn) {
-        // Reference definition to ensure that it has been built
-        fn.definition;
-      }
     }
   }
 

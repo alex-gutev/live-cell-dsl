@@ -8,6 +8,15 @@ class DeferredFunctionSpec extends FunctionSpec {
   /// The raw expression making up the body of the function
   final AstNode expression;
 
+  @override
+  ValueSpec get definition => _buildDefinition();
+
+  @override
+  CellTable get scope {
+    _buildDefinition();
+    return super.scope;
+  }
+
   DeferredFunctionSpec({
     required super.name,
     required super.arguments,
@@ -16,33 +25,31 @@ class DeferredFunctionSpec extends FunctionSpec {
     required this.expression
   });
 
-  @override
-  ValueSpec get definition {
+  /// The spec defining the result of the function
+  ValueSpec? _builtDefinition;
+
+  ValueSpec _buildDefinition() {
     if (_builtDefinition == null) {
       final builder = CellBuilder(
-        scope: scope,
-        operatorTable: OperatorTable([]),
+          scope: super.scope,
+          operatorTable: OperatorTable([]),
 
-        // TODO: Consider adding aliases for all cells defined in [module]
-        module: ModuleSpec(module.path,
-          aliases: UnmodifiableMapView(module.aliases)
-        )
+          // TODO: Consider adding aliases for all cells defined in [module]
+          module: ModuleSpec(module.path,
+              aliases: UnmodifiableMapView(module.aliases)
+          )
       );
 
       final valueCell = builder.buildExpression(expression);
-      builder.finalize();
 
       _builtDefinition = _NamedCellRef(
-          table: scope,
+          table: super.scope,
           id: valueCell.id
       );
     }
 
     return _builtDefinition!;
   }
-
-  /// The spec defining the result of the function
-  ValueSpec? _builtDefinition;
 }
 
 /// Represents an externally defined function

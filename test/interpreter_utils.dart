@@ -18,7 +18,7 @@ class InterpreterTester {
 
   /// Build [ValueCell]s from the definitions in [source].
   Future<void> build(List<String> source) async {
-    await _builder.build(
+    await _builder.processSource(
       Stream.fromIterable(source)
           .transform(Lexer())
           .transform(Parser(operators))

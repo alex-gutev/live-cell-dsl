@@ -29,7 +29,7 @@ class BuildTester {
 
   /// Test output function
   late RunTest _runTest = () async {
-    await builder.build(expressions);
+    await builder.processSource(expressions);
     _pipeline.run(builder.scope);
   };
 

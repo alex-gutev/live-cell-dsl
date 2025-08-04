@@ -1149,6 +1149,15 @@ void main() {
                 leftAssoc: false
             )
           ]
+      )..hasNamed('fn',
+        tester: SpecTester.func(
+            arguments: [NamedCellId('x')],
+
+            // The definition doesn't matter. This tester is only added
+            // to force the definition of `fn` to be built.
+            definition: SpecTester.stub(),
+            tester: FunctionTester()
+        )
       );
 
       expect(builder.run, throwsA(isA<BuildError>()));
@@ -1209,6 +1218,15 @@ void main() {
                 leftAssoc: true
             )
           ]
+      )..hasNamed('add',
+          tester: SpecTester.func(
+              arguments: [NamedCellId('a'), NamedCellId('b')],
+
+              // The definition doesn't matter. This tester is only added
+              // to force the definition of `fn` to be built.
+              definition: SpecTester.stub(),
+              tester: FunctionTester()
+          )
       );
 
       expect(builder.run, throwsA(isA<BuildError>()));
