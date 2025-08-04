@@ -62,9 +62,6 @@ class CellFolder implements Operation {
     ) => _isConstant(operator) &&
         operands.every(_isConstant),
 
-    DeferredSpec() => 
-        _isConstant(spec.build()),
-  
     FunctionSpec() => true,
   };
 

@@ -71,9 +71,6 @@ class Interpreter {
           case Variable():
             return _mutable[spec.id] = MutableCell(null);
 
-          case DeferredSpec():
-            return _makeCell(spec);
-
           default:
             final visitor = _ArgumentCellVisitor(
               interpreter: this,

@@ -1,32 +1,23 @@
 part of 'cell_builder.dart';
 
-/// A deferred [ValueSpec] defining a function.
-class DeferredFunctionDefinition extends DeferredSpec {
-  /// The name of the function
-  final CellId name;
-
-  /// List of argument cell identifiers
-  final List<CellId> arguments;
-
-  /// The function's scope
-  final CellTable scope;
-
+/// A [FunctionSpec] that is built only when the [definition] is referenced.
+class DeferredFunctionSpec extends FunctionSpec {
   /// The module containing the function definition
   final ModuleSpec module;
 
-  /// The parsed expression defining the function
-  final AstNode definition;
+  /// The raw expression making up the body of the function
+  final AstNode expression;
 
-  DeferredFunctionDefinition({
-    required this.name,
-    required this.arguments,
-    required this.scope,
+  DeferredFunctionSpec({
+    required super.name,
+    required super.arguments,
+    required super.scope,
     required this.module,
-    required this.definition
+    required this.expression
   });
 
   @override
-  ValueSpec build() {
+  ValueSpec get definition {
     if (_builtDefinition == null) {
       final builder = CellBuilder(
         scope: scope,
@@ -38,23 +29,30 @@ class DeferredFunctionDefinition extends DeferredSpec {
         )
       );
 
-      final valueCell = builder.buildExpression(definition);
+      final valueCell = builder.buildExpression(expression);
       builder.finalize();
 
-      _builtDefinition = FunctionSpec(
-          name: name,
-          arguments: arguments,
-          scope: scope,
-          definition: _NamedCellRef(
-              table: scope,
-              id: valueCell.id
-          )
+      _builtDefinition = _NamedCellRef(
+          table: scope,
+          id: valueCell.id
       );
     }
 
     return _builtDefinition!;
   }
 
-  /// The built cell definition
-  FunctionSpec? _builtDefinition;
+  /// The spec defining the result of the function
+  ValueSpec? _builtDefinition;
+}
+
+/// Represents an externally defined function
+class ExternalFunctionSpec extends FunctionSpec {
+  @override
+  ValueSpec get definition => const Stub();
+
+  ExternalFunctionSpec({
+    required super.name,
+    required super.arguments,
+    required super.scope
+  });
 }

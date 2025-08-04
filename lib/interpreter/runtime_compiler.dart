@@ -32,7 +32,6 @@ class RuntimeCompiler {
         operands: operands.map(makeEvaluator).toList()
     ),
 
-    DeferredSpec() => makeEvaluator(spec.build()),
     FunctionSpec() => makeFunctionEvaluator(spec),
   };
 

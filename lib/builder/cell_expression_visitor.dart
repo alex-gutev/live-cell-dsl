@@ -7,7 +7,6 @@ abstract interface class ValueSpecVisitor<R> {
   R visitVariable(Variable spec);
   R visitRef(CellRef spec);
   R visitApply(ApplySpec spec);
-  R visitDeferred(DeferredSpec spec);
   R visitFunction(FunctionSpec expression);
 }
 
@@ -24,11 +23,6 @@ abstract class ValueSpecTreeVisitor extends ValueSpecVisitor<void> {
 
   @override
   void visitConstant<T>(Constant<T> spec) {
-  }
-
-  @override
-  void visitDeferred(DeferredSpec spec) {
-    spec.build().accept(this);
   }
 
   @override

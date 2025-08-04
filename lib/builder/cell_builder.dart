@@ -124,9 +124,9 @@ class CellBuilder {
   /// Build all deferred definitions
   void finalize() {
     for (final spec in scope.cells) {
-      // TODO: Walk through definition and build nested deferred expressions
-      if (spec.definition case final DeferredSpec deferred) {
-        deferred.build();
+      if (spec.definition case final FunctionSpec fn) {
+        // Reference definition to ensure that it has been built
+        fn.definition;
       }
     }
   }
@@ -331,12 +331,12 @@ class CellBuilder {
       scope: scope,
       location: definition.location,
 
-      definition: (arguments) => DeferredFunctionDefinition(
+      definition: (arguments) => DeferredFunctionSpec(
           name: module.namedId(name),
           arguments: arguments,
           scope: scope,
           module: module,
-          definition: definition
+          expression: definition
       ),
     );
   }
@@ -495,11 +495,10 @@ class CellBuilder {
             name: name,
             arguments: arguments,
             scope: fnScope,
-            definition: (args) => FunctionSpec(
+            definition: (args) => ExternalFunctionSpec(
                 name: id,
                 arguments: args,
                 scope: fnScope,
-                definition: const Stub()
             ),
             location: location,
         )

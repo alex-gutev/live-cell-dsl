@@ -209,25 +209,8 @@ class ApplySpec extends ValueSpec {
       visitor.visitApply(this);
 }
 
-/// A [ValueSpec] that is built at a later stage.
-///
-/// The building of the spec is deferred to when [build] is called.
-abstract class DeferredSpec extends ValueSpec {
-  const DeferredSpec();
-
-  /// Build the specification
-  ///
-  /// *NOTE*: This method should cache the specification after it is built for
-  /// the first time, rather than building it every time this method called.
-  ValueSpec build();
-
-  @override
-  R accept<R>(ValueSpecVisitor<R> visitor) =>
-      visitor.visitDeferred(this);
-}
-
 /// Represents a function definition
-class FunctionSpec extends ValueSpec {
+abstract class FunctionSpec extends ValueSpec {
   /// The name of the function
   final CellId name;
 
@@ -238,7 +221,7 @@ class FunctionSpec extends ValueSpec {
   final CellTable scope;
 
   /// Specification defining the result of the function
-  final ValueSpec definition;
+  ValueSpec get definition;
 
   /// Set of cells referenced by this function
   Set<CellSpec> get referencedCells {
@@ -262,7 +245,6 @@ class FunctionSpec extends ValueSpec {
     required this.name,
     required this.arguments,
     required this.scope,
-    required this.definition
   });
 
   @override
