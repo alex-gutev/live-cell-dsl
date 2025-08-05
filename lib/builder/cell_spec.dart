@@ -227,15 +227,15 @@ abstract class FunctionSpec extends ValueSpec {
   ValueSpec get definition;
 
   /// Set of cells referenced by this function
-  Set<CellSpec> get referencedCells {
+  Set<CellSpec> get closure {
     if (_closure == null) {
       _closure = {};
 
       for (final spec in scope.cells) {
         spec.definition.accept(
-          _ExternalCellVisitor(
+          _ClosureVisitor(
               scope: scope,
-              external: _closure!
+              closure: _closure!
           )
         );
       }
@@ -263,14 +263,14 @@ abstract class FunctionSpec extends ValueSpec {
 /// Visitor that determines set of referenced cells that are external to [scope].
 ///
 /// Cells referenced within [scope], which are not defined in [scope] are
-/// added to the set [external].
-class _ExternalCellVisitor extends ValueSpecTreeVisitor {
+/// added to the set [closure].
+class _ClosureVisitor extends ValueSpecTreeVisitor {
   final CellTable scope;
-  final Set<CellSpec> external;
+  final Set<CellSpec> closure;
 
-  _ExternalCellVisitor({
+  _ClosureVisitor({
     required this.scope,
-    required this.external
+    required this.closure
   });
 
   @override
@@ -278,14 +278,14 @@ class _ExternalCellVisitor extends ValueSpecTreeVisitor {
     final cell = spec.get;
 
     if (cell.scope != scope) {
-      external.add(cell);
+      closure.add(cell);
     }
   }
 
   @override
   void visitFunction(FunctionSpec spec) {
-    external.addAll(
-        spec.referencedCells
+    closure.addAll(
+        spec.closure
             .where((c) => c.scope != scope)
     );
   }

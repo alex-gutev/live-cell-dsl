@@ -113,7 +113,7 @@ class _ArgumentCellVisitor extends ValueSpecTreeVisitor {
 
   @override
   void visitFunction(FunctionSpec spec) {
-    spec.referencedCells.forEach(_addArgument);
+    spec.closure.forEach(_addArgument);
   }
 
   /// Add [cell] to the [arguments] set.

@@ -101,7 +101,7 @@ class FunctionCompiler extends DartCompiler {
   /// The returned map does not include functions or global cells.
   Map<String, Expression> _getClosure() {
     if (_closure == null) {
-      final closure = Set<CellSpec>.from(functionSpec.referencedCells);
+      final closure = Set<CellSpec>.from(functionSpec.closure);
       final visited = <CellSpec>{};
 
       while (true) {
@@ -119,7 +119,7 @@ class FunctionCompiler extends DartCompiler {
           closure.remove(cell);
 
           closure.addAll(
-              fn.referencedCells.where((e) => !visited.contains(e))
+              fn.closure.where((e) => !visited.contains(e))
           );
         }
       }
