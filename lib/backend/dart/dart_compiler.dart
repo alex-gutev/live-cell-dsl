@@ -49,11 +49,12 @@ class DartCompiler {
   /// **NOTE**: Only one [FunctionGenerator] is created per [spec].
   Expression compileFunction(FunctionSpec spec) {
     if (!functionIds.containsKey(spec)) {
-      final name = functionName(spec);
+      /// Generate a function ID to prevent the function from being built
+      /// again
+      functionId(spec);
 
       if (!functions.containsKey(spec)) {
         final compiler = FunctionCompiler(
-            name: name,
             parent: this,
             functionSpec: spec
         );
@@ -62,7 +63,6 @@ class DartCompiler {
         fn.generate();
       }
     }
-
 
     return functions[spec]!.reference;
   }
@@ -83,11 +83,11 @@ class DartCompiler {
 
   /// Get the name of the variable holding the cell specified by [spec].
   String cellVar(CellSpec spec) =>
-      '_cell${cellId(spec)}';
+      '_c${cellId(spec)}';
 
   /// Get the name of the function implementing the given function [spec].
   String functionName(FunctionSpec spec) =>
-      '_fn${functionId(spec)}';
+      '_f${functionId(spec)}';
 
 
   /// External references

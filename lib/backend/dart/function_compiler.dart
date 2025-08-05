@@ -14,14 +14,10 @@ class FunctionCompiler extends DartCompiler {
   /// The compiler for the environment in which the function is defined
   final DartCompiler parent;
 
-  /// The name of the Dart function to generate
-  final String name;
-
   /// The function specification
   final FunctionSpec functionSpec;
 
   FunctionCompiler({
-    required this.name,
     required this.parent,
     required this.functionSpec
   });
@@ -31,9 +27,14 @@ class FunctionCompiler extends DartCompiler {
     final closure = _getClosure();
 
     if (closure.isNotEmpty) {
-      return _makeClass(closure);
+      return _makeClass(
+          name: '_F${functionId(functionSpec)}',
+          closure: closure
+      );
     }
     else {
+      final name = functionName(functionSpec);
+
       return GlobalFunction(
           name: name,
           build: () => _makeMethod(name)
@@ -75,13 +76,8 @@ class FunctionCompiler extends DartCompiler {
 
   @override
   String cellVar(CellSpec spec) => spec.scope == functionSpec.scope
-      ? 'cell${cellId(spec)}'
+      ? 'c${cellId(spec)}'
       : parent.cellVar(spec);
-
-  @override
-  String functionName(FunctionSpec spec) => spec.scope.parent == functionSpec.scope
-      ? 'fn${functionId(spec)}'
-      : parent.functionName(spec);
 
   // Private
 
@@ -137,7 +133,10 @@ class FunctionCompiler extends DartCompiler {
   }
 
   /// Create a function generator that generates a class using a given [closure].
-  FunctionGenerator _makeClass(Map<String, Expression> closure) =>
+  FunctionGenerator _makeClass({
+    required String name,
+    required Map<String, Expression> closure
+  }) =>
       NestedFunction(
           name: name,
           closure: closure,
@@ -150,6 +149,7 @@ class FunctionCompiler extends DartCompiler {
               b.fields.add(
                   Field((b) => b
                     ..name = field
+                    ..type = refer('dynamic')
                     ..modifier = FieldModifier.final$
                   )
               );
