@@ -61,6 +61,9 @@ class FunctionCompiler extends DartCompiler {
 
       return refer(name);
     }
+    else if (_closureFields!.containsKey(spec)) {
+      return refer(_closureFields![spec]!).call([]);
+    }
     
     return parent.compileRef(spec);
   }
@@ -89,6 +92,9 @@ class FunctionCompiler extends DartCompiler {
 
   /// Map of the expressions referencing the function's closure indexed by variable name.
   Map<String, Expression>? _closure;
+
+  /// Map of the names of the fields holding the closure cell values
+  Map<CellSpec, String>? _closureFields;
 
   /// Get the [Expression]s referencing the function's closure.
   ///
@@ -125,7 +131,14 @@ class FunctionCompiler extends DartCompiler {
       }
 
       _closure = Map.fromEntries(
-          closure.map((e) => MapEntry(cellVar(e), parent.compileRef(e)))
+          closure.map((e) => MapEntry(
+              cellVar(e),
+              makeThunk(parent.compileRef(e))
+          ))
+      );
+
+      _closureFields = Map.fromEntries(
+        closure.map((e) => MapEntry(e, cellVar(e)))
       );
     }
 

@@ -4,6 +4,7 @@ import '../../builder/index.dart';
 import '../../interpreter/builtins.dart';
 import '../../interpreter/exceptions.dart';
 import 'function_generator.dart';
+import 'util.dart';
 
 part 'function_compiler.dart';
 
