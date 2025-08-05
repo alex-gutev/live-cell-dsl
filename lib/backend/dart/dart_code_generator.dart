@@ -25,7 +25,7 @@ class DartBackend implements Operation {
         Directive.import('package:live_cell/runtime/index.dart'),
         Directive.import('package:live_cells_core/live_cells_core.dart')
       ])
-      ..body.addAll(_compiler.functions.values)
+      ..body.addAll(_compiler.functions.values.map((fn) => fn.definition))
       ..body.addAll(_cellFields.values)
       ..body.add(Field((b) => b..name = 'cells'
         ..modifier = FieldModifier.final$

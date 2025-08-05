@@ -9,6 +9,11 @@ class CellTable {
   /// Get all cells defined in this table
   Iterable<CellSpec> get cells => _cells.values;
 
+  /// Is this the global scope?
+  ///
+  /// **NOTE**: A scope is global if [parent] is null.
+  bool get isGlobal => parent == null;
+
   CellTable({
     this.parent
   });

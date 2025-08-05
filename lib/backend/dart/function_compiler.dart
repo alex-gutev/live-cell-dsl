@@ -26,32 +26,19 @@ class FunctionCompiler extends DartCompiler {
     required this.functionSpec
   });
 
-  /// Generate a [Method] that implements the function.
-  Method makeMethod() {
-    var i = 0;
-    
-    for (final arg in functionSpec.arguments) {
-      final cell = functionSpec.scope.get(arg);
-      assert(cell.scope == functionSpec.scope);
-      
-      final name = cellVar(cell);
+  /// Create a [FunctionGenerator] for this function
+  FunctionGenerator makeGenerator() {
+    final closure = _getClosure();
 
-      final def = refer(argsVar)
-          .index(literal(i++))
-          .call([]);
-
-      _statements.add(_varDeclaration(name, def));
+    if (closure.isNotEmpty) {
+      return _makeClass(closure);
     }
-    
-    final result = compile(functionSpec.definition);
-    
-    return Method((b) => b
-        ..name = name
-        ..requiredParameters.addAll([
-          Parameter((b) => b..name = argsVar)
-        ])
-        ..body = _makeBody(result)
-    );
+    else {
+      return GlobalFunction(
+          name: name,
+          build: () => _makeMethod(name)
+      );
+    }
   }
 
   @override
@@ -78,22 +65,13 @@ class FunctionCompiler extends DartCompiler {
   }
 
   @override
-  String compileFunction(FunctionSpec spec) {
-    final added = functions.containsKey(spec);
-    final name = super.compileFunction(spec);
-
-    if (!added && functions.containsKey(spec)) {
-      _statements.add(functions[spec]!.closure.code);
-    }
-
-    return name;
-  }
-
-  @override
   Map<CellSpec, int> get cellIds => parent.cellIds;
 
   @override
   Map<FunctionSpec, int> get functionIds => parent.functionIds;
+
+  @override
+  Map<FunctionSpec, FunctionGenerator> get functions => parent.functions;
 
   @override
   String cellVar(CellSpec spec) => spec.scope == functionSpec.scope
@@ -112,6 +90,115 @@ class FunctionCompiler extends DartCompiler {
 
   /// List of statements comprising the function body
   final _statements = <Code>[];
+
+  /// Map of the expressions referencing the function's closure indexed by variable name.
+  Map<String, Expression>? _closure;
+
+  /// Get the [Expression]s referencing the function's closure.
+  ///
+  /// The returned map contains [Expression]s that reference the values of the
+  /// cells in the closure. These are used when calling the constructor of the
+  /// generated class. The [Expression]s are indexed by the names of the fields
+  /// through which the values of the cells in the closure can be referenced
+  /// within the class's call method.
+  ///
+  /// The returned map does not include functions or global cells.
+  Map<String, Expression> _getClosure() {
+    if (_closure == null) {
+      final closure = Set<CellSpec>.from(functionSpec.referencedCells);
+      final visited = <CellSpec>{};
+
+      while (true) {
+        closure.removeWhere((e) => e.isGlobal);
+        final fns = closure.where((e) => e.definition is FunctionSpec).toList();
+
+        if (fns.isEmpty) {
+          break;
+        }
+
+        for (final cell in fns) {
+          final fn = cell.definition as FunctionSpec;
+
+          visited.add(cell);
+          closure.remove(cell);
+
+          closure.addAll(
+              fn.referencedCells.where((e) => !visited.contains(e))
+          );
+        }
+      }
+
+      _closure = Map.fromEntries(
+          closure.map((e) => MapEntry(cellVar(e), parent.compileRef(e)))
+      );
+    }
+
+    return _closure!;
+  }
+
+  /// Create a function generator that generates a class using a given [closure].
+  FunctionGenerator _makeClass(Map<String, Expression> closure) =>
+      NestedFunction(
+          name: name,
+          closure: closure,
+          build: () => Class((b) {
+            b.name = name;
+            b.constructors.add(_makeClassConstructor());
+            b.methods.add(_makeMethod('call'));
+
+            for (final field in _closure!.keys) {
+              b.fields.add(
+                  Field((b) => b
+                    ..name = field
+                    ..modifier = FieldModifier.final$
+                  )
+              );
+            }
+          })
+      );
+
+  /// Generate the constructor of a class function.
+  Constructor _makeClassConstructor() => Constructor((b) => b
+    ..constant = true
+    ..optionalParameters.addAll(
+      _closure!.keys.map((name) => Parameter((b) => b
+        ..name = name
+        ..named = true
+        ..required = true
+        ..toThis = true
+      ))
+    )
+  );
+
+  /// Generate the [Method] implementing the actual function
+  ///
+  /// [name] is the name of the generated [Method].
+  Method _makeMethod(String name) {
+    var i = 0;
+
+    for (final arg in functionSpec.arguments) {
+      final cell = functionSpec.scope.get(arg);
+      assert(cell.scope == functionSpec.scope);
+
+      final name = cellVar(cell);
+
+      final def = refer(argsVar)
+          .index(literal(i++))
+          .call([]);
+
+      _statements.add(_varDeclaration(name, def));
+    }
+
+    final result = compile(functionSpec.definition);
+
+    return Method((b) => b
+      ..name = name
+      ..requiredParameters.addAll([
+        Parameter((b) => b..name = argsVar)
+      ])
+      ..body = _makeBody(result)
+    );
+  }
 
   /// Generate the [Block] forming the body of the function.
   Block _makeBody(Expression result) => Block((b) => b

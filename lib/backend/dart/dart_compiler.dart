@@ -3,6 +3,7 @@ import 'package:code_builder/code_builder.dart';
 import '../../builder/index.dart';
 import '../../interpreter/builtins.dart';
 import '../../interpreter/exceptions.dart';
+import 'function_generator.dart';
 
 part 'function_compiler.dart';
 
@@ -24,7 +25,7 @@ class DartCompiler {
     ) => compile(operator)
         .call([literalList(operands.map(_makeThunk))]),
 
-    FunctionSpec() => refer(compileFunction(spec)),
+    FunctionSpec() => compileFunction(spec),
   };
 
   /// Create an [Expression] that references the value of a cell
@@ -42,11 +43,11 @@ class DartCompiler {
 
   /// Compile the function specified by [spec].
   ///
-  /// A [Method] that implements the function is generated and saved in
-  /// [functions]. The [name] of the [Method] is returned.
+  /// A [FunctionGenerator] for the function is created and saved in
+  /// [functions]. An [Expression] that references the function is returned.
   ///
-  /// **NOTE**: Only one method is generated per [spec].
-  String compileFunction(FunctionSpec spec) {
+  /// **NOTE**: Only one [FunctionGenerator] is created per [spec].
+  Expression compileFunction(FunctionSpec spec) {
     if (!functionIds.containsKey(spec)) {
       final name = functionName(spec);
 
@@ -57,13 +58,13 @@ class DartCompiler {
             functionSpec: spec
         );
 
-        functions[spec] = compiler.makeMethod();
+        final fn = functions[spec] = compiler.makeGenerator();
+        fn.generate();
       }
-
-      return name;
     }
 
-    return functionName(spec);
+
+    return functions[spec]!.reference;
   }
 
   /// Get the integer identifier for a given cell [spec].
@@ -105,19 +106,22 @@ class DartCompiler {
     final argList = List.generate(spec.arity, (i) => refer('args')
         .index(literal(i)));
 
-    functions.putIfAbsent(fn, () => Method((b) => b
-        ..name = name
-        ..requiredParameters.addAll([
-          Parameter((b) => b..name = 'args')
-        ])
-        ..body = Block((b) {
-          b.statements.add(
-            refer(spec.functionName)
-                .call(argList)
-                .returned
-                .statement
-          );
-        })
+    functions.putIfAbsent(fn, () => GlobalFunction(
+        name: name,
+        build: () => Method((b) => b
+          ..name = name
+          ..requiredParameters.addAll([
+            Parameter((b) => b..name = 'args')
+          ])
+          ..body = Block((b) {
+            b.statements.add(
+                refer(spec.functionName)
+                    .call(argList)
+                    .returned
+                    .statement
+            );
+          })
+        )
     ));
 
     return refer(name);
@@ -131,8 +135,8 @@ class DartCompiler {
   /// Maps function specifications to their integer identifiers
   final functionIds = <FunctionSpec, int>{};
 
-  /// Map of [Method]s implementing [FunctionSpec]s.
-  final functions = <FunctionSpec, Method>{};
+  /// Map of [FunctionGenerator]s for the functions indexed by [FunctionSpec]s.
+  final functions = <FunctionSpec, FunctionGenerator>{};
 
   /// Create an expression that wraps the value specified by [spec] in a thunk.
   Expression _makeThunk(ValueSpec spec) {

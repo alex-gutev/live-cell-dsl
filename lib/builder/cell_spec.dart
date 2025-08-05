@@ -98,6 +98,9 @@ class CellSpec {
   /// If false then this cell has been declared but not defined.
   final bool defined;
 
+  /// Is this a global cell?
+  bool get isGlobal => scope?.isGlobal ?? true;
+
   const CellSpec({
     required this.id,
     required this.definition,
@@ -225,20 +228,20 @@ abstract class FunctionSpec extends ValueSpec {
 
   /// Set of cells referenced by this function
   Set<CellSpec> get referencedCells {
-    if (_external == null) {
-      _external = {};
+    if (_closure == null) {
+      _closure = {};
 
       for (final spec in scope.cells) {
         spec.definition.accept(
           _ExternalCellVisitor(
               scope: scope,
-              external: _external!
+              external: _closure!
           )
         );
       }
     }
 
-    return _external!;
+    return _closure!;
   }
 
   FunctionSpec({
@@ -254,7 +257,7 @@ abstract class FunctionSpec extends ValueSpec {
   // Private
 
   /// Set of cells referenced by this function
-  Set<CellSpec>? _external;
+  Set<CellSpec>? _closure;
 }
 
 /// Visitor that determines set of referenced cells that are external to [scope].
