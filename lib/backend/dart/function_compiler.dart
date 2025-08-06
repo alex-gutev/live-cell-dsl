@@ -44,19 +44,18 @@ class FunctionCompiler extends DartCompiler {
 
   @override
   Expression compileRef(CellSpec spec) {
-    if (spec.isArgument()) {
-      return refer(cellVar(spec));
-    }
-    else if (spec.scope == functionSpec.scope) {
-      if (spec.foldable() && spec.definition is FunctionSpec) {
-        return compile(spec.definition);
-      }
-
+    if (spec.scope == functionSpec.scope) {
       final name = cellVar(spec);
 
-      if (_builtCells.add(spec)) {
-        final def = compile(spec.definition);
-        _statements.add(_varDeclaration(name, def));
+      if (!spec.isArgument()) {
+        if (spec.foldable() && spec.definition is FunctionSpec) {
+          return compile(spec.definition);
+        }
+
+        if (_builtCells.add(spec)) {
+          final def = compile(spec.definition);
+          _statements.add(_varDeclaration(name, def));
+        }
       }
 
       return refer(name);
@@ -64,7 +63,7 @@ class FunctionCompiler extends DartCompiler {
     else if (_closureFields!.containsKey(spec)) {
       return refer(_closureFields![spec]!).call([]);
     }
-    
+
     return parent.compileRef(spec);
   }
 
