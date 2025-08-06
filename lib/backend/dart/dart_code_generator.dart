@@ -30,7 +30,9 @@ class DartBackend implements Operation {
       ..body.add(Field((b) => b..name = 'cells'
         ..modifier = FieldModifier.final$
         ..assignment = literalMap(
-            _cellFields.map((id, f) => MapEntry(id.toString(), refer(f.name)))
+            _cellFields.map((id, f) => MapEntry(id.toString(), refer(f.name))),
+            refer('String'),
+            refer('ValueCell')
         ).code
       )));
 
@@ -84,7 +86,7 @@ class DartBackend implements Operation {
             ..name = _compiler.cellVar(spec)
             ..modifier = FieldModifier.final$
             ..assignment = refer('MutableCell')
-                .call([literalNull])
+                .call([literalNull], {}, [refer('dynamic')])
                 .code
         );
 
