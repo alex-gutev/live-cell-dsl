@@ -9,7 +9,6 @@ make-inc(n) = {
     inc
 }
 
-var(op)
 var(delta)
 var(x)
 
