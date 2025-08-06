@@ -10,6 +10,7 @@ TESTS=generated/single_argument_computed_cell.g.dart \
  	generated/nary_function.g.dart \
  	generated/multi_expression_function.g.dart \
  	generated/function_closure.g.dart \
+ 	generated/nested_functions.g.dart \
  	generated/nested_function_closure.g.dart \
  	generated/lexical_scope.g.dart \
  	generated/lexical_scope_function_arguments.g.dart \
