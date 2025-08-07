@@ -1,0 +1,9 @@
+## Test built in branching functions
+
+import(core)
+
+out = select(cond, a, b)
+
+var(cond)
+var(a)
+var(b)

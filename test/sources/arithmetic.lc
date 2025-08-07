@@ -1,0 +1,12 @@
+## Test built in arithmetic functions
+
+import(core)
+
+out+ = x + y
+out- = x - y
+out* = x * y
+out/ = x / y
+out% = x % y
+
+var(x)
+var(y)

@@ -1,0 +1,9 @@
+## Test built in equality functions
+
+import(core)
+
+out-eq = x == y
+out-neq = x != y
+
+var(x)
+var(y)

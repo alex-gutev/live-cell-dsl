@@ -1,0 +1,10 @@
+## Test built in boolean logic functions
+
+import(core)
+
+out-not = not(x)
+out-and = x and y
+out-or  = x or y
+
+var(x)
+var(y)

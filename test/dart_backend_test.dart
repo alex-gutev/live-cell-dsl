@@ -21,6 +21,11 @@ import 'generated/recursion.g.dart' as test16;
 import 'generated/tail_recursion.g.dart' as test17;
 import 'generated/recursion_fibonacci.g.dart' as test18;
 import 'generated/mutual_recursion.g.dart' as test19;
+import 'generated/arithmetic.g.dart' as test20;
+import 'generated/equality.g.dart' as test21;
+import 'generated/comparison.g.dart' as test22;
+import 'generated/boolean.g.dart' as test23;
+import 'generated/branching.g.dart' as test24;
 
 void main() {
   group('Computed Cells', () {
@@ -392,6 +397,188 @@ void main() {
       x.value = 6;
 
       expect(values, equals([1, 1, 2, 3, 5, 8, 13]));
+    });
+  });
+
+  group('Built in functions', () {
+    test('Arithmetic', () {
+      final x = test20.cells['x'] as MutableCell;
+      final y = test20.cells['y'] as MutableCell;
+
+      x.value = 1;
+      y.value = 2;
+
+      final add = observe(test20.cells['out+']!);
+      final sub = observe(test20.cells['out-']!);
+      final mul = observe(test20.cells['out*']!);
+      final div = observe(test20.cells['out/']!);
+      final mod = observe(test20.cells['out%']!);
+
+      MutableCell.batch(() {
+        x.value = 4;
+        y.value = 2;
+      });
+
+      MutableCell.batch(() {
+        x.value = 8;
+        y.value = 3;
+      });
+
+      MutableCell.batch(() {
+        x.value = 0.5;
+        y.value = 2;
+      });
+
+      expect(add, equals([3, 6, 11, 2.5]));
+      expect(sub, equals([-1, 2, 5, -1.5]));
+      expect(mul, equals([2, 8, 24, 1]));
+      expect(div, equals([0.5, 2, 8/3, 0.5/2]));
+      expect(mod, equals([1, 0, 2, 0.5]));
+    });
+
+    test('Equality', () {
+      final x = test21.cells['x'] as MutableCell;
+      final y = test21.cells['y'] as MutableCell;
+
+      final eq = observe(test21.cells['out-eq']!);
+      final neq = observe(test21.cells['out-neq']!);
+
+      x.value = 5;
+      y.value = 5;
+      y.value = 6;
+
+      x.value = 'hello';
+      y.value = 'hello';
+      x.value = 'bye';
+      x.value = 0;
+
+      expect(eq, equals([
+        true,  // null == null
+        false, // 5 == null
+        true,  // 5 == 5
+        false, // 5 == 6
+        false, // 'hello' == 6
+        true,  // 'hello' == 'hello'
+        false, // 'bye' == 'hello'
+        false, // 0 == 'hello'
+      ]));
+
+      expect(neq, equals([
+        false, // null != null
+        true,  // 5 != null
+        false, // 5 != 5
+        true,  // 5 != 6
+        true,  // 'hello' != 6
+        false, // 'hello' != 'hello'
+        true,  // 'bye' != 'hello'
+        true,  // 0 != 'hello'
+      ]));
+    });
+
+    test('Comparison', () {
+      final x = test22.cells['x'] as MutableCell;
+      final y = test22.cells['y'] as MutableCell;
+
+      x.value = 1;
+      y.value = 2;
+
+      final lt = observe(test22.cells['out-lt']!);
+      final lte = observe(test22.cells['out-lte']!);
+      final gt = observe(test22.cells['out-gt']!);
+      final gte = observe(test22.cells['out-gte']!);
+
+      x.value = 2;
+      x.value = 3;
+      y.value = 4.5;
+      x.value = 8.125;
+
+      expect(lt, equals([
+        true,  // 1 < 2
+        false, // 2 < 2
+        false, // 3 < 2
+        true,  // 3 < 4.5
+        false, // 8.125 < 4.5
+      ]));
+
+      expect(lte, equals([
+        true,  // 1 <= 2
+        true,  // 2 <= 2
+        false, // 3 <= 2
+        true,  // 3 <= 4.5
+        false, // 8.125 <= 4.5
+      ]));
+
+      expect(gt, equals([
+        false,  // 1 > 2
+        false, // 2 > 2
+        true, // 3 > 2
+        false,  // 3 > 4.5
+        true, // 8.125 > 4.5
+      ]));
+
+      expect(gte, equals([
+        false,  // 1 >= 2
+        true,  // 2 >= 2
+        true, // 3 >= 2
+        false,  // 3 >= 4.5
+        true, // 8.125 >= 4.5
+      ]));
+    });
+
+    test('Boolean', () {
+      final x = test23.cells['x'] as MutableCell;
+      final y = test23.cells['y'] as MutableCell;
+
+      x.value = false;
+      y.value = false;
+
+      final not = observe(test23.cells['out-not']!);
+      final and = observe(test23.cells['out-and']!);
+      final or = observe(test23.cells['out-or']!);
+
+      y.value = true;
+      x.value = true;
+      y.value = false;
+
+      expect(not, [
+        true,  // not false
+        false, // not true
+      ]);
+
+      expect(and, equals([
+        false, // false and false
+        false, // false and true
+        true,  // true and true
+        false, // true and false
+      ]));
+
+      expect(or, equals([
+        false, // false or false
+        true,  // false or true
+        true,  // true or true
+        true,  // true or false
+      ]));
+    });
+
+    test('Branching', () {
+      final a = test24.cells['a'] as MutableCell;
+      final b = test24.cells['b'] as MutableCell;
+      final cond = test24.cells['cond'] as MutableCell;
+
+      cond.value = true;
+      a.value = 'x';
+
+      final values = observe(test24.cells['out']!);
+
+      b.value = 'y';
+      cond.value = false;
+
+      b.value = 'z';
+      a.value = 'w';
+      cond.value = true;
+      a.value = 'v';
+
+      expect(values, ['x', 'x', 'y', 'z', 'z', 'w', 'v']);
     });
   });
 }

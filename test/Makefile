@@ -21,7 +21,12 @@ TESTS=generated/single_argument_computed_cell.g.dart \
  	generated/recursion.g.dart \
  	generated/tail_recursion.g.dart \
  	generated/recursion_fibonacci.g.dart \
- 	generated/mutual_recursion.g.dart
+ 	generated/mutual_recursion.g.dart \
+ 	generated/arithmetic.g.dart \
+ 	generated/equality.g.dart \
+ 	generated/comparison.g.dart \
+ 	generated/boolean.g.dart \
+ 	generated/branching.g.dart
 
 generated/%.g.dart: sources/%.lc
 	$(CC) ${ARGS} -o $@ $<
