@@ -1,3 +1,4 @@
+import 'package:live_cell/runtime/index.dart';
 import 'package:live_cells_core/live_cells_core.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
@@ -27,6 +28,7 @@ import 'generated/comparison.g.dart' as test22;
 import 'generated/boolean.g.dart' as test23;
 import 'generated/branching.g.dart' as test24;
 import 'generated/invalid_operator.g.dart' as test25;
+import 'generated/arity_errors.g.dart' as test26;
 
 void main() {
   group('Computed Cells', () {
@@ -594,6 +596,25 @@ void main() {
 
       f.value = 'inc';
       expect(() => out.value, throwsA(isA<NoSuchMethodError>()));
+    });
+
+    test('Incorrect number of arguments', () async {
+      final a = test26.cells['a'] as MutableCell;
+      final b = test26.cells['b'] as MutableCell;
+      final c = test26.cells['c'] as MutableCell;
+
+      a.value = 1;
+      b.value = 2;
+      c.value = 3;
+
+      final tooFew = test26.cells['too-few']!;
+      final tooMany = test26.cells['too-many']!;
+      final correct = test26.cells['correct']!;
+
+      expect(() => tooFew.value, throwsA(isA<ArityError>()));
+      expect(() => tooMany.value, throwsA(isA<ArityError>()));
+
+      expect(correct.value, equals(3));
     });
   });
 }
