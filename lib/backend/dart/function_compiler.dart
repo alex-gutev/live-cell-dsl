@@ -188,6 +188,14 @@ class FunctionCompiler extends DartCompiler {
   Method _makeMethod(String name) {
     var i = 0;
 
+    _statements.add(
+        DartCompiler.makeArityCheck(
+          name: functionSpec.name,
+          arity: functionSpec.arguments.length,
+          argsVar: argsVar
+        )
+    );
+
     for (final arg in functionSpec.arguments) {
       final cell = functionSpec.scope.get(arg);
       assert(cell.scope == functionSpec.scope);

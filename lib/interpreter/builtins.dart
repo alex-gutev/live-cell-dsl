@@ -1,6 +1,4 @@
-import '../builder/index.dart';
-import '../runtime/builtins.dart';
-import '../runtime/thunk.dart';
+import '../runtime/index.dart';
 import 'evaluator.dart';
 
 /// Specification for a builtin function

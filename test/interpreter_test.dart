@@ -1,5 +1,5 @@
-import 'package:live_cell/builder/index.dart';
 import 'package:live_cell/interpreter/index.dart';
+import 'package:live_cell/runtime/index.dart';
 import 'package:live_cells_core/live_cells_core.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';

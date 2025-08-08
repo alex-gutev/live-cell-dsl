@@ -95,6 +95,8 @@ class DartCompiler {
 
   /// Create an [Expression] that references an externally defined [cell].
   Expression refExternalCell(CellSpec cell) {
+    const argsVar = 'args';
+
     final spec = Builtins.fns[cell.id];
     final fn = cell.definition;
 
@@ -104,7 +106,7 @@ class DartCompiler {
 
     final name = functionName(fn);
 
-    final argList = List.generate(spec.arity, (i) => refer('args')
+    final argList = List.generate(spec.arity, (i) => refer(argsVar)
         .index(literal(i)));
 
     functions.putIfAbsent(fn, () => GlobalFunction(
@@ -112,9 +114,17 @@ class DartCompiler {
         build: () => Method((b) => b
           ..name = name
           ..requiredParameters.addAll([
-            Parameter((b) => b..name = 'args')
+            Parameter((b) => b..name = argsVar)
           ])
           ..body = Block((b) {
+            b.statements.add(
+                makeArityCheck(
+                  name: cell.id,
+                  arity: spec.arity,
+                  argsVar: argsVar
+                )
+            );
+
             b.statements.add(
                 refer(spec.functionName)
                     .call(argList)
@@ -148,4 +158,37 @@ class DartCompiler {
     return refer('Thunk')
         .call([fn.closure]);
   }
+
+  /// Generate an [Expression] that constructs a given cell [id].
+  static Expression referCellId(CellId id) => switch (id) {
+    NamedCellId(:final name, :final module) =>
+      refer('NamedCellId').call([literalString(name)], {
+        'module': literal(module)
+      }),
+
+    AppliedCellId(:final operator, :final operands) =>
+      refer('AppliedCellId').call([], {
+        'operator': referCellId(operator),
+        'operands': literalList(operands.map(referCellId))
+      }),
+
+    ValueCellId(:final value) =>
+        refer('ValueCellId').call([literal(value)]),
+  };
+
+  /// Generate a statement that performs arity checks.
+  ///
+  /// [name] is the identifier of the function. [arity] is the expected
+  /// number of arguments and [argsVar] is the name of the variable holding the
+  /// argument list.
+  static Code makeArityCheck({
+    required CellId name,
+    required int arity,
+    required String argsVar
+  }) =>
+      refer('checkArity').call([], {
+        'name': DartCompiler.referCellId(name),
+        'arity': literal(arity),
+        'arguments': refer(argsVar)
+      }).statement;
 }
