@@ -26,7 +26,8 @@ TESTS=generated/single_argument_computed_cell.g.dart \
  	generated/equality.g.dart \
  	generated/comparison.g.dart \
  	generated/boolean.g.dart \
- 	generated/branching.g.dart
+ 	generated/branching.g.dart \
+ 	generated/invalid_operator.g.dart
 
 generated/%.g.dart: sources/%.lc
 	$(CC) ${ARGS} -o $@ $<

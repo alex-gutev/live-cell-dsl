@@ -1,0 +1,10 @@
+## Tests calling something which is not a function
+
+import(core)
+
+inc(n) = n + 1
+
+var(f)
+var(x)
+
+out = f(x)

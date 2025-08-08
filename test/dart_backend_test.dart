@@ -26,6 +26,7 @@ import 'generated/equality.g.dart' as test21;
 import 'generated/comparison.g.dart' as test22;
 import 'generated/boolean.g.dart' as test23;
 import 'generated/branching.g.dart' as test24;
+import 'generated/invalid_operator.g.dart' as test25;
 
 void main() {
   group('Computed Cells', () {
@@ -579,6 +580,20 @@ void main() {
       a.value = 'v';
 
       expect(values, ['x', 'x', 'y', 'z', 'z', 'w', 'v']);
+    });
+  });
+
+  group('Errors', () {
+    test('Operator is not a function', () {
+      final f = test25.cells['f'] as MutableCell;
+      final x = test25.cells['x'] as MutableCell;
+      final out = test25.cells['out']!;
+
+      x.value = 1;
+      expect(() => out.value, throwsA(isA<NoSuchMethodError>()));
+
+      f.value = 'inc';
+      expect(() => out.value, throwsA(isA<NoSuchMethodError>()));
     });
   });
 }
