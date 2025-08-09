@@ -1,3 +1,14 @@
+import 'dart:io';
+
+import 'package:live_cell/analyzer/index.dart';
+import 'package:live_cell/backend/dart/dart_code_generator.dart';
+import 'package:live_cell/builder/index.dart';
+import 'package:live_cell/common/pipeline.dart';
+import 'package:live_cell/interpreter/exceptions.dart';
+import 'package:live_cell/lexer/index.dart';
+import 'package:live_cell/modules/index.dart';
+import 'package:live_cell/optimization/folding.dart';
+import 'package:live_cell/parser/index.dart';
 import 'package:live_cell/runtime/index.dart';
 import 'package:live_cells_core/live_cells_core.dart';
 import 'package:test/expect.dart';
@@ -615,6 +626,41 @@ void main() {
       expect(() => tooMany.value, throwsA(isA<ArityError>()));
 
       expect(correct.value, equals(3));
+    });
+
+    test('Undefined external function', () async {
+      final source = [
+        'import(core);',
+        'external(foo(a));',
+        'out = foo(var(x));'
+      ];
+
+      final modulePath = '${Directory.current.path}/modules';
+      final operators = OperatorTable([]);
+
+      late final builder = CellBuilder(
+          operatorTable: operators,
+          loadModule: ModuleLoader(
+              modulePath: modulePath,
+              operators: operators
+          )
+      );
+
+      final output = StringBuffer();
+
+      final pipeline = Pipeline()
+        ..add(SemanticAnalyzer())
+        ..add(CellFolder())
+        ..add(DartBackend(output));
+
+      await builder.processSource(
+          Stream.fromIterable(source)
+              .transform(Lexer())
+              .transform(Parser(operators))
+      );
+
+      expect(() => pipeline.run(builder.scope),
+          throwsA(isA<MissingExternalCellError>()));
     });
   });
 }
