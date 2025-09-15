@@ -19,7 +19,7 @@ class Lexer extends StreamTransformerBase<String, Token> {
   @override
   Stream<Token> bind(Stream<String> stream) => Stream<Token>.eventTransformed(
       stream.transform(LineSplitter()),
-      (sink) => TokenEventSink(sink)
+      (sink) => TokenEventSink(sink, path: path)
   );
 }
 

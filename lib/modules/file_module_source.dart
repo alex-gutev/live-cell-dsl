@@ -16,7 +16,7 @@ class FileModuleSource extends ModuleSource {
   @override
   Stream<AstNode> get nodes => source.openRead()
       .transform(utf8.decoder)
-      .transform(Lexer())
+      .transform(Lexer(path: source.path))
       .transform(Parser(operators));
 
   const FileModuleSource({
