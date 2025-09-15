@@ -65,7 +65,7 @@ class Operators {
     switch (args) {
       case [
         Name(:final name),
-        Name(name: 'infix' && final type),
+        Name(name: ('infix' || 'prefix') && final type),
         Value<int>(value: final precedence),
         Name(name: ('left' || 'right') && final associativity)
       ]:
@@ -81,7 +81,7 @@ class Operators {
 
       case [
         Name(:final name),
-        Name(name: 'infix' && final type),
+        Name(name: ('infix' || 'prefix') && final type),
         Value<int>(value: final precedence),
       ]:
         builder.operatorTable.add(
