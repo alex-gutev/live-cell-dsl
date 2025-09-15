@@ -17,3 +17,8 @@ operator(-, infix, 50)
 operator(*, infix, 100)
 operator(/, infix, 100)
 operator(%, infix, 100)
+
+operator(not, prefix, 110)
+
+operator(var, prefix, 200)
+operator(import, prefix, 200)
