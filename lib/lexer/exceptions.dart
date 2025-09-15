@@ -57,6 +57,6 @@ extension DescribeLocationExtension on Location {
   }) {
     final input = path ?? 'input';
 
-    return '$prefix in $input at $line:$column: $description';
+    return '$prefix in $input at ${line+1}:${column+1}: $description';
   }
 }
