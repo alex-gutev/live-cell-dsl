@@ -3,7 +3,7 @@
 
 import(core)
 
-var(delta)
+var delta
 
 f(x) = {
     # This delta shadows the global `delta` cell within the
@@ -23,4 +23,4 @@ g(x) = x + delta
 # `x` or `delta` changes
 
 out = f(x)
-var(x)
+var x

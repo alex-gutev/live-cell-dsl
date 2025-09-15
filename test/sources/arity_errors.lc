@@ -4,9 +4,9 @@ import(core)
 
 add(x, y) = x + y
 
-var(a)
-var(b)
-var(c)
+var a
+var b
+var c
 
 too-few = add(a)
 too-many = add(a, b, c)

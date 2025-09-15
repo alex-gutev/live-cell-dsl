@@ -13,8 +13,8 @@ g(x) = {
     x + delta
 }
 
-var(x)
-var(delta)
+var x
+var delta
 
 f = make-inc(1)
 out = f(g(x))

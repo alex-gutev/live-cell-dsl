@@ -2,5 +2,5 @@
 
 import(core)
 
-out = add(var(x), var(y))
+out = add(var x, var y)
 add(a, b) = a + b

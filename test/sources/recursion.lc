@@ -8,4 +8,4 @@ factorial(n) = select(
     1
 )
 
-out = factorial(var(x))
+out = factorial(var x)

@@ -5,5 +5,5 @@ import(core)
 out-eq = x == y
 out-neq = x != y
 
-var(x)
-var(y)
+var x
+var y

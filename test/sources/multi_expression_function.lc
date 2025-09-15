@@ -11,4 +11,4 @@ frob(a, b) = {
     result
 }
 
-out = frob(var(x), var(y))
+out = frob(var x, var y)

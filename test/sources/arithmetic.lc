@@ -8,5 +8,5 @@ out* = x * y
 out/ = x / y
 out% = x % y
 
-var(x)
-var(y)
+var x
+var y

@@ -3,4 +3,4 @@
 import(core)
 
 inc(n) = n + 1
-out = inc(var(x))
+out = inc(var x)

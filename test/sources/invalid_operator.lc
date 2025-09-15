@@ -4,7 +4,7 @@ import(core)
 
 inc(n) = n + 1
 
-var(f)
-var(x)
+var f
+var x
 
 out = f(x)

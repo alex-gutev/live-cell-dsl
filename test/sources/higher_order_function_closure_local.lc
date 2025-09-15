@@ -9,8 +9,8 @@ make-inc(n) = {
     inc
 }
 
-var(delta)
-var(x)
+var delta
+var x
 
 f = make-inc(1)
 out = f(x)

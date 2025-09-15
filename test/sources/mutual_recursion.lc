@@ -15,4 +15,4 @@ fib(n) = {
     calc(n)
 }
 
-out = fib(var(x))
+out = fib(var x)

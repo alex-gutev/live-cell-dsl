@@ -2,9 +2,9 @@
 
 import(core)
 
-var(x)
-var(y)
-var(z)
+var x
+var y
+var z
 
 sum = x + y
 out = sum * z

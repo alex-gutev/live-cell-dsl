@@ -9,5 +9,5 @@ inc(n) = {
     _inc(n)
 }
 
-var(delta)
-var(x)
+var delta
+var x

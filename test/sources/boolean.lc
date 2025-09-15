@@ -2,9 +2,9 @@
 
 import(core)
 
-out-not = not(x)
+out-not = not x
 out-and = x and y
 out-or  = x or y
 
-var(x)
-var(y)
+var x
+var y

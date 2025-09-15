@@ -6,6 +6,6 @@ import(core)
 out = inc(x)
 inc(n) = n + delta
 
-var(delta)
-var(x)
+var delta
+var x
 

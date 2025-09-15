@@ -7,5 +7,5 @@ out-lte = x <= y
 out-gt  = x > y
 out-gte = x >= y
 
-var(x)
-var(y)
+var x
+var y

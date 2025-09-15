@@ -5,8 +5,8 @@ import(core)
 inc(n) = n + 1
 dec(n) = n - 1
 
-var(op)
-var(x)
+var op
+var x
 
 fn = select(op == "inc", inc, dec)
 out = fn(x)

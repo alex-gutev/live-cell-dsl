@@ -4,6 +4,6 @@ import(core)
 
 out = select(cond, a, b)
 
-var(cond)
-var(a)
-var(b)
+var cond
+var a
+var b

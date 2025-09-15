@@ -15,4 +15,4 @@ factorial(n) = {
     calc(n, 1)
 }
 
-out = factorial(var(x))
+out = factorial(var x)

@@ -9,4 +9,4 @@ fib(n) = select(
     fib(n - 1) + fib(n - 2)
 )
 
-out = fib(var(x))
+out = fib(var x)

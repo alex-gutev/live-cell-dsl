@@ -13,7 +13,7 @@ void main() {
 
       await tester.build([
         'import(core);',
-        'out = var(x) + 1;'
+        'out = var x + 1;'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -32,7 +32,7 @@ void main() {
 
       await tester.build([
         'import(core);',
-        'out = var(x) + var(y);'
+        'out = var x + var y;'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -61,9 +61,9 @@ void main() {
 
       await tester.build([
         'import(core);',
-        'var(x);',
-        'var(y);',
-        'var(z);',
+        'var x;',
+        'var y;',
+        'var z;',
         'sum = x + y;',
         'out = sum * z;'
       ]);
@@ -101,7 +101,7 @@ void main() {
       await tester.build([
         'import(core);',
         'inc(n) = n + 1;',
-        'out = inc(var(x));'
+        'out = inc(var x);'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -123,7 +123,7 @@ void main() {
       await tester.build([
         'import(core);',
         'add(a, b) = a + b;',
-        'out = add(var(x), var(y));'
+        'out = add(var x, var y);'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -156,7 +156,7 @@ void main() {
         ' d = b * b;',
         ' result',
         '};',
-        'out = frob(var(x), var(y));'
+        'out = frob(var x, var y);'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -185,8 +185,8 @@ void main() {
         'import(core);',
         'out = inc(x);',
         'inc(n) = n + delta;',
-        'var(delta);',
-        'var(x);'
+        'var delta;',
+        'var x;'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -218,8 +218,8 @@ void main() {
         ' _inc(m) = m + delta;',
         ' _inc(n)',
         '};',
-        'var(delta);',
-        'var(x);'
+        'var delta;',
+        'var x;'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -252,8 +252,8 @@ void main() {
         ' _inc(m) = m + delta;',
         ' _inc(n)',
         '};',
-        'var(delta);',
-        'var(x);'
+        'var delta;',
+        'var x;'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -287,10 +287,10 @@ void main() {
         ' delta = 5;',
         ' g(x + delta)',
         '};',
-        'var(delta);',
+        'var delta;',
         'g(x) = x + delta;',
         'out = f(x);',
-        'var(x);'
+        'var x;'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -323,10 +323,10 @@ void main() {
         'f(x, delta) = {',
         ' g(x + delta)',
         '};',
-        'var(delta);',
+        'var delta;',
         'g(x) = x + delta;',
         'out = f(x, 5);',
-        'var(x);'
+        'var x;'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -355,8 +355,8 @@ void main() {
         'import(core);'
         'inc(n) = n + 1;'
         'dec(n) = n - 1;'
-        'var(op);'
-        'var(x);'
+        'var op;'
+        'var x;'
         'fn = select(op == "inc", inc, dec);'
         'out = fn(x);'
       ]);
@@ -393,8 +393,8 @@ void main() {
         ' inc(m) = m + delta;',
         ' inc',
         '};',
-        'var(x);',
-        'var(delta);',
+        'var x;',
+        'var delta;',
         'f = make-inc(1);',
         'out = f(x);'
       ]);
@@ -427,8 +427,8 @@ void main() {
         ' inc(m) = m + n + delta;',
         ' inc',
         '};',
-        'var(x);',
-        'var(delta);',
+        'var x;',
+        'var delta;',
         'f = make-inc(1);',
         'out = f(x);'
       ]);
@@ -465,8 +465,8 @@ void main() {
         ' delta = 10;'
         ' x + delta;',
         '};',
-        'var(x);',
-        'var(delta);',
+        'var x;',
+        'var delta;',
         'f = make-inc(1);',
         'out = g(f(x));'
       ]);
@@ -500,7 +500,7 @@ void main() {
         '  n * factorial(n - 1),',
         '  1',
         ');',
-        'out = factorial(var(x));'
+        'out = factorial(var x);'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -533,7 +533,7 @@ void main() {
         '    );',
         '  calc(n, 1);'
         '};'
-        'out = factorial(var(x));'
+        'out = factorial(var x);'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -559,7 +559,7 @@ void main() {
         '  1,',
         '  fib(n - 1) + fib(n - 2)',
         ');',
-        'out = fib(var(x));'
+        'out = fib(var x);'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -594,7 +594,7 @@ void main() {
         '  fib2(n) = calc(n - 2);'
         '  calc(n);'
         '};'
-        'out = fib(var(x));'
+        'out = fib(var x);'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
@@ -621,8 +621,8 @@ void main() {
       await tester.build([
         'import(core);',
         'inc(n) = n + 1;',
-        'var(f);',
-        'var(x);',
+        'var f;',
+        'var x;',
         'out = f(x);'
       ]);
 
@@ -643,7 +643,7 @@ void main() {
       await tester.build([
         'import(core);',
         'add(x, y) = x + y;',
-        'var(a); var(b); var(c);'
+        'var a; var b; var c;'
         'too-few = add(a);'
         'too-many = add(a, b, c);'
         'correct = add(a, b);'
@@ -673,7 +673,7 @@ void main() {
       expect(() => tester.build([
         'import(core);',
         'external(foo(a));',
-        'out = foo(var(x));'
+        'out = foo(var x);'
       ]), throwsA(isA<MissingExternalCellError>()));
     });
   });
@@ -685,7 +685,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) + var(y);'
+          'out = var x + var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -707,7 +707,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) - var(y);'
+          'out = var x - var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -729,7 +729,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) * var(y);'
+          'out = var x * var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -751,7 +751,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) / var(y);'
+          'out = var x / var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -776,7 +776,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) % var(y);'
+          'out = var x % var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -800,7 +800,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) == var(y)'
+          'out = var x == var y'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -834,7 +834,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) != var(y)'
+          'out = var x != var y'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -870,7 +870,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) < var(y);'
+          'out = var x < var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -899,7 +899,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) <= var(y);'
+          'out = var x <= var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -928,7 +928,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) > var(y);'
+          'out = var x > var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -957,7 +957,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) >= var(y);'
+          'out = var x >= var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -989,7 +989,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = not(var(x));'
+          'out = not var x;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -1009,7 +1009,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) and var(y);'
+          'out = var x and var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -1037,7 +1037,7 @@ void main() {
 
         await tester.build([
           'import(core);',
-          'out = var(x) or var(y);'
+          'out = var x or var y;'
         ]);
 
         final x = tester.getVar(NamedCellId('x'));
@@ -1068,7 +1068,7 @@ void main() {
         await tester.build([
           'import(core);',
           'out = select(cond, a, b);',
-          'var(cond); var(a); var(b);'
+          'var cond; var a; var b;'
         ]);
 
         final cond = tester.getVar(NamedCellId('cond'));
