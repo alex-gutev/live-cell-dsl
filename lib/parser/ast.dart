@@ -39,6 +39,9 @@ class Name extends AstNode {
 
   @override
   int get hashCode => _$NameHashCode(this);
+
+  @override
+  String toString() => name;
 }
 
 /// Represents a literal value
@@ -61,6 +64,9 @@ class Value<T> extends AstNode {
 
   @override
   int get hashCode => _$ValueHashCode(this);
+
+  @override
+  String toString() => 'Value<$value>';
 }
 
 /// Represents the application of an [operator] to one or more [operands].
@@ -89,6 +95,9 @@ class Application extends AstNode {
 
   @override
   int get hashCode => _$ApplicationHashCode(this);
+
+  @override
+  String toString() => '$operator(${operands.join(',')})';
 }
 
 /// Represents a block of one or more [expressions]
@@ -113,4 +122,7 @@ class Block extends AstNode {
 
   @override
   int get hashCode => _$BlockHashCode(this);
+
+  @override
+  String toString() => '{${expressions.join(';')}}';
 }
