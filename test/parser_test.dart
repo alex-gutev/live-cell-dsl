@@ -1328,5 +1328,10 @@ void main() {
           )
         ]
     ));
+
+    test('Malformed: Identifier not registered as operator', () {
+      expect(() => parse('- a').toList(),
+          throwsA(isA<UnexpectedTokenParseError>()));
+    });
   });
 }
