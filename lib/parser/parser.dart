@@ -178,32 +178,74 @@ class _Parser {
   /// is not necessarily followed by a [Terminator] token.
   Future<AstNode> _parseExpression() async {
     final builder = ExpressionBuilder();
-    builder.addOperand(await _parseOperand());
+
+    Future<AstNode?> parsePrefixOperand(List<Operator> operators) async {
+      final name = _current;
+      final operator = await _parseOperator(OperatorType.prefix);
+
+      if (operator != null) {
+        operators.add(operator);
+        final operand = await parsePrefixOperand(operators);
+
+        if (operand != null) {
+          return operand;
+        }
+        else {
+          operators.removeLast();
+
+          return Name(
+              operator.name,
+              location: name.location
+          );
+        }
+      }
+
+      return await _parseOperand();
+    }
+
+    Future<AstNode> parseOperand() async {
+      final operators = <Operator>[];
+      final operand = await parsePrefixOperand(operators);
+
+      operators.forEach(builder.addPrefixOperator);
+
+      if (operand != null) {
+        return operand;
+      }
+
+      throw UnexpectedTokenParseError(
+          token: _current,
+          expected: ExpectedFormType.subExpression
+      );
+    }
+
+    builder.addOperand(await parseOperand());
 
     while (true) {
-      final operator = await _parseInfixOperator();
+      final operator = await _parseOperator(OperatorType.infix);
 
       if (operator == null) {
         break;
       }
 
       builder.addOperator(operator);
-      builder.addOperand(await _parseOperand());
+      builder.addOperand(await parseOperand());
     }
 
     return builder.build();
   }
 
-  /// Parse an infix operator at the current position in the stream.
+  /// Parse an operator at the current position in the stream.
   ///
-  /// If the current token in the stream is an infix operator in [_operatorTable],
-  /// it is consumed and returned. Otherwise null is returned.
-  Future<Operator?> _parseInfixOperator() async {
+  /// If the current token in the stream is an operator, of the given [type],
+  /// in [_operatorTable], it is consumed and returned. Otherwise null is
+  /// returned.
+  Future<Operator?> _parseOperator(OperatorType type) async {
     switch (_current) {
       case IdToken(:final name):
         final operator = operatorTable.find(
             name: name,
-            type: OperatorType.infix,
+            type: type,
             minPrecedence: 0
         );
 
@@ -222,12 +264,16 @@ class _Parser {
   ///
   /// An operand may be a function application or a parenthesized expression
   /// but not an expression of an infix operator.
-  Future<AstNode> _parseOperand() async {
+  Future<AstNode?> _parseOperand() async {
     var op = await _parseSubExpression();
+
+    if (op == null) {
+      return op;
+    }
 
     while (_current is ParenOpen) {
       op = Application(
-          operator: op,
+          operator: op!,
           operands: await _parseArgList(),
           location: op.location,
       );
@@ -237,7 +283,7 @@ class _Parser {
   }
 
   /// Parse an expression that is not a function application
-  Future<AstNode> _parseSubExpression() async {
+  Future<AstNode?> _parseSubExpression() async {
     switch (_current) {
       case IdToken(:final name, :final location):
         await _advance();
@@ -256,10 +302,7 @@ class _Parser {
         return await _parseBlock();
 
       default:
-        throw UnexpectedTokenParseError(
-            token: _current,
-            expected: ExpectedFormType.subExpression
-        );
+        return null;
     }
   }
 

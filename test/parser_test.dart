@@ -796,4 +796,537 @@ void main() {
           throwsA(isA<UnexpectedTokenParseError>()));
     });
   });
+
+  group('Prefix Operators', () {
+    test('Single operator', () => testParser(
+        '- a',
+        [
+          Application(
+              operator: Name('-'),
+              operands: [
+                Name('a'),
+              ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '-',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 1,
+              leftAssoc: true
+          )
+        ]
+    ));
+
+    test('Infix and prefix operators', () => testParser(
+        '- a - b - - c',
+        [
+          Application(
+            operator: Name('-'),
+            operands: [
+              Application(
+                operator: Name('-'),
+                operands: [
+                  Application(
+                      operator: Name('-'),
+                      operands: [
+                        Name('a'),
+                      ]
+                  ),
+                  Name('b')
+                ]
+              ),
+              Application(
+                  operator: Name('-'),
+                  operands: [
+                    Name('c'),
+                  ]
+              )
+            ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '-',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 2,
+              leftAssoc: true
+          )
+        ]
+    ));
+
+    test('Lower precedence prefix operator', () => testParser(
+        '- a - b - - c',
+        [
+          Application(
+              operator: Name('-'),
+              operands: [
+                Application(
+                    operator: Name('-'),
+                    operands: [
+                      Application(
+                          operator: Name('-'),
+                          operands: [
+                            Name('a'),
+                            Name('b')
+                          ]
+                      ),
+                      Application(
+                          operator: Name('-'),
+                          operands: [
+                            Name('c'),
+                          ]
+                      )
+                    ]
+                )
+              ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '-',
+              type: OperatorType.infix,
+              precedence: 2,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 1,
+              leftAssoc: true
+          )
+        ]
+    ));
+
+    test('Multiple operators with varying precedence', () => testParser(
+        'a * - b + - c / d',
+        [
+          Application(
+              operator: Name('+'),
+              operands: [
+                Application(
+                    operator: Name('*'),
+                    operands: [
+                      Name('a'),
+                      Application(
+                        operator: Name('-'),
+                        operands: [
+                          Name('b')
+                        ]
+                      )
+                    ]
+                ),
+                Application(
+                  operator: Name('-'),
+                  operands: [
+                    Application(
+                        operator: Name('/'),
+                        operands: [
+                          Name('c'),
+                          Name('d')
+                        ]
+                    )
+                  ]
+                )
+              ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '+',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 3,
+              leftAssoc: false
+          ),
+          Operator(
+              name: '*',
+              type: OperatorType.infix,
+              precedence: 5,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '/',
+              type: OperatorType.infix,
+              precedence: 5,
+              leftAssoc: true
+          )
+        ]
+    ));
+
+    test('Prefix operator chaining', () => testParser(
+        '+ - + - a * b',
+        [
+          Application(
+            operator: Name('+'),
+            operands: [
+              Application(
+                operator: Name('-'),
+                operands: [
+                  Application(
+                    operator: Name('+'),
+                    operands: [
+                      Application(
+                        operator: Name('-'),
+                        operands: [
+                          Application(
+                            operator: Name('*'),
+                            operands: [
+                              Name('a'),
+                              Name('b')
+                            ]
+                          )
+                        ]
+                      )
+                    ]
+                  )
+                ]
+              )
+            ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '+',
+              type: OperatorType.prefix,
+              precedence: 5,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 1,
+              leftAssoc: false
+          ),
+          Operator(
+              name: '*',
+              type: OperatorType.infix,
+              precedence: 3,
+              leftAssoc: true
+          ),
+        ]
+    ));
+
+    test('Prefix operator chaining with lower precedence', () => testParser(
+        '+ - + - a * b',
+        [
+          Application(
+              operator: Name('+'),
+              operands: [
+                Application(
+                    operator: Name('-'),
+                    operands: [
+                      Application(
+                          operator: Name('+'),
+                          operands: [
+                            Application(
+                                operator: Name('*'),
+                                operands: [
+                                  Application(
+                                    operator: Name('-'),
+                                    operands: [
+                                      Name('a')
+                                    ]
+                                  ),
+                                  Name('b')
+                                ]
+                            )
+                          ]
+                      )
+                    ]
+                )
+              ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '+',
+              type: OperatorType.prefix,
+              precedence: 1,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 5,
+              leftAssoc: false
+          ),
+          Operator(
+              name: '*',
+              type: OperatorType.infix,
+              precedence: 3,
+              leftAssoc: true
+          ),
+        ]
+    ));
+
+    test('Controlling precedence with parenthesis', () => testParser(
+        '(- a) - b - - c;'
+        '+ (a - b)',
+        [
+          Application(
+              operator: Name('-'),
+              operands: [
+                Application(
+                    operator: Name('-'),
+                    operands: [
+                      Application(
+                          operator: Name('-'),
+                          operands: [
+                            Name('a'),
+                          ]
+                      ),
+                      Name('b')
+                    ]
+                ),
+                Application(
+                    operator: Name('-'),
+                    operands: [
+                      Name('c'),
+                    ]
+                )
+              ]
+          ),
+          Application(
+            operator: Name('+'),
+            operands: [
+              Application(
+                operator: Name('-'),
+                operands: [
+                  Name('a'),
+                  Name('b')
+                ]
+              )
+            ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '-',
+              type: OperatorType.infix,
+              precedence: 2,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '+',
+              type: OperatorType.prefix,
+              precedence: 5,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 1,
+              leftAssoc: true
+          )
+        ]
+    ));
+
+    test('Application as prefix operator operand', () => testParser(
+        'f(a) - - g(b, - c)',
+        [
+          Application(
+            operator: Name('-'),
+            operands: [
+              Application(
+                operator: Name('f'),
+                operands: [
+                  Name('a')
+                ]
+              ),
+              Application(
+                operator: Name('-'),
+                operands: [
+                  Application(
+                    operator: Name('g'),
+                    operands: [
+                      Name('b'),
+                      Application(
+                          operator: Name('-'),
+                          operands: [
+                            Name('c')
+                          ]
+                      )
+                    ]
+                  )
+                ]
+              )
+            ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '-',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 5,
+              leftAssoc: true
+          )
+        ]
+    ));
+
+    test('Prefix operator as operand', () => testParser(
+        'a - - -;'
+        'f(-, -(b), (-)(c, d))',
+        [
+          Application(
+            operator: Name('-'),
+            operands: [
+              Name('a'),
+              Application(
+                operator: Name('-'),
+                operands: [
+                  Name('-')
+                ]
+              ),
+            ]
+          ),
+          Application(
+              operator: Name('f'),
+              operands: [
+                Name('-'),
+                Application(
+                    operator: Name('-'),
+                    operands: [
+                      Name('b'),
+                    ]
+                ),
+                Application(
+                    operator: Name('-'),
+                    operands: [
+                      Name('c'),
+                      Name('d')
+                    ]
+                )
+              ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '-',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 5,
+              leftAssoc: true
+          )
+        ]
+    ));
+
+    test('Soft terminators ignored in parenthesis', () => testParser(
+        '(a - -\n b)',
+        [
+          Application(
+            operator: Name('-'),
+            operands: [
+              Name('a'),
+              Application(
+                operator: Name('-'),
+                operands: [
+                  Name('b')
+                ]
+              )
+            ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '-',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 5,
+              leftAssoc: true
+          )
+        ]
+    ));
+
+    test('Block as operand', () => testParser(
+        'a - - {f(x); - y}',
+        [
+          Application(
+            operator: Name('-'),
+            operands: [
+              Name('a'),
+              Application(
+                operator: Name('-'),
+                operands: [
+                  Block(
+                    expressions: [
+                      Application(
+                        operator: Name('f'),
+                        operands: [
+                          Name('x')
+                        ]
+                      ),
+                      Application(
+                        operator: Name('-'),
+                        operands: [
+                          Name('y')
+                        ]
+                      )
+                    ]
+                  )
+                ]
+              )
+            ]
+          )
+        ],
+
+        operators: [
+          Operator(
+              name: '-',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: true
+          ),
+          Operator(
+              name: '-',
+              type: OperatorType.prefix,
+              precedence: 5,
+              leftAssoc: true
+          )
+        ]
+    ));
+  });
 }

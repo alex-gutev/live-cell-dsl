@@ -20,17 +20,26 @@ class ExpressionBuilder {
 
   /// Add an operator to the stack
   void addOperator(Operator operator) {
-    while (_operators.lastOrNull?.hasPrecedence(operator) ?? false) {
-      _output.addLast(_Operator(_operators.removeLast()));
+    while (_operators.lastOrNull?.$1.hasPrecedence(operator) ?? false) {
+      _output.addLast(
+          _makeOperator(_operators.removeLast())
+      );
     }
     
-    _operators.add(operator);
+    _operators.add((operator, OperatorType.infix));
+  }
+
+  /// Add a prefix operator to the stack
+  void addPrefixOperator(Operator operator) {
+    _operators.add((operator, OperatorType.prefix));
   }
 
   /// Build the expression
   AstNode build() {
     while (_operators.isNotEmpty) {
-      _output.addLast(_Operator(_operators.removeLast()));
+      _output.addLast(
+          _makeOperator(_operators.removeLast())
+      );
     }
 
     final expression = _popExpression();
@@ -42,8 +51,16 @@ class ExpressionBuilder {
     return expression;
   }
 
-  final _operators = Queue<Operator>();
+  final _operators = Queue<(Operator, OperatorType)>();
   final _output = Queue<_Item>();
+
+  _Item _makeOperator((Operator, OperatorType) operator) => switch (operator.$2) {
+    OperatorType.prefix => _PrefixOperator(operator.$1),
+    OperatorType.infix => _InfixOperator(operator.$1),
+
+    // TODO: Handle this case.
+    OperatorType.postfix => throw UnimplementedError(),
+  };
 
   /// Build the expression from the operator/operand at the top of the stack
   AstNode _popExpression() {
@@ -55,7 +72,15 @@ class ExpressionBuilder {
       case _Operand(:final expression):
         return expression;
 
-      case _Operator(operator: Operator(:final name)):
+      case _PrefixOperator(operator: Operator(:final name)):
+        return Application(
+            operator: Name(name),
+            operands: [
+              _popExpression()
+            ]
+        );
+
+      case _InfixOperator(operator: Operator(:final name)):
         final rhs = _popExpression();
         final lhs = _popExpression();
 
@@ -85,10 +110,18 @@ class _Operand extends _Item {
   const _Operand(this.expression);
 }
 
-/// Represents an operator in the stack
-class _Operator extends _Item {
+/// Represents a prefix operator in the stack
+class _PrefixOperator extends _Item {
   /// The operator
   final Operator operator;
 
-  const _Operator(this.operator);
+  const _PrefixOperator(this.operator);
+}
+
+/// Represents an infix operator in the stack
+class _InfixOperator extends _Item {
+  /// The operator
+  final Operator operator;
+
+  const _InfixOperator(this.operator);
 }
