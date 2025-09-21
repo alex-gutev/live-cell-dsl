@@ -23,6 +23,9 @@ abstract class Evaluator {
   /// Create an [Evaluator] that references the value of the cell identified by [id].
   const factory Evaluator.ref(RuntimeCellId id) = RefEvaluator;
 
+  /// Create an [Evaluator] that references the value of the effect identified by [id].
+  const factory Evaluator.refEffect(int id) = EffectRefEvaluator;
+
   /// Create an [Evaluator] that applies an [operator] to one or more [operands].
   const factory Evaluator.apply({
     required Evaluator operator,
@@ -50,6 +53,16 @@ abstract class Evaluator {
     required Evaluator definition
   }) = FunctionEvaluator;
 
+  /// Create an [Evaluator] that assigns a [value] to a cell.
+  ///
+  /// This evaluator sets the value of the cell identified by [cellId] to
+  /// the value computed by [value]. The assigned value is returned by the
+  /// evaluator.
+  const factory Evaluator.assign({
+    required RuntimeCellId cellId,
+    required Evaluator value
+  }) = AssignEvaluator;
+
   dynamic eval(RuntimeContext context);
 }
 
@@ -73,6 +86,17 @@ class RefEvaluator extends Evaluator {
 
   @override
   eval(RuntimeContext context) => context.refCell(id);
+}
+
+/// Evaluator that references the state of a side effect.
+class EffectRefEvaluator extends Evaluator {
+  /// The identifier of the referenced effect
+  final int id;
+
+  const EffectRefEvaluator(this.id);
+
+  @override
+  eval(RuntimeContext context) => context.refEffect(id);
 }
 
 /// Evaluator that returns the result of applying [operator] to [operands].
@@ -137,6 +161,41 @@ class FunctionEvaluator extends Evaluator {
         )
     );
   };
+}
+
+/// An evaluator that assigns a [value] to the value of a cell.
+class AssignEvaluator extends Evaluator {
+  /// ID of the cell, of which the value is being assigned
+  final RuntimeCellId cellId;
+
+  /// Evaluator that computes the value to assign
+  final Evaluator value;
+
+  const AssignEvaluator({
+    required this.cellId,
+    required this.value
+  });
+
+  @override
+  eval(RuntimeContext context) {
+    final value = this.value.eval(context);
+    context.setCellValue(cellId, value);
+
+    return value;
+  }
+}
+
+/// Evaluator that evaluates a list of [evaluators] and returns the value of the last one.
+class BlockEvaluator extends Evaluator {
+  /// List of evaluators to evaluate.
+  final List<Evaluator> evaluators;
+
+  const BlockEvaluator(this.evaluators);
+
+  @override
+  eval(RuntimeContext context) => evaluators
+      .map((e) => e.eval(context))
+      .lastOrNull;
 }
 
 // An [Evaluator] that evaluates another [evaluator] in a given [context]

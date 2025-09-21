@@ -1,4 +1,5 @@
 export 'cell_spec.dart';
+export 'effect_spec.dart';
 export 'cell_table.dart';
 export 'attributes.dart';
 export 'modules.dart';

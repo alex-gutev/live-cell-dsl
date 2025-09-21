@@ -30,6 +30,11 @@ class Operators {
     module: 'live_cell.core'
   );
 
+  /// Operator for declaring side effects
+  static const effect = NamedCellId('effect',
+    module: 'live_cell.core'
+  );
+
   /// Map from top-level special operator identifiers to the processor functions.
   static final topLevelOperators = <NamedCellId, TopLevelProcessor>{
     import: _ModuleImporter().call,

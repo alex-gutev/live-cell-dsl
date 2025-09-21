@@ -3,6 +3,7 @@ import 'package:live_cells_core/live_cells_core.dart';
 import '../builder/index.dart';
 import 'evaluator.dart';
 import 'runtime_compiler.dart';
+import 'statement_compiler.dart';
 
 /// Builds [ValueCell]s from source code loaded at run time.
 /// 
@@ -14,10 +15,14 @@ class Interpreter {
 
   Interpreter(this.scope);
 
-  /// Build [ValueCell]s from the specifications in [scope].
+  /// Build [ValueCell]s and [CellWatchers] from the specifications in [scope].
   void compile() {
     for (final spec in scope.cells) {
       _compileCell(spec);
+    }
+
+    for (final effect in scope.effects) {
+      _compileEffect(effect);
     }
   }
 
@@ -87,6 +92,28 @@ class Interpreter {
             ).store();
         }
       });
+
+  /// Build a [CellWatcher] for a given side effect [spec].
+  CellWatcher _compileEffect(EffectSpec spec) => _context.addEffect(spec.id, () {
+    final statementCompiler = StatementCompiler(
+        compiler: _compiler
+    );
+
+    // TODO: Some argument cells might be folded
+    // TODO: Iterate through all arguments and use [_ArgumentCellVisitor] on foldable cells
+
+    final args = spec.arguments.map(_makeCell).toList();
+
+    final evaluators = spec.statements
+        .map(statementCompiler.makeEvaluator)
+        .toList();
+
+    return args.watch(() {
+      for (final evaluator in evaluators) {
+        evaluator.eval(_context);
+      }
+    });
+  });
 }
 
 /// Determines the set of [arguments] reference by a given [ValueSpec].

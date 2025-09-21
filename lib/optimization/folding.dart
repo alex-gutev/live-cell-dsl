@@ -63,6 +63,7 @@ class CellFolder implements Operation {
         operands.every(_isConstant),
 
     FunctionSpec() => true,
+    EffectRef() => true
   };
 
   /// Determine whether a given [cell] can be folded.

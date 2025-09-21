@@ -23,6 +23,7 @@ class RuntimeCompiler {
 
     Constant(:final value) => Evaluator.constant(value),
     CellRef(get: final cell) => makeRef(cell),
+    EffectRef(get: final effect) => makeEffectRef(effect),
 
     ApplySpec(
         :final operator,
@@ -47,6 +48,10 @@ class RuntimeCompiler {
 
     return Evaluator.ref(idForCell(spec));
   }
+
+  /// Create an [Evaluator] that references a given [effect].
+  Evaluator makeEffectRef(EffectSpec effect) =>
+      Evaluator.refEffect(effect.id);
 
   /// Create an evaluator for the function defined by [spec].
   ///

@@ -35,6 +35,12 @@ class RuntimeCellId {
 abstract class RuntimeContext {
   /// Reference the value of the cell identified by [id].
   dynamic refCell(RuntimeCellId id);
+
+  /// Set the value of the cell identified by [id] to [value].
+  void setCellValue(RuntimeCellId id, dynamic value);
+
+  /// Reference the effect identified by [id].
+  CellWatcher refEffect(int id);
 }
 
 /// Context containing globally defined cells
@@ -42,8 +48,20 @@ class GlobalContext extends RuntimeContext {
   /// Maps cell identifiers to [ValueCell]s.
   final cells = <RuntimeCellId, ValueCell>{};
 
+  /// Maps effect identifiers to [CellWatcher]s.
+  final effects = <int, CellWatcher>{};
+
   @override
   refCell(RuntimeCellId id) => getCell(id).value;
+
+  @override
+  void setCellValue(RuntimeCellId id, value) {
+    // TODO: Throw exception if cell is not mutable
+    (getCell(id) as MutableCell).value = value;
+  }
+
+  @override
+  CellWatcher refEffect(int id) => effects[id]!;
 
   /// Check whether the context has a cell identified by [id].
   bool hasCell(RuntimeCellId id) => cells.containsKey(id);
@@ -58,6 +76,14 @@ class GlobalContext extends RuntimeContext {
   /// newly added or existing cell is returned.
   ValueCell addCell(RuntimeCellId id, ValueCell Function() makeCell) =>
       cells.putIfAbsent(id, makeCell);
+
+  /// Add a side effect to the context.
+  ///
+  /// If the context does not have an effect identified by [id], [make] is
+  /// called to create the [CellWatcher], which is then added to the context.
+  /// The newly added or existing [CellWatcher] is returned.
+  CellWatcher addEffect(int id, CellWatcher Function() make) =>
+      effects.putIfAbsent(id, make);
 }
 
 /// Context for referencing cells defined within a function
@@ -93,6 +119,15 @@ class FunctionContext extends RuntimeContext {
 
     return parent.refCell(id);
   });
+
+  @override
+  void setCellValue(RuntimeCellId id, value) {
+    // TODO: Throw exception if the cell is local to the function
+    parent.setCellValue(id, value);
+  }
+
+  @override
+  CellWatcher refEffect(int id) => parent.refEffect(id);
 
   /// Map of cached cell values
   final _values = <RuntimeCellId, dynamic>{};
