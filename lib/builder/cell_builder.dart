@@ -4,6 +4,7 @@ import 'attributes.dart';
 import 'exceptions.dart';
 import 'cell_spec.dart';
 import 'cell_table.dart';
+import 'effect_spec.dart';
 import 'modules.dart';
 import 'special_operators.dart';
 import '../lexer/index.dart';
@@ -145,12 +146,24 @@ class CellBuilder {
       operands: operands,
     ),
 
+    // TODO: Match proper external keyword
     Application(
       operator: Name(name: 'external'),
       :final operands,
     ) => _markExternalCell(
       args: operands,
     ),
+
+    // TODO: Match proper effect keyword
+    Application(
+      operator: Name(name: 'effect'),
+      :final operands
+    ) => _makeEffectCell(
+      operands: operands,
+      location: expression.location
+    ),
+
+    // TODO: Match assignment operator and throw an exception
 
     Application(:final operator, :final operands) =>
         _buildAppliedCell(
@@ -500,6 +513,80 @@ class CellBuilder {
         id: spec.id
     )
   };
+
+  // Effects
+
+  /// Create an effect specification and a cell that references it.
+  ///
+  /// The effect is added to the current [scope].
+  CellSpec _makeEffectCell({
+    required List<AstNode> operands,
+    required Location location
+  }) {
+    final effect = _makeEffect(
+        statements: operands,
+        location: location
+    );
+
+    return CellSpec(
+      id: UniqueCellId(),
+      scope: scope,
+      definition: _IndexedEffectRef(
+          table: scope,
+          id: effect.id
+      )
+    );
+  }
+
+  /// Create an effect specification.
+  ///
+  /// The effect specification is added to the current [scope].
+  EffectSpec _makeEffect({
+    required List<AstNode> statements,
+    required Location location
+  }) => scope.addEffect((id) => EffectSpec(
+      id: id,
+      statements: statements.map(_makeStatement).toList(),
+      location: location,
+      scope: scope
+    ));
+
+  StatementSpec _makeStatement(AstNode statement) => switch (statement) {
+    Block(:final expressions) => BlockStatement(
+      statements: expressions
+          .map(_makeStatement)
+          .toList()
+    ),
+
+    // TODO: Match proper assignment operator
+    Application(
+      operator: Name(name: ':='),
+      :final operands
+    ) => _makeAssignment(operands),
+
+    _ => ExpressionStatement(
+      expression: _refCell(buildExpression(statement))
+    )
+  };
+
+  /// Create an assignment statement specification
+  StatementSpec _makeAssignment(List<AstNode> operands) => switch (operands) {
+    [final lhs, final rhs] => AssignStatement(
+      cell: _assignmentTarget(lhs),
+      value: _makeStatement(rhs)
+    ),
+
+    // TODO: Proper exception type
+    _ => throw Exception('Malformed assignment')
+  };
+
+  /// Get a [CellRef] for the target cell of an assignment.
+  CellRef _assignmentTarget(AstNode lhs) => switch (_refCell(buildExpression(lhs))) {
+    CellRef ref => ref,
+
+    // TODO: Proper exception type
+    _ => throw Exception('Malformed assignment')
+  };
 }
 
 /// A reference to a cell within a given cell [table].
@@ -517,6 +604,23 @@ class _NamedCellRef extends CellRef {
 
   @override
   CellSpec get get => table.get(id);
+}
+
+/// A reference to an effect within a given cell [table] using a numeric [id].
+class _IndexedEffectRef extends EffectRef {
+  /// Table in which the cell is referenced
+  final CellTable table;
+
+  /// ID of the referenced cell
+  final int id;
+
+  const _IndexedEffectRef({
+    required this.table,
+    required this.id
+  });
+
+  @override
+  EffectSpec get get => table.getEffect(id);
 }
 
 /// Converts a [Value] node to a [CellSpec].

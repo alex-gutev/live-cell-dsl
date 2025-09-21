@@ -3,6 +3,7 @@ import 'package:live_cells_core/live_cells_core.dart';
 import 'cell_table.dart';
 import '../lexer/index.dart';
 import '../util/equality.dart';
+import 'effect_spec.dart';
 
 part 'cell_expression_visitor.dart';
 part 'cell_spec.g.dart';
@@ -77,6 +78,14 @@ class ValueCellId extends CellId {
 
   @override
   String toString() => 'Value($value)';
+}
+
+/// A unique unnamed cell identifier.
+///
+/// This is used to represent generated cells rather than cells declared in the
+/// source.
+class UniqueCellId extends CellId {
+  UniqueCellId();
 }
 
 /// A specification for a cell
@@ -192,6 +201,18 @@ abstract class CellRef extends ValueSpec {
   @override
   R accept<R>(ValueSpecVisitor<R> visitor) =>
       visitor.visitRef(this);
+}
+
+/// Base class representing a reference to a side effect.
+abstract class EffectRef extends ValueSpec {
+  /// Get the specification of the referenced side effect
+  EffectSpec get get;
+
+  const EffectRef();
+
+  @override
+  R accept<R>(ValueSpecVisitor<R> visitor) =>
+      visitor.visitEffect(this);
 }
 
 /// Represents the application of an [operator] on one or more [operands].

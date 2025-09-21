@@ -1,4 +1,5 @@
 import 'cell_spec.dart';
+import 'effect_spec.dart';
 import 'modules.dart';
 
 /// Table containing cells defined in a given module/scope
@@ -8,6 +9,9 @@ class CellTable {
 
   /// Get all cells defined in this table
   Iterable<CellSpec> get cells => _cells.values;
+
+  /// Get all effects defined in this table
+  Iterable<EffectSpec> get effects => _effects.values;
 
   /// Is this the global scope?
   ///
@@ -26,6 +30,14 @@ class CellTable {
   CellSpec? lookup(CellId id) =>
       _cells[id] ?? parent?.lookup(id);
 
+  /// Lookup a side effect specification by identifier
+  ///
+  /// If the effect is not found in this table, the [parent] table is
+  /// searched. If the effect is not found in the parent table (or its ancestor
+  /// tables), [null] is returned.
+  EffectSpec? lookupEffect(int id) =>
+    _effects[id] ?? parent?.lookupEffect(id);
+
   /// Lookup a cell specification by identifier
   ///
   /// If the cell is not found in this table, the [parent] table is
@@ -41,11 +53,30 @@ class CellTable {
     return spec;
   }
 
+  /// Lookup a side effect specification by identifier
+  ///
+  /// If the effect is not found in this table, the [parent] table is
+  /// searched. If the effect is not found in the parent table (or its ancestor
+  /// tables), an exception is thrown.
+  EffectSpec getEffect(int id) {
+    /// TODO: Handle not found errors
+    return lookupEffect(id)!;
+  }
+
   /// Add/replace a cell specification to the table
   void add(CellSpec spec) {
     if (spec.id is! ValueCellId) {
       _cells[spec.id] = spec;
     }
+  }
+
+  /// Add a new effect to the table.
+  ///
+  /// The function [create], which is passed a generated effect ID, is called
+  /// to create the effect.
+  EffectSpec addEffect(EffectSpec Function(int) create) {
+    final id = _effects.length;
+    return _effects[id] = create(id);
   }
 
   /// Get the value of an [attribute] applying to the cell identified by [id]
@@ -80,6 +111,9 @@ class CellTable {
 
   /// Map of cells indexed by cell specifications identifiers
   final _cells = <CellId, CellSpec>{};
+
+  /// Map of effect specifications indexed by identifiers
+  final _effects = <int, EffectSpec>{};
 
   /// Map storing attributes applying to cells
   final _meta = <(CellId, String), dynamic>{};
