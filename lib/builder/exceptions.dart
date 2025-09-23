@@ -104,3 +104,28 @@ class MalformedOperatorDeclarationError implements Exception {
   @override
   String toString() => 'Malformed operator declaration';
 }
+
+/// Thrown when a malformed assignment statement (:=) is encountered.
+class MalformedAssignmentError implements Exception {
+  const MalformedAssignmentError();
+  
+  @override
+  String toString() => 'Malformed assignment statement.';
+}
+
+/// Thrown when the destination of an assignment is malformed.
+class MalformedAssignmentTargetError implements Exception {
+  const MalformedAssignmentTargetError();
+  
+  @override
+  String toString() => 
+      'Left-hand side of assignment statement must be a named cell.';
+}
+
+/// Thrown when an assignment statement is encountered outside an effect
+class MisplacedAssignmentError implements Exception {
+  const MisplacedAssignmentError();
+
+  @override
+  String toString() => 'Assignment statement outside of an effect.';
+}

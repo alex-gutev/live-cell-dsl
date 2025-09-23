@@ -163,7 +163,10 @@ class CellBuilder {
       location: expression.location
     ),
 
-    // TODO: Match assignment operator and throw an exception
+    // TODO: Match proper assignment operator
+    Application(
+      operator: Name(name: ':='),
+    ) => throw MisplacedAssignmentError(),
 
     Application(:final operator, :final operands) =>
         _buildAppliedCell(
@@ -576,16 +579,14 @@ class CellBuilder {
       value: _makeStatement(rhs)
     ),
 
-    // TODO: Proper exception type
-    _ => throw Exception('Malformed assignment')
+    _ => throw MalformedAssignmentError()
   };
 
   /// Get a [CellRef] for the target cell of an assignment.
   CellRef _assignmentTarget(AstNode lhs) => switch (_refCell(buildExpression(lhs))) {
     CellRef ref => ref,
 
-    // TODO: Proper exception type
-    _ => throw Exception('Malformed assignment')
+    _ => throw MalformedAssignmentTargetError()
   };
 }
 
