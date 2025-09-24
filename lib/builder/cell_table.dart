@@ -59,8 +59,13 @@ class CellTable {
   /// searched. If the effect is not found in the parent table (or its ancestor
   /// tables), an exception is thrown.
   EffectSpec getEffect(int id) {
-    /// TODO: Handle not found errors
-    return lookupEffect(id)!;
+    final spec = lookupEffect(id);
+
+    if (spec == null) {
+      throw EffectNotFound(id);
+    }
+
+    return spec;
   }
 
   /// Add/replace a cell specification to the table
@@ -128,4 +133,12 @@ class CellNotFound implements Exception {
   final CellId id;
 
   CellNotFound(this.id);
+}
+
+/// Exception indicating that a referenced effect was not found.
+class EffectNotFound implements Exception {
+  /// ID that was referenced
+  final int id;
+
+  EffectNotFound(this.id);
 }
