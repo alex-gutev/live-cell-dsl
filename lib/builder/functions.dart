@@ -33,6 +33,7 @@ class DeferredFunctionSpec extends FunctionSpec {
       final builder = CellBuilder(
           scope: super.scope,
           operatorTable: OperatorTable([]),
+          effectsAllowed: false,
 
           // TODO: Consider adding aliases for all cells defined in [module]
           module: ModuleSpec(module.path,

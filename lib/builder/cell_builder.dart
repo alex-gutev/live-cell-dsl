@@ -35,6 +35,9 @@ class CellBuilder {
   /// This function is called when an `import` declaration is processed.
   final LoadModule? loadModule;
 
+  /// Are side effects allowed to be defined in the current [scope]?
+  final bool effectsAllowed;
+
   /// Create a [CellBuilder] that builds cells in a given [scope].
   /// 
   /// If [scope] is null, a new scope is created.
@@ -44,7 +47,8 @@ class CellBuilder {
     required this.operatorTable,
     CellTable? scope,
     ModuleSpec? module,
-    this.loadModule
+    this.loadModule,
+    this.effectsAllowed = true
   }) : scope = scope ?? CellTable(),
         module = module ?? ModuleSpec(null);
 
@@ -526,6 +530,10 @@ class CellBuilder {
     required List<AstNode> operands,
     required Location location
   }) {
+    if (!effectsAllowed) {
+      throw EffectsNotAllowedError();
+    }
+
     final effect = _makeEffect(
         statements: operands,
         location: location

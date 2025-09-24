@@ -129,3 +129,11 @@ class MisplacedAssignmentError implements Exception {
   @override
   String toString() => 'Assignment statement outside of an effect.';
 }
+
+/// Thrown when a side effect is declared outside of the global scope.
+class EffectsNotAllowedError implements Exception {
+  const EffectsNotAllowedError();
+
+  @override
+  String toString() => 'Side effects are not allowed here.';
+}
