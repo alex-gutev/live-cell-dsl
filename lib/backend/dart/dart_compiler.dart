@@ -27,6 +27,8 @@ class DartCompiler {
         .call([literalList(operands.map(_makeThunk))]),
 
     FunctionSpec() => compileFunction(spec),
+
+    EffectRef(get: final effect) => refer(effectVar(effect)),
   };
 
   /// Create an [Expression] that references the value of a cell
@@ -90,6 +92,9 @@ class DartCompiler {
   String functionName(FunctionSpec spec) =>
       '_f${functionId(spec)}';
 
+  /// Get the name of the variable that references the [CellWatcher] for a given effect.
+  String effectVar(EffectSpec spec) =>
+      '_e${spec.id}';
 
   /// External references
 
@@ -174,6 +179,8 @@ class DartCompiler {
 
     ValueCellId(:final value) =>
         refer('ValueCellId').call([literal(value)]),
+
+    UniqueCellId() => refer('UniqueCellId').call([])
   };
 
   /// Generate a statement that performs arity checks.
