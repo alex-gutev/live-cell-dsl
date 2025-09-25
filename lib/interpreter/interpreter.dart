@@ -99,16 +99,28 @@ class Interpreter {
         compiler: _compiler
     );
 
-    // TODO: Some argument cells might be folded
-    // TODO: Iterate through all arguments and use [_ArgumentCellVisitor] on foldable cells
+    final arguments = <ValueCell>{};
 
-    final args = spec.arguments.map(_makeCell).toList();
+    for (final arg in spec.arguments) {
+      if (arg is ValueCellSpec || arg.foldable()) {
+        arg.definition.accept(
+            _ArgumentCellVisitor(
+                interpreter: this,
+                cell: arg,
+                arguments: arguments
+            )
+        );
+      }
+      else {
+        arguments.add(_makeCell(arg));
+      }
+    }
 
     final evaluators = spec.statements
         .map(statementCompiler.makeEvaluator)
         .toList();
 
-    return args.watch(() {
+    return arguments.watch(() {
       for (final evaluator in evaluators) {
         evaluator.eval(_context);
       }
@@ -121,15 +133,16 @@ class _ArgumentCellVisitor extends ValueSpecTreeVisitor {
   final Interpreter interpreter;
 
   /// Set of arguments referenced by the visited [ValueSpec].
-  final arguments = <ValueCell>{};
+  final Set<ValueCell> arguments;
 
   /// Set of all cells that were visited
   final _visited = <CellSpec>{};
 
   _ArgumentCellVisitor({
     required this.interpreter,
-    required CellSpec cell
-  }) {
+    required CellSpec cell,
+    Set<ValueCell>? arguments
+  }) : arguments = arguments ?? {} {
     _visited.add(cell);
   }
 
