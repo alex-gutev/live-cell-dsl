@@ -916,6 +916,62 @@ void main() {
               )
             )
             .run());
+
+    test('Initial values preceding var declaration', () =>
+        BuildTester('x = 1; var(x);', operators: [
+          Operator(
+              name: '=',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: false
+          )
+        ]).hasNamed('x',
+            tester: SpecTester.variable(
+                SpecTester.value(1)
+            )
+        ).run());
+
+    test('Initial values following var declaration', () =>
+        BuildTester('var(x); x = 5', operators: [
+          Operator(
+              name: '=',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: false
+          )
+        ]).hasNamed('x',
+            tester: SpecTester.variable(
+                SpecTester.value(5)
+            )
+        ).run());
+
+    test('Usage preceding initial value declaration', () =>
+        BuildTester('y = f(x); var(x); x = 5', operators: [
+          Operator(
+              name: '=',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: false
+          )
+        ]).hasNamed('x',
+            tester: SpecTester.variable(
+                SpecTester.value(5)
+            )
+        ).run());
+
+    test('Usage following initial value declaration', () =>
+        BuildTester('var(x); x = 5; y = f(x)', operators: [
+          Operator(
+              name: '=',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: false
+          )
+        ]).hasNamed('x',
+            tester: SpecTester.variable(
+                SpecTester.value(5)
+            )
+        ).run());
   });
 
   group('External cell declarations', () {
@@ -1252,9 +1308,9 @@ void main() {
       expect(tester.run(), throwsA(isA<BuildError>()));
     });
 
-    test('Incompatible var declaration with cell definition', () {
+    test('Multiple initial values', () {
       final tester = BuildTester(
-          'a = b; var(a)',
+          'x = 1; var(x); x = 2;',
 
           operators: [
             Operator(

@@ -292,7 +292,10 @@ sealed class SpecTester {
   }) = _FunctionTester;
 
   /// Create a test that tests [Variable]s.
-  factory SpecTester.variable() = _VariableTester;
+  ///
+  /// If [initialValue] is given it is used to test the initial value of the
+  /// cell.
+  factory SpecTester.variable([SpecTester? initialValue]) = _VariableTester;
 
   /// Run the test on a given cell definition [spec].
   ///
@@ -317,8 +320,9 @@ class _StubExpressionTester extends SpecTester {
   Future<void> run({
     required CellTable scope,
     required ValueSpec spec
-  }) async =>
-      spec is Stub;
+  }) async {
+    expect(spec, isA<Stub>());
+  }
 }
 
 /// [CellRef] expression tester
@@ -390,11 +394,23 @@ class _ConstantTester extends SpecTester {
 
 /// [Variable] tester
 class _VariableTester extends SpecTester {
+  /// Tester for the initial value
+  final SpecTester? initialValue;
+
+  _VariableTester([this.initialValue]);
+
   @override
   Future<void> run({
     required CellTable scope,
     required ValueSpec spec
-  }) async => spec is Variable;
+  }) async {
+    expect(spec, isA<Variable>());
+
+    initialValue?.test(
+        scope: scope,
+        spec: (spec as Variable).initialValue
+    );
+  }
 }
 
 /// [FunctionSpec] tester
