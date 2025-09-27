@@ -28,13 +28,6 @@ class DartBackend implements Operation {
       ..body = Block((b) => b..statements.addAll(_initStatements))
     );
 
-    final effectFields = scope.effects.map((e) => Field((b) => b
-      ..name = _compiler.effectVar(e)
-      ..modifier = FieldModifier.final$
-      ..type = refer('CellWatcher')
-      ..late = true
-    ));
-
     final library = Library((b) => b
       ..directives.addAll([
         Directive.import('package:live_cell/runtime/index.dart'),
@@ -42,7 +35,7 @@ class DartBackend implements Operation {
       ])
       ..body.addAll(_compiler.functions.values.map((fn) => fn.definition))
       ..body.addAll(_cellFields.values)
-      ..body.addAll(effectFields)
+      ..body.addAll(_effectFields.values)
       ..body.add(Field((b) => b..name = 'cells'
         ..modifier = FieldModifier.final$
         ..assignment = literalMap(
@@ -74,9 +67,12 @@ class DartBackend implements Operation {
   /// Map of [Field]s holding cell definitions
   final _cellFields = <CellId, Field>{};
 
-  /// List of statements to include in the init function
+  /// Map of [Field]s holding effect definitions
+  final _effectFields = <int, Field>{};
+
+  /// List of statements to add to main (init) function
   final _initStatements = <Code>[];
-  
+
   /// Generate Dart code for a given cell [spec].
   void _compileCell(CellSpec spec) {
     if (spec is! ValueCellSpec && !spec.foldable() && !spec.isExternal()) {
@@ -144,7 +140,7 @@ class DartBackend implements Operation {
   // Effects
 
   /// Generate Dart code for a given effect [spec].
-  void _compileEffect(EffectSpec spec) {
+  void _compileEffect(EffectSpec spec) => _effectFields.putIfAbsent(spec.id, () {
     final statementCompiler = DartStatementCompiler(
         compiler: _compiler
     );
@@ -181,14 +177,25 @@ class DartBackend implements Operation {
                 statements.map((e) => e.statement)
             ))
           ).closure
-        ]);
+        ], {
+          'deferred': literalTrue
+        });
+
+    final effectVar = _compiler.effectVar(spec);
 
     _initStatements.add(
-        refer(_compiler.effectVar(spec))
-            .assign(watcher)
-            .statement
+      refer(effectVar)
+          .property('start')
+          .call([])
+          .statement
     );
-  }
+
+    return Field((b) => b
+        ..name = effectVar
+        ..modifier = FieldModifier.final$
+        ..assignment = watcher.code
+    );
+  });
 
   /// Generate the list of Dart statements making up the body of the effect
   Iterable<Expression> _compileEffectStatements({
