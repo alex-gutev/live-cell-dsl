@@ -130,6 +130,13 @@ class CellSpec {
         value: value
     );
   }
+
+  /// Create a copy of this [CellSpec] with a new [definition].
+  CellSpec withDefinition(ValueSpec definition) => CellSpec(
+      id: id,
+      definition: definition,
+      scope: scope
+  );
 }
 
 /// Specification for a cell holding a constant value
@@ -184,7 +191,10 @@ class Constant<T> extends ValueSpec {
 /// 
 /// This class is used as the definition of mutable cells.
 class Variable extends ValueSpec {
-  const Variable();
+  /// The initial value of the variable cell
+  final ValueSpec initialValue;
+  
+  const Variable(this.initialValue);
 
   @override
   R accept<R>(ValueSpecVisitor<R> visitor) =>

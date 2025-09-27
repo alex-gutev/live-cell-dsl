@@ -284,25 +284,23 @@ class CellBuilder {
     final existing = scope.lookup(id);
 
     if (existing != null && existing.scope == scope) {
-      switch (existing.definition) {
-        case Stub():
-          break;
-
-        case Variable():
-          return existing;
-
-        default:
-          throw IncompatibleVarDeclarationError();
+      if (existing.definition is Variable) {
+        return existing;
       }
     }
 
     return _addCell(
         CellSpec(
             id: id,
-            definition: const Variable(),
             defined: true,
-            scope: scope
-        )
+            scope: scope,
+
+            definition: Variable(
+              existing?.definition ?? Stub()
+            ),
+        ),
+
+        replace: true
     );
   }
 
@@ -385,14 +383,30 @@ class CellBuilder {
   }
 
   /// Add a cell to the current [scope].
-  CellSpec _addCell(CellSpec spec) {
+  ///
+  /// If [replace] is true, existing cells in the [scope] are replaced with the
+  /// new [spec]. Otherwise a [MultipleDefinitionError] exception is thrown
+  /// if there is an existing definition for the cell that is incompatible with
+  /// [spec].
+  CellSpec _addCell(CellSpec spec, {
+    bool replace = false
+  }) {
     final existing = scope.lookup(spec.id);
 
-    if (existing != null && existing.scope == scope) {
-      if (existing.definition is! Stub || existing.defined) {
-        throw MultipleDefinitionError(
+    if (!replace && existing != null && existing.scope == scope) {
+      switch (existing.definition) {
+        case Variable(initialValue: Stub()):
+          spec = spec.withDefinition(
+              Variable(spec.definition)
+          );
+
+        case Stub() when !existing.defined:
+          break;
+
+        default:
+          throw MultipleDefinitionError(
             id: spec.id,
-        );
+          );
       }
     }
 
