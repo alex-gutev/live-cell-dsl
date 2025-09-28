@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:live_cell/analyzer/index.dart';
 import 'package:live_cell/builder/index.dart';
 import 'package:live_cell/common/pipeline.dart';
 import 'package:live_cell/modules/index.dart';
 import 'package:live_cell/parser/index.dart';
-import 'package:live_cell/analyzer/semantic_analyzer.dart';
 import 'package:live_cell/backend/dart/dart_code_generator.dart';
 import 'package:live_cell/optimization/folding.dart';
 
@@ -47,6 +47,7 @@ class Compiler {
       final pipeline = Pipeline()
           .add(SemanticAnalyzer())
           .add(CellFolder())
+          .add(MutableCellAnalysis())
           .add(DartBackend(outSink));
 
       pipeline.run(builder.scope);

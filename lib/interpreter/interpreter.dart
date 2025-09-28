@@ -73,8 +73,8 @@ class Interpreter {
           case Constant(:final value):
             return ValueCell.value(value);
 
-          case Variable():
-            return _mutable[spec.id] = MutableCell(null);
+          case Variable(:final initialValue):
+            return _mutable[spec.id] = _makeMutableCell(initialValue);
 
           default:
             final visitor = _ArgumentCellVisitor(
@@ -92,6 +92,15 @@ class Interpreter {
             ).store();
         }
       });
+
+  /// Create a new mutable cell with a given initial value.
+  MutableCell _makeMutableCell(ValueSpec initialValue) {
+    final value = initialValue is Stub
+        ? null
+        : _compiler.makeEvaluator(initialValue).eval(_context);
+
+    return MutableCell<dynamic>(value);
+  }
 
   /// Build a [CellWatcher] for a given side effect [spec].
   CellWatcher _compileEffect(EffectSpec spec) => _context.addEffect(spec.id, () {

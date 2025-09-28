@@ -97,12 +97,12 @@ class DartBackend implements Operation {
                 .code
         );
 
-      case Variable():
+      case Variable(:final initialValue):
         return Field((b) => b
             ..name = _compiler.cellVar(spec)
             ..modifier = FieldModifier.final$
             ..assignment = refer('MutableCell')
-                .call([literalNull], {}, [refer('dynamic')])
+                .call([_compileInitialValue(initialValue)], {}, [refer('dynamic')])
                 .code
         );
 
@@ -136,6 +136,12 @@ class DartBackend implements Operation {
         );
     }
   });
+
+  /// Generate an [Expression] that computes a mutable cell the initial [value].
+  Expression _compileInitialValue(ValueSpec value) => switch (value) {
+    Stub() => literalNull,
+    _ => _compiler.compile(value)
+  };
 
   // Effects
 
