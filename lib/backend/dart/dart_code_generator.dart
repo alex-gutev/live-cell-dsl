@@ -24,7 +24,8 @@ class DartBackend implements Operation {
     }
 
     final init = Method((b) => b
-      ..name = 'init'
+      ..name = 'main'
+      ..returns = refer('void')
       ..body = Block((b) => b..statements.addAll(_initStatements))
     );
 
