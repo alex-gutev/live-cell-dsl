@@ -1,0 +1,8 @@
+## Tests mutable cell initial values
+
+import(core)
+
+var x
+
+x = 1
+y = x * 10

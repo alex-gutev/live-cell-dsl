@@ -92,6 +92,27 @@ void main() {
 
       expect(values, equals([55, 60, 65, 140, 185, 370]));
     });
+
+    test('Mutable cell initial values', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'var x;',
+        'x = 1;'
+        'y = x * 10;'
+      ]);
+
+      final x = tester.getVar(NamedCellId('x'));
+      final y = tester.get(NamedCellId('y'));
+
+      expect(x.value, 1);
+      expect(y.value, 10);
+
+      x.value = 5;
+      expect(x.value, 5);
+      expect(y.value, 50);
+    });
   });
 
   group('Functions', () {

@@ -40,6 +40,7 @@ import 'generated/boolean.g.dart' as test23;
 import 'generated/branching.g.dart' as test24;
 import 'generated/invalid_operator.g.dart' as test25;
 import 'generated/arity_errors.g.dart' as test26;
+import 'generated/initial_values.g.dart' as test27;
 
 void main() {
   group('Computed Cells', () {
@@ -101,6 +102,18 @@ void main() {
       z.value = 10;
 
       expect(values, equals([55, 60, 65, 140, 185, 370]));
+    });
+
+    test('Mutable cell initial values', () {
+      final x = test27.cells['x'] as MutableCell;
+      final y = test27.cells['y']!;
+
+      expect(x.value, 1);
+      expect(y.value, 10);
+
+      x.value = 5;
+      expect(x.value, 5);
+      expect(y.value, 50);
     });
   });
 

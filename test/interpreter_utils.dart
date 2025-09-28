@@ -28,6 +28,7 @@ class InterpreterTester {
 
     pipeline.add(SemanticAnalyzer());
     pipeline.add(CellFolder());
+    pipeline.add(MutableCellAnalysis());
     pipeline.run(_builder.scope);
 
     _interpreter.compile();

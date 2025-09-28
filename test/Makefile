@@ -6,6 +6,7 @@ ARGS=-m $(SEARCH_PATH)
 TESTS=generated/single_argument_computed_cell.g.dart \
 	generated/multi_argument_computed_cell.g.dart \
  	generated/complex_expressions.g.dart \
+ 	generated/initial_values.g.dart \
  	generated/simple_function.g.dart \
  	generated/nary_function.g.dart \
  	generated/multi_expression_function.g.dart \
