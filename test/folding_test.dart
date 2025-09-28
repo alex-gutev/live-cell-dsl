@@ -3,6 +3,7 @@ import 'package:live_cell/builder/attributes.dart';
 import 'package:live_cell/builder/cell_spec.dart';
 import 'package:live_cell/optimization/folding.dart';
 import 'package:live_cell/parser/index.dart';
+import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 import 'build_test_utils.dart';
@@ -337,5 +338,126 @@ void main() {
           .addOperation(SemanticAnalyzer())
           .addOperation(CellFolder())
           .run());
+  });
+
+  group('Mutable cell initial value analysis', () {
+    test('Literal constants', () => BuildTester(
+        'x = 1;'
+        'var(x);'
+        'y = x + 2;'
+        'external(+(x,y));',
+
+        operators: [
+          Operator(
+              name: '=',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: false
+          ),
+          Operator(
+              name: '+',
+              type: OperatorType.infix,
+              precedence: 5,
+              leftAssoc: true
+          )
+        ])
+        .addOperation(SemanticAnalyzer())
+        .addOperation(CellFolder())
+        .addOperation(MutableCellAnalysis())
+        .hasNamed('x',
+          tester: SpecTester.variable(SpecTester.value(1)),
+          attributes: {
+            Attributes.fold: false
+          }
+        )
+        .hasApplication(
+          operator: NamedCellId('+'),
+          operands: [
+            NamedCellId('x'),
+            ValueCellId(2)
+          ],
+
+          attributes: {
+            Attributes.fold: false
+          }
+        )
+        .run());
+
+    test('Expression constants', () => BuildTester(
+        'x = c;'
+            'a = 1;'
+            'b = 2;'
+            'c = a + b;'
+            'var(x);'
+            'y = x + 2;'
+            'external(+(x,y));',
+
+        operators: [
+          Operator(
+              name: '=',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: false
+          ),
+          Operator(
+              name: '+',
+              type: OperatorType.infix,
+              precedence: 5,
+              leftAssoc: true
+          )
+        ])
+        .addOperation(SemanticAnalyzer())
+        .addOperation(CellFolder())
+        .addOperation(MutableCellAnalysis())
+        .hasNamed('x',
+          tester: SpecTester.variable(),
+          attributes: {
+            Attributes.fold: false
+          }
+        )
+        .hasApplication(
+          operator: NamedCellId('+'),
+          operands: [
+            NamedCellId('x'),
+            ValueCellId(2)
+          ],
+
+          attributes: {
+            Attributes.fold: false
+          }
+        )
+        .run());
+
+
+    test('Non-constant initial value', () {
+      final tester = BuildTester(
+          'external(+(a,b))\n'
+              'var(x);'
+              'a = x + 1;'
+              'y = a;'
+              'var(y);',
+
+          operators: [
+            Operator(
+                name: '=',
+                type: OperatorType.infix,
+                precedence: 1,
+                leftAssoc: false
+            ),
+            Operator(
+                name: '+',
+                type: OperatorType.infix,
+                precedence: 5,
+                leftAssoc: true
+            )
+          ]
+      );
+
+      tester.addOperation(SemanticAnalyzer());
+      tester.addOperation(CellFolder());
+      tester.addOperation(MutableCellAnalysis());
+
+      expect(tester.run, throwsA(isA<InitialValueNotConstantError>()));
+    });
   });
 }
