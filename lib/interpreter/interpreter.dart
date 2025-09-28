@@ -38,6 +38,16 @@ class Interpreter {
   /// An exception is thrown if [id] does not identify a variable cell.
   MutableCell getVar(CellId id) => _mutable[id]!;
 
+  /// Start all side-effects.
+  ///
+  /// After this method is called all side effects begin observing their
+  /// argument cells.
+  void start() {
+    for (final effect in _context.effects.values) {
+      effect.start();
+    }
+  }
+
   // Private
 
   /// The cell definition compiler
@@ -133,7 +143,7 @@ class Interpreter {
       for (final evaluator in evaluators) {
         evaluator.eval(_context);
       }
-    });
+    }, deferred: true);
   });
 }
 
