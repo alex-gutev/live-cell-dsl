@@ -107,13 +107,18 @@ void main() {
     test('Mutable cell initial values', () {
       final x = test27.cells['x'] as MutableCell;
       final y = test27.cells['y']!;
+      final z = test27.cells['z'] as MutableCell;
 
       expect(x.value, 1);
       expect(y.value, 10);
+      expect(z.value, 11);
 
       x.value = 5;
       expect(x.value, 5);
       expect(y.value, 50);
+
+      z.value = 20;
+      expect(z.value, 20);
     });
   });
 

@@ -99,19 +99,28 @@ void main() {
       await tester.build([
         'import(core);',
         'var x;',
-        'x = 1;'
-        'y = x * 10;'
+        'x = 1;',
+        'y = x * 10;',
+        'a = 5;',
+        'b = 6;',
+        'z = a + b;',
+        'var z;'
       ]);
 
       final x = tester.getVar(NamedCellId('x'));
       final y = tester.get(NamedCellId('y'));
+      final z = tester.getVar(NamedCellId('z'));
 
       expect(x.value, 1);
       expect(y.value, 10);
+      expect(z.value, 11);
 
       x.value = 5;
       expect(x.value, 5);
       expect(y.value, 50);
+
+      z.value = 20;
+      expect(z.value, 20);
     });
   });
 
