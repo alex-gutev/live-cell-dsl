@@ -32,3 +32,14 @@ class UndefinedCellError extends AnalysisError {
   @override
   String get description => 'No definition for `${cell.id}`.';
 }
+
+/// Thrown when a mutable cell with a non-constant initial value is encountered
+class InitialValueNotConstantError extends AnalysisError {
+  final CellSpec cell;
+
+  const InitialValueNotConstantError(this.cell);
+
+  @override
+  String get description =>
+      'The initial value of mutable cell `${cell.id}` is not a constant.';
+}
