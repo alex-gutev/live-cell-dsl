@@ -1,5 +1,8 @@
 operator(=, infix, 1, right)
 
+operator(effect, prefix, 2)
+operator(:=, infix, 1)
+
 operator(or, infix, 5, left)
 operator(and, infix, 7, left)
 
