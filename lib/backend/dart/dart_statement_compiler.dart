@@ -75,7 +75,11 @@ class DartStatementCompiler {
 
     yield* compile(value, result: result);
 
-    yield compiler.compileRef(cell)
-        .assign(refer(result));
+    yield refer('runPostUpdate').call([
+      Method((b) => b..lambda = true
+        ..body = compiler.compileRef(cell)
+            .assign(refer(result!)).code
+      ).closure
+    ]);
   }
 }

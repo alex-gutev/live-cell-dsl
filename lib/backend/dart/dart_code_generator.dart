@@ -23,16 +23,39 @@ class DartBackend implements Operation {
       _compileEffect(effect);
     }
 
+    final updatingVar = '\$updating';
+
     final init = Method((b) => b
       ..name = 'main'
       ..returns = refer('void')
-      ..body = Block((b) => b..statements.addAll(_initStatements))
+      ..body = Block((b) => b
+        ..statements.add(
+          declareFinal(updatingVar)
+            .assign(
+              refer('CellUpdateManager')
+                  .property('beginCellUpdates')
+                  .call([])
+            )
+            .statement
+        )
+        ..statements.add(Code('try {'))
+        ..statements.addAll(_initStatements)
+        ..statements.add(Code('} finally {'))
+        ..statements.add(
+            refer('CellUpdateManager')
+                .property('endCellUpdates')
+                .call([refer(updatingVar)])
+                .statement
+        )
+        ..statements.add(Code('}'))
+      )
     );
 
     final library = Library((b) => b
       ..directives.addAll([
         Directive.import('package:live_cell/runtime/index.dart'),
-        Directive.import('package:live_cells_core/live_cells_core.dart')
+        Directive.import('package:live_cells_core/live_cells_core.dart'),
+        Directive.import('package:live_cells_core/live_cells_internals.dart')
       ])
       ..body.addAll(_compiler.functions.values.map((fn) => fn.definition))
       ..body.addAll(_cellFields.values)
