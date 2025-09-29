@@ -1122,4 +1122,25 @@ void main() {
       });
     });
   });
+
+  group('Effects', () {
+    test('Simple cell value assignment', () async {
+      final tester = InterpreterTester();
+
+      await tester.build([
+        'import(core);',
+        'var a;',
+        'a = 0;',
+        'b = a + 1;',
+        'effect {',
+        '  a := select(b < 10, b, 10)'
+        '}'
+      ]);
+
+      final values = tester.observe(NamedCellId('a'));
+      tester.start();
+
+      expect(values, equals([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+    });
+  });
 }

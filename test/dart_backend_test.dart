@@ -41,6 +41,7 @@ import 'generated/branching.g.dart' as test24;
 import 'generated/invalid_operator.g.dart' as test25;
 import 'generated/arity_errors.g.dart' as test26;
 import 'generated/initial_values.g.dart' as test27;
+import 'generated/effects.g.dart' as test28;
 
 void main() {
   group('Computed Cells', () {
@@ -679,6 +680,16 @@ void main() {
 
       expect(() => pipeline.run(builder.scope),
           throwsA(isA<MissingExternalCellError>()));
+    });
+  });
+
+  group('Effects', () {
+    test('Simple cell value assignment', () {
+      final values = observe(test28.cells['a']!);
+
+      test28.main();
+
+      expect(values, equals([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
     });
   });
 }

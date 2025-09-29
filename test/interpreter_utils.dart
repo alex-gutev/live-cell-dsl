@@ -40,6 +40,11 @@ class InterpreterTester {
   /// Get the [MutableCell] for the variable cell identified by [id].
   MutableCell getVar(CellId id) => _interpreter.getVar(id);
 
+  /// Start all side-effects
+  void start() {
+    _interpreter.start();
+  }
+
   /// Return a list containing the values of the cell identified by [id].
   ///
   /// This list is updated whenever the value of the cell changes, even after
