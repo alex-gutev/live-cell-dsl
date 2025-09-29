@@ -179,7 +179,8 @@ class AssignEvaluator extends Evaluator {
   @override
   eval(RuntimeContext context) {
     final value = this.value.eval(context);
-    context.setCellValue(cellId, value);
+
+    runPostUpdate(() => context.setCellValue(cellId, value));
 
     return value;
   }

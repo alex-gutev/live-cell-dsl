@@ -1,4 +1,5 @@
 import 'package:live_cells_core/live_cells_core.dart';
+import 'package:live_cells_core/live_cells_internals.dart';
 
 import '../builder/index.dart';
 import 'evaluator.dart';
@@ -43,8 +44,15 @@ class Interpreter {
   /// After this method is called all side effects begin observing their
   /// argument cells.
   void start() {
-    for (final effect in _context.effects.values) {
-      effect.start();
+    final updating = CellUpdateManager.beginCellUpdates();
+
+    try {
+      for (final effect in _context.effects.values) {
+        effect.start();
+      }
+    }
+    finally {
+      CellUpdateManager.endCellUpdates(updating);
     }
   }
 
