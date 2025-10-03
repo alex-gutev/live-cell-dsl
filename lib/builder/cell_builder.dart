@@ -247,6 +247,18 @@ class CellBuilder {
             definition: definition
         ),
 
+    // TODO: Match proper var operator
+    [
+      Application(
+        operator: Name(name: 'var'),
+        operands: [final Name name]
+      ),
+      final definition
+    ] => _buildVarDefinition(
+        name: name,
+        definition: definition
+    ),
+
     [
       Application(
         operator: Name(:final name),
@@ -261,6 +273,19 @@ class CellBuilder {
 
     _ => throw MalformedDefinitionError()
   };
+
+  CellSpec _buildVarDefinition({
+    required Name name,
+    required AstNode definition
+  }) {
+    final cell = _buildDefinition(
+        operands: [name, definition]
+    );
+
+    return cell.withDefinition(
+      Variable(cell.definition)
+    );
+  }
 
   /// Process a `var` declaration
   CellSpec _addVarCell({

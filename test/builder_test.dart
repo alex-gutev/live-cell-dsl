@@ -972,6 +972,20 @@ void main() {
                 SpecTester.value(5)
             )
         ).run());
+
+    test('Initial value inline with var declaration', () =>
+        BuildTester('var(x) = 5; y = f(x)', operators: [
+          Operator(
+              name: '=',
+              type: OperatorType.infix,
+              precedence: 1,
+              leftAssoc: false
+          )
+        ]).hasNamed('x',
+            tester: SpecTester.variable(
+                SpecTester.value(5)
+            )
+        ).run());
   });
 
   group('External cell declarations', () {

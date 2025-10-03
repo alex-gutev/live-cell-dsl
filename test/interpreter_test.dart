@@ -1129,8 +1129,7 @@ void main() {
 
       await tester.build([
         'import(core);',
-        'var a;',
-        'a = 0;',
+        'var a = 0;',
         'b = a + 1;',
         'effect {',
         '  a := select(b < 10, b, 10)'
